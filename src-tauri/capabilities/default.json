@@ -1,0 +1,41 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "local": true,
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:webview:allow-webview-close",
+    "core:webview:allow-create-webview-window",
+    "core:window:allow-close",
+    "core:window:allow-destroy",
+    "core:window:allow-set-focus",
+    "dialog:allow-message",
+    "dialog:allow-open",
+    "dialog:default",
+    "log:default",
+    "os:default",
+    "shell:allow-open",
+    "shell:default",
+    "updater:default",
+    "process:default",
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "https://raw.githubusercontent.com/FelisDiligens/Fallout76-QuickConfiguration/*"
+        },
+        {
+          "url": "https://raw.githubusercontent.com/FelisDiligens/QuickConfiguration2/*"
+        },
+        {
+          "url": "https://status.bethesda.net/en/status/api/statuses"
+        },
+        {
+          "url": "https://api.locize.app/657e9e0e-8225-4266-88dd-75f047f1a2b3/live/*/status"
+        }
+      ]
+    }
+  ]
+}

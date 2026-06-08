@@ -1,0 +1,88 @@
+[package]
+name = "f76qc2"
+version = "2.0.0-beta.1"
+description = "Fallout 76 Quick Configuration"
+authors = ["FelisDiligens"]
+license = "MIT"
+repository = ""
+edition = "2024"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+serde_json = "1.0"
+
+[dependencies]
+# Tauri
+tauri = { version = "2", features = ["protocol-asset"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-http = "2"
+tauri-plugin-log = "2"
+tauri-plugin-os = "2"
+tauri-plugin-shell = "2"
+tauri-plugin-single-instance = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
+
+# Tauri Specta (beta)
+specta = { version = "=2.0.0-rc.20", features = ["serde_json"] }
+specta-typescript = "0.0.7"
+tauri-specta = { version = "=2.0.0-rc.20", features = ["derive", "typescript"] }
+
+anyhow = "1.0.102"
+chrono = { version = "0.4.43", features = ["serde"] }
+dirs = "5.0.1"
+duplicate = "1.0.0"
+futures-util = { version = "0.3.32", features = ["sink"] }
+image = "0.25.9"
+indoc = "2"
+itertools = "0.14.0"
+log = "0.4.29"
+log-panics = { version = "2.1.0", features = ["with-backtrace"] }
+quick-xml = { version = "0.31.0", features = ["serialize"] }
+regex = "1.12.3"
+reqwest = { version = "0.12.28", features = ["stream"] }
+rust-ini = { version = "0.20.0", features = ["inline-comment", "case-insensitive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = ["preserve_order"] }
+tap = "1.0.1"
+thiserror = "2.0.18"
+tokio = { version = "1.49.0", features = ["macros"] }
+tokio-tungstenite = { version = "0.27.0", features = ["native-tls"] }
+unescape = "0.1.0"
+uuid = { version = "1.21.0", features = ["v4"] }
+cfg-if = "1.0.4"
+duct = "1.1.1"
+which = "8.0.0"
+tempdir = "0.3.7"
+function_name = "0.3.0"
+clone-macro = "1.0.0"
+strum = { version = "0.28.0", features = ["derive"] }
+camino = { version = "1.2.2", features = ["serde1"] }
+url = "2.5.8"
+percent-encoding = "2.3.2"
+semver = "1.0.28"
+normalize-path = "0.2.1"
+content_disposition = "0.4.0"
+
+[dev-dependencies]
+mockall = "0.14.0"
+wiremock = "0.6.5"
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.54.0", features = [
+    "Win32_Foundation",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_Storage_FileSystem",
+    "Win32_System_WindowsProgramming",
+] }
+dunce = "1"
+windows-registry = "0.5"
+windows-result = "0.3"
+
+[features]
+# this feature is used for production builds or when `devPath` points to the filesystem
+# DO NOT REMOVE!!
+custom-protocol = ["tauri/custom-protocol"]

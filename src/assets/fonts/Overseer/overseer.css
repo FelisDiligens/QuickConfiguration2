@@ -1,0 +1,6 @@
+@font-face {
+    font-family: "Overseer";
+    src: local("Overseer"),
+        url("./overseer.ttf") format("truetype");
+    font-weight: normal;
+}

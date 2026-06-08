@@ -1,0 +1,270 @@
+$primary: #ebc04b;
+$warning: #bd6b00;
+$nav-link-color: #d8b041;
+$nav-link-hover-color: #a88932;
+
+@import "bootstrap/scss/bootstrap";
+
+/* Allow vertical responsive layout: */
+html,
+body,
+div#root {
+    height: 100%;
+}
+
+html,
+body {
+    font-family: Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue",
+        "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji",
+        "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/*
+ * Prevents text selection and dragging on all HTML elements.
+ * Source: https://gist.github.com/msuchodolski/41c9338f3a732379dc570142826ed76e
+ */
+*,
+*::after,
+*::before {
+    -webkit-user-drag: none;
+    -webkit-app-region: no-drag;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Since all elements cannot be selected anymore, allow with CSS class selectively. */
+.allow-select {
+    -webkit-user-select: auto;
+    user-select: auto;
+}
+
+/* Since all elements cannot be dragged anymore, allow with CSS class selectively. */
+.allow-drag {
+    -webkit-user-drag: element;
+    -webkit-app-region: drag;
+    -webkit-user-select: auto;
+    user-select: auto;
+}
+
+:root {
+    --bs-font-sans-serif: Roboto, system-ui, -apple-system, "Segoe UI",
+        "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
+    --bs-form-control-bg: #343a40;
+}
+
+@include color-mode(light) {
+    a {
+        color: #d8b041;
+        text-decoration: none;
+    }
+
+    a:hover {
+        color: #a88932;
+    }
+
+    summary {
+        color: #d8b041;
+    }
+    
+    /* Primary color is too bright for text */
+    button.btn-outline-primary:not(:hover) {
+        color: #775907;
+    }
+}
+
+@include color-mode(dark) {
+    a {
+        color: #fed664;
+        text-decoration: none;
+    }
+
+    a:hover {
+        color: #bd9b3e;
+    }
+
+    summary {
+        color: #fed664;
+    }
+}
+
+a {
+    text-decoration: none;
+}
+
+a.dropdown-item,
+a.dropdown-item:hover {
+    color: var(--bs-body-color);
+}
+
+h1,
+h2,
+h3 {
+    color: var(--bs-body-color);
+}
+
+h1.title {
+    font-size: 26pt;
+    font-family: "Overseer", "Roboto";
+    margin-top: 10px;
+    /*
+    margin: 10px auto 0 auto;
+    max-width: 560px;
+    */
+}
+
+h1 {
+    font-size: 22pt;
+    margin-top: 20px;
+}
+
+h2 {
+    font-size: 18pt;
+    margin-top: 20px;
+}
+
+h3 {
+    font-size: 14pt;
+    margin-top: 20px;
+}
+
+h4 {
+    font-size: 12pt;
+}
+
+p {
+    margin-top: 5px;
+}
+
+.form-label {
+    margin-bottom: 0;
+}
+
+/* At slight tint to outlined buttons */
+button.btn-outline-primary:not(:hover) {
+    background-color: rgba($color: $primary, $alpha: 0.1);
+}
+button.btn-outline-secondary:not(:hover) {
+    background-color: rgba($color: $secondary, $alpha: 0.1);
+}
+button.btn-outline-success:not(:hover) {
+    background-color: rgba($color: $success, $alpha: 0.1);
+}
+button.btn-outline-warning:not(:hover) {
+    background-color: rgba($color: $warning, $alpha: 0.1);
+}
+button.btn-outline-danger:not(:hover) {
+    background-color: rgba($color: $danger, $alpha: 0.1);
+}
+
+/*
+ * Bootstrap tabs
+ */
+
+.nav-tabs {
+    padding: 4px 0;
+    border: none;
+    background-color: #111313;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+.nav-tabs > .nav-item {
+    flex-grow: 1;
+    max-width: 250px;
+}
+
+.nav-tabs > .nav-item > button:focus {
+    outline: auto;
+}
+
+/* https://stackoverflow.com/a/65431687 */
+.nav-tabs > .nav-item > button:focus:not(:focus-visible) {
+    outline: none;
+}
+
+.nav-tabs > .nav-item > .nav-link {
+    width: calc(100% - 4px);
+    padding: 2px 16px;
+    margin: 2px auto;
+    text-transform: uppercase;
+    font-family: "Roboto Condensed", sans-serif;
+    font-weight: bold;
+    border: none;
+    border-radius: 0;
+    color: #fefeca;
+    background-color: #111313;
+    transition: none;
+}
+
+@include color-mode(light) {
+    .nav-tabs {
+        background-color: #e4e4e4;
+    }
+
+    .nav-tabs > .nav-item > .nav-link {
+        color: black;
+        background-color: #e4e4e4;
+    }
+}
+
+.nav-tabs > .nav-item > .nav-link.active {
+    color: black;
+    /* https://cssgradient.io/ */
+    background: rgb(249, 225, 140); /* #f6cf65; */
+    background: radial-gradient(
+        circle,
+        rgba(249, 225, 140, 1) 33%,
+        rgba(255, 222, 110, 1) 100%
+    );
+    box-shadow: #f3d175d8 0 0 2px 2px;
+}
+
+/* ===== Scrollbar CSS ===== */
+/* Source: https://codepen.io/stephenpaton-tech/full/JjRvGmY */
+/* Firefox */
+* {
+    scrollbar-width: auto;
+    scrollbar-color: $primary $light;
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+*::-webkit-scrollbar-track {
+    background: $light;
+}
+
+*::-webkit-scrollbar-thumb {
+    background-color: $primary;
+    border-radius: 4px;
+    border: 3px solid $light;
+}
+
+::-webkit-scrollbar-corner {
+  background: $light;
+}
+
+@include color-mode(dark) {
+    /* Firefox */
+    * {
+        scrollbar-color: $primary $dark;
+    }
+
+    /* Chrome, Edge, and Safari */
+    *::-webkit-scrollbar-track {
+        background: $dark;
+    }
+
+    *::-webkit-scrollbar-thumb {
+        border: 3px solid $dark;
+    }
+
+    ::-webkit-scrollbar-corner {
+      background: $dark;
+    }
+}

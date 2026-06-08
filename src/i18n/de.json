@@ -1,0 +1,1009 @@
+{
+  "common": {
+    "yes": "Ja",
+    "no": "Nein",
+    "ok": "OK",
+    "abort": "Abbrechen",
+    "cancel": "Abbrechen",
+    "autoDetect": "Automatisch erkennen",
+    "autoDetectPathButton": "Automatisch erkennen",
+    "unknown": "Unbekannt",
+    "loading": "Laden...",
+    "loading-ini": "Lade ini-Dateien...",
+    "error": "Fehler",
+    "saveButton": "Speichern",
+    "resetButton": "Zurücksetzen",
+    "pickColorButton": "Wählen",
+    "chooseFileButton": "Datei wählen",
+    "chooseFolderButton": "Ordner wählen",
+    "unnamedProfile": "Unbenannt",
+    "noContent": "Kein Inhalt",
+    "reload": "Neu laden",
+    "success": "Erfolg",
+    "showMore": "Mehr anzeigen",
+    "showLess": "Weniger anzeigen"
+  },
+  "errors": {
+    "anErrorOccurred": "Ein Fehler ist aufgetreten",
+    "anUnexpectedErrorOccurred": "Ein unerwarteter Fehler ist aufgetreten.",
+    "iniNotFound": {
+      "title": "*.ini-Dateien konnten nicht geladen werden.",
+      "text": [
+        "<p>Fehlen die *.ini Dateien? Lass uns das Problem beheben:</p>",
+        "<ul>",
+        "<li><b>Starte das Spiel zuerst.</b> Es erstellt dann die fehlenden *.ini-Dateien.</li>",
+        "<li>Prüfe, ob die *.ini-Dateien im Ordner <code>C:\\Users\\[your username]\\Documents\\My Games\\Fallout 76\\</code> existieren. Die sollten <code>Fallout76.ini</code> und <code>Fallout76Prefs.ini</code> oder <code>Project76.ini</code> und <code>Project76Prefs.ini</code> heißen.</li>",
+        "<li>Prüfe deine <a>Profileinstellungen</a>, besonders die erweiterten Optionen. Wurden *.ini-Pfad und Präfix auf die korrekten Werte gesetzt?</li>",
+        "</ul>"
+      ],
+      "createIniButton": "Ini-Dateien von mitgelieferten Vorlagen erstellen"
+    },
+    "iniParseError": {
+      "title": "Eine *.ini-Datei enthält ungültige Syntax und konnte nicht geparst werden.",
+      "text": [
+        "<p>Sind die *.ini Dateien beschädigt? Wurden sie bearbeitet? Probiere eines dieser Optionen:</p>",
+        "<ul>",
+        "<li>Öffne die angegebene *.ini-Datei und behebe den Fehler, wenn du weißt wie das geht, oder</li>",
+        "<li><b>Starte das Spiel</b> und ändere ein paar Einstellungen, oder</li>",
+        "<li>Lösche die *.ini-Dateien im Ordner <code>C:\\Users\\[your username]\\Documents\\My Games\\Fallout 76\\</code> und <b>starte das Spiel</b>. Das setzt alle Einstellungen zurück.</li>",
+        "</ul>"
+      ]
+    },
+    "iniSaveFailed": "INI-Dateien konnten nicht gespeichert werden",
+    "routeNotFound": "Die Route <code>{{route}}</code> existiert nicht.",
+    "gamePathNotSet": "Der Spielpfad wurde nicht für das aktive Profil gesetzt.",
+    "iniPathNotSet": "Der Pfad zu den ini-Dateien wurde nicht für das aktive Profil gesetzt.",
+    "whatsNewFetchFailed": "Konnte \"What's new\" nicht abfragen.",
+    "profileNotSet": "Kein Profil ausgewählt oder konnte das aktive Profil nicht bestimmen.",
+    "launchGameFailed": "Spielstart ist fehlgeschlagen: {{error}}",
+    "settingsLoadFailed": "Konnte die App-Einstellungen nicht laden.",
+    "profilesLoadFailed": "Konnte die App-Profile nicht laden.",
+    "dndWarning": {
+      "title": "Ziehen und Ablegen nicht möglich",
+      "text": "Ziehen und Ablegen von Dateien nur im \"Dateiablagefenster\" möglich. Bitte klicke \"Mod hinzufügen\" in der Werkzeugleiste oben und wähle \"Dateiablagefenster anzeigen\" aus."
+    }
+  },
+  "navigation": {
+    "quickConfiguration": "Schnellkonfiguration",
+    "playButton": "Spielen",
+    "browseButton": "Durchsuchen",
+    "browse": {
+      "gameInstallationFolder": "Spielinstallationsordner",
+      "gameConfigurationFolder": "Spielkonfigurationsordner",
+      "appInstallationFolder": "Appinstallationsordner",
+      "appConfigurationFolder": "Appkonfigurationordner",
+      "appTranslationsFolder": "Appübersetzungenordner",
+      "steamScreenshotsFolder": "Steams Screenshotsordner",
+      "gamePhotosFolder": "Spielfotosordner",
+      "editIniFile": "{{file}} bearbeiten"
+    },
+    "homePage": "Start",
+    "tweaksPage": "Konfiguration",
+    "pipboyPage": "Pip-Boy",
+    "modsPage": "Mods",
+    "galleryPage": "Galerie",
+    "settingsPage": "Einstellungen",
+    "nexusmodsPage": "NexusMods",
+    "selectedProfile": "Ausgewähltes Profil:",
+    "noProfile": "Kein Profil"
+  },
+  "home": {
+    "title": "Willkommen zur Schnellkonfiguration",
+    "subtitle": "Diese App erlaubt es dir, alles mögliche schnell einzustellen.",
+    "version": "Version",
+    "prerelease": "Vorabversion",
+    "serverStatus": {
+      "label": "Serverstatus",
+      "refresh": "Klicke zum Neuladen",
+      "loading": "Laden...",
+      "error": "Fehler beim Laden aufgetreten"
+    },
+    "author": "Autor",
+    "translationAuthor": "Übersetzt von",
+    "whatsNew": "Was gibt's Neues?",
+    "goBack": "Zurück",
+    "links": {
+      "title": "Weblinks",
+      "nexusmods": "NexusMods",
+      "github": "GitHub",
+      "wiki": "Wiki & Anleitungen",
+      "bugs": "Fehlerberichte",
+      "bethesdaNetStatus": "Bethesda.net-Statusportal",
+      "nukesAndDragonsBuildPlanner": "N&D Build Planner",
+      "nukacrypt": "NukaCrypt",
+      "map76": "Map76",
+      "xTranslator": "xTranslator"
+    },
+    "update": {
+      "button": "Jetzt aktualisieren!",
+      "text": "Eine neue Version ist verfügbar: {{version}}",
+      "link": "Oder lade es manuell herunter..."
+    }
+  },
+  "tweaks": {
+    "title": "Konfiguration",
+    "general": {
+      "title": "Allgemein",
+      "loadingGroup": "Ladebildschirm",
+      "skipIntroVideos": "Introvideos überspringen",
+      "skipStartupSplash": "Splash Screen mit Neuigkeiten beim Start überspringen",
+      "skipStartupSplashSubtitle": "Wenn aktiv, stört das Spielt nicht mehr mit Neuigkeiten beim Start.",
+      "fasterFadeIn": "Das Einblenden nach dem Laden beschleunigen",
+      "fasterFadeInSubtitle": "Nach dem Laden in eine Welt und nach dem Schnellreisen spielt das Spiel eine Einblendeanimation ab, die dich daran hindert dich zu bewegen. Diese Option beschleunigt diese Animation.",
+      "gameplayGroup": "Spiel",
+      "corpseHighlighting": "Leichen hervorheben",
+      "corpseHighlightingSubtitle": "Nachdem ein Gegner getötet wurde, wird seine Leiche hervorgehoben bleiben bis diese gelootet wurde.",
+      "corpseHighlightingOptions": {
+        "disabled": "Deaktiviert",
+        "clearOnInspect": "Bei Inspektion löschen",
+        "clearOnRemove": "Beim Entfernen löschen"
+      },
+      "showBackpack": "Rucksack sichtbar",
+      "rejectSharedPerks": "Geteilte eingehende Skills zurückweisen",
+      "vatsGrenadeMineTargetingMode": "Granaten-/Minen-Zielerfassungsmodus",
+      "vatsGrenadeMineTargetingModeOptions": {
+        "none": "Keine",
+        "onlyMyOwn": "Nur meine Eigenen",
+        "all": "Alle"
+      },
+      "askOpenPerkCardPacks": "Hinweis für ungeöffnete Skill-Karten-Pakete anzeigen",
+      "quickHealStimpakPriority": "Stimpak-Priorität beim Schnellheilen",
+      "quickHealStimpakPriorityOptions": {
+        "useWeakestFirst": "Schwächstes zuerst nutzen",
+        "useStrongestFirst": "Stärkstes zuerst nutzen"
+      },
+      "dialogueGroup": "Dialog",
+      "showGeneralSubtitles": "Allgemeine Untertitel aktivieren",
+      "showDialogueSubtitles": "Dialoguntertitel aktivieren",
+      "showDialogueHistory": "Gesprächsverlauf anzeigen",
+      "historySize": "Größe des Gesprächsverlaufs",
+      "historySizeSubtitle": "Anzahl der Zeilen",
+      "hudGroup": "HUD",
+      "hudOpacity": "HUD-Transparenz",
+      "activeEffectsOnHud": "Aktive Effekte auf der HUD anzeigen",
+      "activeEffectsOnHudOptions": {
+        "disabled": "Deaktiviert",
+        "detrimental": "Schädlich",
+        "all": "Alle"
+      },
+      "showCrosshair": "Fadenkreuz anzeigen",
+      "enablePowerArmorHud": "Powerrüstungs-HUD aktiveren",
+      "enablePublicTeamNotifications": "Benachrichtigungen vom öffentlichen Teams aktivieren",
+      "showFloatingDamageNumbers": "Schwebende Schadensnummern anzeigen",
+      "showOtherPlayersNames": "Namen anderer Spieler anzeigen",
+      "showOtherPlayersPings": "Pings anderer Spieler anzeigen",
+      "showCompass": "Kompass anzeigen",
+      "advancedModDescriptions": "Erweiterte Mod-Beschreibungen",
+      "autoScrollPipboyItemStats": "Pip-Boy Item Stats automatisch scrollen",
+      "showCAMPWeather": "C.A.M.P.-Wetter anzeigen",
+      "floatingQuestMarkersGroup": "Schwebende Questmarkierungen",
+      "floatingQuestMarkersDistance": "Anzeigeentfernung",
+      "showFloatingQuestMarkers": "Schwebende Questmarkierungen anzeigen",
+      "showFloatingQuestText": "Schwebende Questtexte anzeigen",
+      "questsGroup": "Quests",
+      "enableQuestTrackNotification": "Benachrichtigungen für begonnene inaktive Quests anzeigen",
+      "autoTrackMainQuest": "Hauptquests, wenn gestartet, aktiv schalten",
+      "autoTrackSideQuest": "Nebenquests, wenn gestartet, aktiv schalten",
+      "autoTrackMiscQuest": "Sonstige Quests, wenn gestartet, aktiv schalten",
+      "autoTrackEventQuest": "Event-Quests, wenn gestartet, aktiv schalten",
+      "autoTrackDailyQuest": "Tagesquests, wenn gestartet, aktiv schalten"
+    },
+    "video": {
+      "title": "Video",
+      "displayGroup": "Bildschirm",
+      "displayMode": "Anzeigemodus",
+      "displayModeOptions": {
+        "fullscreen": "Vollbild",
+        "windowed": "Fenster",
+        "borderlessWindowed": "Randloses Fenster",
+        "borderlessFullscreen": "Randloses Fenster (Vollbild)"
+      },
+      "displayModeTip": {
+        "list": [
+          "<li><b>Vollbild</b>: Echter Vollbildmodus (beste Leistung)</li>",
+          "<li><b>Fenster</b>: Startet das Spiel in einem Fenster mit Rahmen (auch bekannt als Fensterdekoration).</li>",
+          "<li><b>Randloses Fenster</b>: Ermöglicht das problemlose Drücken von Alt + Tab. Achte jedoch darauf, dass die Auflösung mit der Auflösung deines Displays übereinstimmt. (Standard)</li>",
+          "<li><b>Randloses Fenster (Vollbild)</b>: Wie \"Randloses Fenster\", jedoch wird das Fenster so maximiert, dass es zu deiner Auflösung passt.</li>"
+        ]
+      },
+      "resolution": "Auflösung",
+      "customResolution": "Benutzerdefinierte Auflösung",
+      "customResolutionOption": "Benutzerdefiniert",
+      "autoDetectResolutionButton": "Auflösung automatisch erkennen",
+      "vsync": "Vertikale Synchronisation (Bildratenbegrenzung)",
+      "topMostWindow": "Immer im Vordergrund",
+      "fixHudAspectRatio": "Probleme mit HUD in 5:4 und 4:3 Auflösung beheben",
+      "graphicsGroup": "Grafik",
+      "graphicsQualityPreset": "Vorgabe",
+      "graphicsQualityPresetSubtitle": "Grafikqualität",
+      "graphicsQualityPresetOptions": {
+        "custom": "Benutzerdefiniert",
+        "low": "Niedrig",
+        "medium": "Medium",
+        "high": "Hoch",
+        "ultra": "Ultra"
+      },
+      "enableAntiAliasing": "Kantenglättung aktivieren",
+      "enableAntiAliasingSubtitle": "TAA (Temporal Anti-Aliasing)",
+      "anisotropicFiltering": "Anisotropische Filterung",
+      "anisotropicFilteringOptions": {
+        "0x": "Kein",
+        "2x": "2x",
+        "4x": "4x",
+        "8x": "8x",
+        "16x": "16x (Standard)"
+      },
+      "texturesGroup": "Texturen",
+      "textureQualityPreset": "Texturenqualität",
+      "textureQualityPresetOptions": {
+        "custom": "Benutzerdefiniert",
+        "low": "Niedrig",
+        "medium": "Medium",
+        "high": "Hoch",
+        "ultra": "Ultra"
+      },
+      "waterGroup": "Wasser",
+      "waterDisplacement": "Verdrängung",
+      "waterDisplacementSubtitle": "Wellen- und Plätschereffekte",
+      "waterShadowFilter": "Schattenfilter",
+      "waterShadowFilterOptions": {
+        "low": "Niedrig",
+        "medium": "Medium",
+        "high": "Hoch"
+      },
+      "waterSSRFix": "Schwarzes oder unsichtbares Wasser beheben",
+      "waterSSRFixSubtitle": "Diese Option behebt ungültige Konfigurationen um die Wassergrafiken wiederherzustellen.",
+      "waterSSRFixTip": [
+        "<p>Manchmal resultiert das Ausschalten von Screen Space Reflektionen in schwarzes, weißes oder sogar unsichtbares Wasser.</p>",
+        "<p><code>Fallout76Prefs.ini</code>:</p>",
+        "<ul>",
+        "<li>Behebt schwarzes Wasser: <code>[Water]bUseWaterHiRes=1</code></li>",
+        "<li>Behebt (entferntes) unsichtbares Wasser: <code>[Water]bUseWaterReflections=1</code></li>",
+        "<li>",
+        "Behebt unsichtbares Wasser:",
+        "<ul>",
+        "<li><code>[Display]fBlendSplitDirShadow=48.0000</code> (wenn vorher <= 1)</li>",
+        "<li><code>[Display]iMaxFocusShadows=4</code> (wenn vorher <= 1)</li>",
+        "<li><code>[Display]uWaterShadowFilter=3</code> (wenn nicht bereits = 3)</li>",
+        "</ul>",
+        "</li>",
+        "</ul>"
+      ],
+      "lightingGroup": "Beleuchtung",
+      "volumetricLighting": "Volumentrische Beleuchtung",
+      "volumetricLightingSubtitle": "bzw. Lichtstrahlen",
+      "volumetricLightingQuality": "Qualität der volumetrischen Beleuchtung",
+      "volumetricLightingQualityOptions": {
+        "low": "Niedrig",
+        "medium": "Medium",
+        "high": "Hoch"
+      },
+      "postProcessingGroup": "Nachbearbeitung",
+      "depthOfField": "Tiefenschärfe aktivieren",
+      "depthOfFieldStrength": "Effektstärke der Tiefenschärfe",
+      "radialBlur": "Radiale Unschärfe",
+      "radialBlurSubtitle": "Der Bildschirm verschwimmt, wenn der Spieler verletzt ist oder sich unter Wasser befindet.",
+      "lensFlare": "Linsenreflexion",
+      "ambientOcclusion": "Umgebungsverdeckung (SSAO)",
+      "ambientOcclusionSubtitle": "Künstliche Schatten an den Ecken von Objekten/Gegenständen",
+      "reflections": "Reflektionen (SSR)",
+      "reflectionsSubtitle": "Reflektionen auf Wasseroberflächen oder glänzenden Objekten",
+      "effectsGroup": "Effekte",
+      "enableGore": "Gewalt anzeigen",
+      "enableGoreSubtitle": "Blutpartikeleffekte wenn Gegner angeschossen werden",
+      "enableBloodSplatter": "Blutspritzer auf der HUD anzeigen",
+      "enableMuzzleFlashes": "Mündungsfeuereffekte anzeigen",
+      "enableWeaponImpactEffects": "Nicht-explosive Waffeneinschlag-Effekte anzeigen",
+      "enableIntenseWeatherEffects": "Intensive Wettereffekte anzeigen",
+      "shadowsGroup": "Schatten",
+      "shadowQualityPreset": "Qualität",
+      "shadowQualityPresetOptions": {
+        "custom": "Benutzerdefiniert",
+        "low": "Niedrig",
+        "medium": "Medium",
+        "high": "Hoch",
+        "ultra": "Ultra"
+      },
+      "shadowMapResolution": "Auflösung der Texture Map",
+      "shadowMapResolutionSubtitle": "Viereck-Seitenlänge in Pixeln",
+      "shadowMapResolutionOptions": {
+        "512": "512px (Kartoffel)",
+        "1024": "1024px (Niedrig)",
+        "2048": "2048px (Hoch, default)",
+        "4096": "4096px (Ultra)",
+        "8192": "8192px (Verrückt)"
+      },
+      "shadowBlurriness": "Verschwommenheit",
+      "shadowBlurrinesSubtitle": "Kaschiert den Treppeneffekt von Schatten",
+      "shadowBlurrinessOptions": {
+        "0": "0 (nicht verschwommen)",
+        "1": "1 (schärfer, Pixel bemerkbar)",
+        "2": "2 (weniger verschwommen)",
+        "3": "3 (verschwommen, Standard)"
+      },
+      "shadowFadeDistance": "Ausblendedistanz",
+      "lodFadeDistanceGroup": "Detaillierungsgrad (LOD)",
+      "lodFadeDistanceGroupSubtitle": "Ausblendedistanz",
+      "lodFadeDistanceObjects": "Objekte",
+      "lodFadeDistanceItems": "Gegenstände",
+      "lodFadeDistanceActors": "Charaktere",
+      "grassGroup": "Gras",
+      "enableGrass": "Gras anzeigen",
+      "grassFadeDistance": "Ausblendedistanz",
+      "taaSharpeningGroup": "TAA-Schärfefilter",
+      "taaSharpeningGroupSubtitle": "Zu hohe Werte können zu Flackern und seltsamen grafischen Artefakten führen",
+      "taaSharpeningPostOverlay": "Post overlay",
+      "taaSharpeningPostSharpen": "Post sharpen"
+    },
+    "audio": {
+      "title": "Audio",
+      "volume": "Lautstärke",
+      "volumeMaster": "Gesamtlautstärke",
+      "volumeChat": "Chat-Lautstärke",
+      "volumeMenuMusic": "Menümusik",
+      "volumeWorldRadios": "Weltradiosender",
+      "volumeVoice": "Stimme",
+      "volumeMusic": "Musik",
+      "volumeEffects": "Effekte",
+      "volumeFootsteps": "Schritte",
+      "volumePipboyRadio": "Pip-Boy-Radio",
+      "audio": "Audio",
+      "enableAudio": "Audio aktivieren",
+      "playMusicInMainMenu": "Hintergrundmusik im Hauptmenü abspielen",
+      "voice": "Voice-Chat",
+      "voiceChatMode": "Voice-Chat-Modus",
+      "voiceChatModeAuto": "Automatisch",
+      "voiceChatModeArea": "Gebiet",
+      "voiceChatModeTeam": "Team",
+      "voiceChatModeNone": "Keine",
+      "enablePushToTalk": "Push-To-Talk aktivieren"
+    },
+    "controls": {
+      "title": "Steuerung",
+      "mouse": "Maus",
+      "horizontalSensitivity": "Horizontale Empfindlichkeit",
+      "verticalSensitivity": "Vertikale Empfindlichkeit",
+      "invertYAxis": "Y-Achse umkehren",
+      "invertXAxis": "X-Achse umkehren",
+      "toggleAim": "Zielen umschalten",
+      "gamepad": "Controller",
+      "gamepadRumble": "Vibration aktivieren",
+      "aimAssist": "Zielhilfe",
+      "enableGamepad": "Controller aktivieren",
+      "enableGamepadSubtitle": "Deaktivieren, um Maus und Tastatur statt angeschlossenem Controller zu verwenden"
+    },
+    "camera": {
+      "title": "Kamera",
+      "fieldOfView": "Sichtfeld",
+      "viewmodelFov": "Viewmodel-Sichtfeld",
+      "accessibility": "Barrierefreiheit",
+      "enableCameraShaking": "Kamerawackeln aktivieren",
+      "cameraDistance": "Entfernung der Kamera",
+      "cameraDistanceSubtitle": "in dritter Person",
+      "cameraMinimumDistance": "Minimale Entfernung",
+      "cameraMinimumDistanceSubtitle": "wenn reingezoomt wird",
+      "cameraMaximumDistance": "Maximale Entfernung",
+      "cameraMaximumDistanceSubtitle": "wenn rausgezoomt wird",
+      "cameraZoomOutDistance": "Rauszoomentfernung",
+      "cameraZoomOutDistanceSubtitle": "wenn auf den Boden geschaut wird",
+      "photomode": "Fotomodus",
+      "movementSpeed": "Bewegungsgeschwindigkeit",
+      "rotationSpeed": "Drehgeschwindigkeit",
+      "photomodeRangeLimit": "Maximale Entfernung",
+      "freeCam": "Freie Kamera (Werkstatt-Baumodus)",
+      "startInFreeCam": "In freier Kamera starten",
+      "freeCamStartAtLastLocation": "An letzter Position starten",
+      "freeCamControlsHoldToggle": "Controller drücken und halten umschalten"
+    },
+    "accessibility": {
+      "title": "Barrierefreiheit",
+      "enableSpeechToText": "Spracherkennung aktivieren",
+      "messageWindowFadeTime": "Ausblendzeit des Nachrichtenfensters",
+      "messageWindowFadeTimeSubtitle": "in Sekunden",
+      "messageWindowFadeAmount": "Sichtbarkeit des Nachrichtenfensters",
+      "messageWindowFadeAmountSubtitle": "Deckkraft im verblassten Zustand",
+      "singleButtonNotificationCancel": "Einmal drücken für Benachrichtigungsabbruch",
+      "enableScreenNarration": "Bildschirmkommentare aktivieren",
+      "screenNarrationVoice": "Bildschirmkommentarstimme",
+      "screenNarrationVoiceType": "Stimmtyp {{num}}",
+      "showAccessibilityScreenOnStart": "Barrierefreiheitseinstellungen beim Start (erneut) anzeigen",
+      "alternativeNoteView": "Alternative Notizanzeige",
+      "alternativeNoteViewSubtitle": "Beim Lesen einer Notiz kann die alternative Anzeige durch Drücken der V-Taste umgeschaltet werden.",
+      "altNoteViewLargeText": "Größere Schriftgröße benutzen",
+      "altNoteViewTextColor": "Textfarbe",
+      "altNoteViewBackgroundColor": "Hintergrundfarbe"
+    }
+  },
+  "pipboy": {
+    "title": "Pip-Boy Individualisierung",
+    "pipboy": "Pip-Boy",
+    "quickboy": "Quick-Boy",
+    "powerArmor": "Power-Rüstung",
+    "pipboyColor": "Pip-Boy-Farbe",
+    "quickboyColor": "Quick-Boy-Farbe",
+    "powerArmorColor": "Power-Rüstungsfarbe",
+    "preview": "Vorschau",
+    "previewSubtitle": "Die Vorschau ist nur eine Annäherung,<br>daher könnte es im Spiel etwas anders aussehen.",
+    "colorPicker": "Farbwähler",
+    "presets": "Vorgaben",
+    "presetsSubtitle": "Klicke auf ein Farbkreis, um es anzuwenden.",
+    "presetColors": {
+      "fo3": {
+        "name": "Ödland der Hauptstadt Grün",
+        "description": "Fallout 3 Standardfarbe"
+      },
+      "fonv": {
+        "name": "Mojave-Ödland Bernstein",
+        "description": "Fallout New Vegas Standardfarbe"
+      },
+      "fo3blue": {
+        "name": "Klassisches Blau",
+        "description": "von Fallout 3"
+      },
+      "fo3white": {
+        "name": "Klassisches Weiß",
+        "description": "von Fallout 3"
+      },
+      "fo4": {
+        "name": "Commonwealth Grün",
+        "description": "Fallout 4 Standardfarbe"
+      },
+      "fo76": {
+        "name": "Appalachia Grün",
+        "description": "Fallout 76 Standardfarbe"
+      },
+      "fo76quickboy": {
+        "name": "Quick-Boy Standardfarbe",
+        "description": "Standardfarbe"
+      },
+      "fo76pa": {
+        "name": "Power-Rüstung Standardfarbe",
+        "description": "Standardfarbe"
+      },
+      "radiantWhite": {
+        "name": "Strahlend Weiß",
+        "description": "Selbsterstellte Farbe"
+      },
+      "calmingLavender": {
+        "name": "Beruhigendes Lavendel",
+        "description": "Selbsterstellte Farbe"
+      },
+      "lushTato": {
+        "name": "Üppiges Tato",
+        "description": "Selbsterstellte Farbe"
+      }
+    },
+    "mode": "Modus",
+    "usePipboy": "Pip-Boy verwenden",
+    "useQuickboy": "Quick-Boy verwenden",
+    "resolution": "Auflösung",
+    "resolutionSubtitle": "Diese Einstellung beinflusst sowohl Pip-Boy als auch Quick-Boy.",
+    "setRecommendedResolution": "Empfohlene Auflösung verwenden",
+    "resetToDefault": "Auf Standardeinstellung zurücksetzen"
+  },
+  "mods": {
+    "title": "Mods",
+    "errors": {
+      "noModsPath": "Modspfad ist nicht im Profil angegeben.",
+      "unsetModsPath": "Modspfad nicht gesetzt.",
+      "unsetGamePath": "Spielpfad nicht gesetzt.",
+      "unsetModsPathOrGamePath": "Modspfad oder Spielpfad nicht gesetzt.",
+      "unsetIniPathOrIniPrefix": "Inipfad oder Inipräfix nicht gesetzt.",
+      "goToProfilesToSetModsPath": "Gehe zu den Profilen und setze den Spielpfad (und den Modspfad unter den erweiterten Optionen)."
+    },
+    "modOrderTab": {
+      "title": "Modreihenfolge",
+      "toolbar": {
+        "installMod": "Mod hinzufügen",
+        "installFromFile": "Von Datei installieren",
+        "installFromFolder": "Von Ordner installieren",
+        "more": "Mehr",
+        "importInstalledArchives": "Installierte Archive importieren",
+        "showConflictingFiles": "In Konflikt stehende Dateien anzeigen",
+        "openDragAndDropWindow": "Dateiablagefenster anzeigen",
+        "deployMods": "Mods anwenden",
+        "disableMods": "Mods deaktivieren",
+        "enableMods": "Mods aktivieren",
+        "nexusMods": "NexusMods-Integration",
+        "checkForUpdates": "Nach Aktualisierungen suchen",
+        "downloadModInfo": "Modinformationen und Vorschaubilder herunterladen",
+        "endorseAllMods": "Alle Mods empfehlen",
+        "archive2": "Archive2",
+        "openArchive2": "Archive2 öffnen",
+        "exploreBa2Archive": "*.ba2-Archiv durchsuchen",
+        "extractBa2Archive": "*.ba2-Archiv extrahieren nach ...",
+        "createBa2Archive": "Neues *.ba2-Archiv erstellen",
+        "displayInfoAboutBa2Archive": "Informationen zu *.ba2-Archiv anzeigen",
+        "autoPackIntoArchives": "Neue *.ba2-Archive von Ordner erstellen",
+        "wikiAndGuides": "Wiki und Anleitungen"
+      },
+      "searchForMod": "Nach Mod suchen...",
+      "table": {
+        "header": {
+          "modName": "Modname & -info",
+          "version": "Version",
+          "status": "Status",
+          "rootFolder": "Installiere nach",
+          "endorsed": "Empfohlen",
+          "actions": "Aktionen"
+        },
+        "rows": {
+          "byAuthor": "von {{author}}",
+          "enabled": "aktiviert",
+          "disabled": "deaktiviert",
+          "endorsedYes": "Ja",
+          "endorsedNo": "Nein",
+          "deleteButton": "Löschen",
+          "status": {
+            "enabled": "aktiviert",
+            "disabled": "deaktiviert",
+            "redeployPending": "Neuanwendung ausstehend",
+            "deployPending": "Anwendung ausstehend",
+            "removePending": "Entfernung ausstehend"
+          }
+        }
+      },
+      "detailsPane": {
+        "enableThisMod": "Diese Mod aktivieren",
+        "endorsedText": "Du hast diese Mod empfohlen.",
+        "abstainedText": "Du hast darauf verzichtet diese Mod zu empfehlen.",
+        "undecidedText": "Du hast diese Mod noch nicht empfohlen.",
+        "detailsGroup": "Details",
+        "modName": "Modname",
+        "installedVersion": "Installierte Version",
+        "webpageUrl": "Webseite (URL)",
+        "openLinkInBrowser": "Link im Browser öffnen",
+        "notes": "Notizen",
+        "installationGroup": "Installation",
+        "installInto": "Installiere nach...",
+        "selectFolder": "Ordner wählen",
+        "resetPath": "Pfad zurücksetzen",
+        "modFolderName": "Modordnername",
+        "openModFolder": "Modordner öffnen",
+        "nexusmodsGroup": "NexusMods",
+        "latestVersion": "Neueste Version",
+        "setLatestVersion": "Neueste Version setzen",
+        "author": "Autor",
+        "downloadModInfo": "Modinformationen herunterladen",
+        "renameFailed": "Konnte Ordner nicht umbenennen: {{error}}"
+      },
+      "statusbar": {
+        "deploymentNecessary": "Übernehmen von Änderungen notwendig",
+        "modsEnabled": "Alle Mods aktiviert",
+        "modsDisabled": "Alle Mods deaktiviert",
+        "modsInstalled_zero": "Keine Mods installiert",
+        "modsInstalled_one": "{{count}} Mod installiert",
+        "modsInstalled_other": "{{count}} Mods installiert",
+        "modsEnabled_zero": "Keine Mods aktiviert",
+        "modsEnabled_one": "{{count}} Mod aktiviert",
+        "modsEnabled_other": "{{count}} Mods aktiviert"
+      },
+      "modals": {
+        "deleteModTitle": "Mod löschen?",
+        "deleteModText": "Bist du sicher, dass du {{mod}} löschen möchtest?",
+        "importModal": {
+          "title": "Installierte Archive importieren",
+          "description": "Importiere ein oder mehrere *.ba2-Archive, die noch nicht verfolgt werden, als neue Mod.",
+          "modName": "Modname",
+          "selectArchives": "Zu importierende Archive auswählen",
+          "importButton": "Importieren",
+          "noArchives": "Keine Archive gefunden"
+        },
+        "conflictsModal": {
+          "title": "Konflikte",
+          "noConflictsFound": "Keine Konflikte gefunden.",
+          "conflictText_zero": "{{lowerMod}} überschreibt 0 Dateien von {{upperMod}}:",
+          "conflictText_one": "{{lowerMod}} überschreibt 1 Datei von {{upperMod}}:",
+          "conflictText_other": "{{lowerMod}} überschreibt {{count}} Dateien von {{upperMod}}:"
+        },
+        "installationModal": {
+          "title": "Neue Mod erstellen",
+          "detailsGroup": "Details",
+          "modName": "Modname",
+          "version": "Version",
+          "url": "URL",
+          "installationGroup": "Installation",
+          "installInto": "Installiere nach",
+          "modFolderName": "Modordnername",
+          "selectFolder": "Ordner wählen",
+          "fileContents": "Ordnerinhalt",
+          "installButton": "Installieren",
+          "cancelButton": "Abbrechen",
+          "warnings": {
+            "emptyFolder": "Der Mod-Ordner ist leer.",
+            "noModFilesFound": "Der Mod-Ordner enthält keine typischen Mod-Dateien.",
+            "wrongFolderForArchives": "Falscher Stammordner für Archive (BA2-Dateien). Sie sollten im Ordner \"Data\" bereitgestellt werden.",
+            "wrongFolderForStrings": "Falscher Stammordner für String-Dateien (STRINGS, DLSTRINGS, ILSTRINGS). Sie sollten im Ordner \"Data/Strings\" bereitgestellt werden.",
+            "wrongFolderForDlls": "Falscher Stammordner für Bibliotheken (DLL-Dateien). Sie sollten im Ordner \".\" bereitgestellt werden.",
+            "multipleBa2Archives": "Mehrere *.ba2-Archive in Unterordnern gefunden. Sie sollten sich im Data-Ordner befinden.",
+            "unpackedFiles": "Es wurden Ordner gefunden, die normalerweise in einem BA2-Archiv sein sollten. Sie sollten mit Archive2 in ein oder mehrere BA2-Archive gepackt werden.",
+            "fixButton": "Beheben"
+          },
+          "instructionsText": "Stelle sicher, dass alle Optionen korrekt eingestellt sind, dann klicke auf \"Installieren\" unten.",
+          "readmeCardHeader": "Installationsanweisungen",
+          "readmeCardText": "Es wurden Textdateien gefunden, die möglicherweise Anweisungen zur Installation des Mods enthalten. Klicke auf die Dateien unten, um sie zu lesen:",
+          "fileSelectionText": "Wähle aus, welche Dateien installiert werden sollen:"
+        },
+        "archive2": {
+          "infoTitle": "Informationen über das *.ba2-Archiv",
+          "createTitle": "Neues *.ba2-Archiv erstellen",
+          "createArchivePath": "Archivpfad",
+          "sourceFolderPath": "Dateien packen in...",
+          "destinationFolderPath": "Archive erstellen in...",
+          "createButton": "Erstellen",
+          "extractTitle": "*.ba2-Archiv extrahieren",
+          "extractArchivePath": "Archivpfad",
+          "extractToFolderPath": "Extrahieren nach...",
+          "extractButton": "Extrahieren",
+          "autoPackTitle": "Neue *.ba2-Archive von einem Ordner erstellen",
+          "autoPackDescription": "Erkennt automatisch und erstellt verschiedene BA2 Archivtypen von den Dateien in dem Ordner. Das funktioniert unter Umständen nicht immer richtig.",
+          "autoPackButton": "Archive packen",
+          "filePath": "Dateipfad",
+          "fileSize": "Dateigröße",
+          "format": "Format",
+          "compression": "Komprimierung",
+          "numOfFiles": "Dateianzahl",
+          "formatOptions": {
+            "General": "Allgemein",
+            "DDS": "DDS",
+            "XBoxDDS": "XBoxDDS",
+            "GNF": "GNF"
+          },
+          "compressionOptions": {
+            "Default": "Standard",
+            "XBox": "XBox",
+            "None": "Keine"
+          },
+          "error": {
+            "archive2RequirementsNotMet": [
+              "Archive2 hat einen Fehler zurückgegeben: <i>{{errorMessage}}</i><br/>",
+              "Das Visual C++ Redistributable für Visual Studio 2012 Update 4 ist vermutlich nicht installiert.",
+              "Lade <a>vcredist_x86.exe und vcredist_x64.exe von Microsoft</a> herunter und installiere sie. Versuche es dann erneut."
+            ],
+            "wineNotFound": "Wine ist nicht installiert. Verwende den Paketmanager deines Systems, um Wine zu installieren. Auf Ubuntu wäre das zum Beispiel: <code>{{command}}</code>. Versuche es dann erneut.",
+            "wineMonoNotInstalled": "Wine Mono ist nicht installiert. Lade <a>{{fileName}}</a> für deine installierte Wine-Version herunter. Führe dann <code>{{command}}</code> in einem Terminal aus. Wähle dort das heruntergeladene <code>{{fileExtension}}</code>-Paket aus, um Wine Mono zu installieren. Versuche es dann erneut.",
+            "archive2NotFound": "Archive2 konnte nicht gefunden werden. Die Datei <code>resources/Archive2/Archive2.exe</code> muss sich neben dem installierten Programm (<code>f76qc2.exe</code>) befinden. Stelle sicher, dass das Programm korrekt installiert wurde."
+          }
+        },
+        "loggedOutModal": {
+          "title": "Nicht angemeldet",
+          "message": "Du bist nicht bei NexusMods angemeldet. Bitte <a>melde dich an</a>, um diese Funktion zu nutzen."
+        },
+        "outdatedModsModal": {
+          "title": "Veraltete Mods",
+          "modsOutdated": "{{count}} Mods sind veraltet:",
+          "tableHeaderMod": "Mod",
+          "tableHeaderCurrentVersion": "Aktuelle Version",
+          "tableHeaderLatestVersion": "Neueste Version",
+          "allUpToDate": "Alle Mods sind auf dem neuesten Stand."
+        },
+        "chooseCDNModal": {
+          "title": "NexusMods CDN-Link wählen",
+          "description": "Wähle einen CDN-Server zum Herunterladen der Mod aus.",
+          "pickButton": "Auswählen",
+          "cancelButton": "Abbrechen"
+        }
+      },
+      "progress": {
+        "deploying": {
+          "deploying": "Mods werden angewendet",
+          "modXofY": "Mod {{count}} von {{total}} wird angewendet: {{name}}",
+          "fileXofY": "Datei {{count}} von {{total}} wird kopiert: {{name}}"
+        },
+        "requestingCdnLinks": "Download-Links werden von NexusMods abgefragt",
+        "downloadingMod": "Mod wird heruntergeladen",
+        "downloadingModWithProgress": "Mod wird heruntergeladen: {{downloaded}} von {{total}} ({{percent}}%)",
+        "copyingFile": "Datei wird kopiert",
+        "copyingFiles": "Dateien werden kopiert",
+        "copyingFolderContents": "Ordnerinhalt wird kopiert",
+        "installingMod": "Mod wird installiert",
+        "cleaningUp": "Wird aufgeräumt",
+        "deletingMod": "Mod wird gelöscht",
+        "extractingArchive": "Extrahiere...",
+        "creatingArchive": "Erstelle...",
+        "autoPackingArchives": "Erstelle Archive...",
+        "removingModStatusText": "Entferne Mod {{removedMods}} von {{totalMods}}: {{modTitle}}, Datei {{removedFiles}} von {{totalFiles}}: {{fileName}}",
+        "retrievingInfoForMods": "Lade Modinformationen",
+        "retrievingInfoForModXofY": "Lade Modinformationen für Mod {{currentMod}} von {{totalMods}}: {{modTitle}}",
+        "endorsingMods": "Empfehle Mods",
+        "endorsingModXofY": "Empfehle Mod {{currentMod}} von {{totalMods}}: {{modTitle}}",
+        "retrievingModInfo": "Lade Modinformationen",
+        "endorsingMod": "Empfehle Mod",
+        "abstainingFromEndorsingMod": "Verzichte auf Mod-Empfehlung",
+        "modNotFound": "Mod nicht gefunden",
+        "checkingForConflicts": "Suche nach Konflikten"
+      },
+      "toasts": {
+        "savingFailed": "Modmetadaten konnten nicht gespeichert werden",
+        "modInstalled": "Mod installiert",
+        "modInstallFailed": "Mod konnte nicht installiert werden",
+        "modDeleted": "Mod gelöscht",
+        "modDeletedFailed": "Mod konnte nicht gelöscht werden",
+        "modsDeployed": "Mods angewendet",
+        "modsRemoved": "Mods entfernt",
+        "modsRemovalFailed": "Mods konnten nicht entfernt werden",
+        "archive2Created": "Archiv erstellt",
+        "archive2Extracted": "Archiv extrahiert",
+        "archive2AutoPacked": "Archive erstellt",
+        "infoRetrieved": "Informationen abgerufen",
+        "infoRetrievedWithCount": "Informationen abgerufen, Anzahl: {{count}}",
+        "modsEndorsed": "Mods empfohlen, Anzahl: {{count}}"
+      }
+    },
+    "resourceListTab": {
+      "title": "Ressourcenliste",
+      "toolbar": {
+        "addArchiveName": "Archivnamen hinzufügen",
+        "addUnlisted": "Nicht aufgelistete Archive hinzufügen",
+        "removeUnavailable": "Nicht existierende Archive entfernen"
+      },
+      "table": {
+        "header": {
+          "archiveName": "Archivname",
+          "modName": "Modname",
+          "fileSize": "Dateigröße",
+          "exists": "Existiert?",
+          "actions": "Aktionen"
+        },
+        "rows": {
+          "existsYes": "Ja",
+          "existsNo": "Nein",
+          "removeButton": "Entfernen"
+        }
+      },
+      "modals": {
+        "removeArchiveTitle": "Archiv von der Liste entfernen?",
+        "removeArchiveText": "Bist du sicher, dass du {{archive}} von der Liste entfernen möchtest? Das löscht das Archiv nicht aus dem Data-Ordner.",
+        "addArchiveTitle": "Archiv zur Liste hinzufügen"
+      },
+      "toasts": {
+        "loadingFailed": "Ressourcenliste konnte nicht geladen werden",
+        "savingFailed": "Ressourcenliste konnte nicht gespeichert werden",
+        "removedNonExistantArchives": "Alle nicht existierenden Archive wurden von der Liste entfernt",
+        "addedUnlistedArchives": "Alle nicht aufgelisteten Archive wurden zur Liste hinzugefügt"
+      }
+    },
+    "settingsTab": {
+      "title": "Einstellungen",
+      "interfaceGroup": "Oberfläche",
+      "nexusmodsGroup": "NexusMods-Integration",
+      "downloadsFolder": "Downloads-Ordner",
+      "associateNxmUrl": "\"Mod Manager Download\" Links mit dieser App öffnen",
+      "associateNxmUrlSubtitle": "Das registriert die App als Handler für nxm:// URLs.",
+      "showNexusModsTitle": "Modtitel von NexusMods anzeigen, wenn verfügbar",
+      "showNexusModsTitleSubtitle": "Wenn deaktiviert, zeigt es den Titel nur so an, wie er eingegeben wurde.",
+      "noteDeployMods": "<b>Beachte</b>: Einige Einstellungen treten erst in Kraft nachdem die Mods erneut angewendet wurden.",
+      "copyMethodGroup": "Wie sollen Dateien kopiert werden?",
+      "makeHardLinksOption": "Harte Verknüpfungen anlegen",
+      "makeHardLinksOptionSubtitle": "Empfohlen, spart Speicherplatz, funktioniert nur wenn Mods auf der selben Festplatte liegen",
+      "makeSymlinksOption": "Symbolische Verknüpfungen anlegen",
+      "makeSymlinksOptionSubtitle": "Benötigt Administratorrechte auf Windows",
+      "copyFilesOption": "Dateien kopieren",
+      "copyFilesOptionSubtitle": "Am stabilsten, verwende diese Option wenn das Anwenden fehlschlägt",
+      "deploymentBehavior": "Modanwendungsverhalten",
+      "resourceListOption": "Welche Ressourcenliste soll verwendet werden?",
+      "default": "Standard",
+      "keepConfigFiles": "Konfigurationsdateien behalten",
+      "keepConfigFilesSubtitle": "Überschreibt keine bereits existierenden Konfigurationsdateien ({{extensions}}) und entfernt sie auch nicht.",
+      "resourceInsertionPosition": "Wo sollen *.ba2-Archive in der Ressourcenliste beim Anwenden platziert werden?",
+      "resourceInsertionPositionAppend": "An das Ende der Liste (anhängen)",
+      "resourceInsertionPositionPrepend": "An den Anfang der Liste (voranstellen)"
+    },
+    "resourceList": {
+      "loadFailed": "Ressourcenliste konnte nicht geladen werden"
+    },
+    "migration": {
+      "title": "Mods migrieren",
+      "description": "Mod-Dateien von einer älteren Version von Quick Configuration wurden gefunden. Du musst entscheiden, was damit passieren soll, um den Mod-Manager nutzen zu können. Du kannst diese Meldung auch einfach ignorieren und weg navigieren, es wurden noch keine Dateien geändert.",
+      "migrationState": "Migrationsstatus:",
+      "warning": "Die folgenden Aktionen sind dauerhaft und können nicht rückgängig gemacht werden.",
+      "decideWhatToDo": "Entscheide, was zu tun ist",
+      "migrateOldModsButton": "Alte Mods ins neue v2-Format migrieren",
+      "deleteOldModsButton": "Alte Mods löschen und neu beginnen",
+      "migrateModal": {
+        "title": "Bist du sicher, dass du alte Mods migrieren möchtest?",
+        "description": "Mods werden ins neue Format migriert:",
+        "bundledArchives": "\"Gebündelte BA2-Archive\" werden gelöscht und durch einzeln gepackte Archive für jede Mod ersetzt.",
+        "separateArchives": "\"Separate BA2-Archive\" werden bei Bedarf gepackt. Eingefrorene Archive werden wiederverwendet.",
+        "looseFiles": "\"Lose Dateien\" werden so belassen.",
+        "archive2Note": "Während der Migration kann Archive2 verwendet werden, um Archive zu erstellen. Stelle sicher, dass auf deiner Festplatte genug Speicherplatz verfügbar ist.",
+        "cannotBeUndone": "Diese Aktion kann nicht rückgängig gemacht werden."
+      },
+      "deleteModal": {
+        "title": "Bist du sicher, dass du alte Mods löschen möchtest?",
+        "description": "Alle alten Mods werden gelöscht, inklusive:",
+        "bundledArchivesDetail": "\"Gebündelte BA2-Archive\", die bereitgestellt wurden. Das beinhaltet alle *.ba2-Archive, die mit \"Bundled - ...\" beginnen.",
+        "deployedFiles": "Alle alten bereitgestellten Mod-Dateien.",
+        "folders": "Der Ordner \"Mods\" und der Ordner \"FrozenData\".",
+        "cannotBeUndone": "Diese Aktion kann nicht rückgängig gemacht werden."
+      }
+    },
+    "progress": {
+      "migration": {
+        "migratingMods": "Mods werden migriert...",
+        "removingBundledArchives": "Gebündelte Archive werden entfernt...",
+        "removingMod": "Entferne Mod {{count}} von {{total}}: \"{{modTitle}}\"...",
+        "migratingMod": "Migriere Mod {{count}} von {{total}}: \"{{modTitle}}\"...",
+        "cleanup": "Wird aufgeräumt..."
+      },
+      "deletion": {
+        "removingMods": "Mods werden entfernt...",
+        "removingBundledArchives": "Gebündelte Archive werden entfernt...",
+        "removingMod": "Entferne Mod {{count}} von {{total}}: \"{{modTitle}}\"...",
+        "cleanup": "Wird aufgeräumt..."
+      }
+    }
+  },
+  "gallery": {
+    "title": "Galerie",
+    "noImagesFound": "Keine Bilder gefunden"
+  },
+  "nexusmods": {
+    "title": "NexusMods-Integration",
+    "profile": {
+      "membership": "Mitgliedschaft",
+      "userId": "Benutzer-ID",
+      "hourlyRateLimit": {
+        "title": "Stündliches Ratenlimit",
+        "text": "{{count}} übrig für diese Stunde, wird um {{reset, datetime}} zurückgesetzt."
+      },
+      "dailyRateLimit": {
+        "title": "Tägliches Ratenlimit",
+        "text": "{{count}} übrig für heute, wird am {{reset, datetime}} zurückgesetzt."
+      },
+      "updateProfile": "Profil aktualisieren",
+      "logout": "Ausloggen"
+    },
+    "login": {
+      "notLoggedIn": "Nicht eingeloggt.",
+      "apiKey": "API-Schlüssel",
+      "tryApiKeyLink": "Login funktioniert nicht? Versuche stattdessen deinen API-Schlüssel einzugeben.",
+      "howToUseApiKeyLink": "Wie logge ich mich mit einem API-Schlüssel ein?",
+      "loginWithApiKey": "Einloggen mit API-Schlüssel",
+      "login": "Einloggen"
+    },
+    "loginModal": {
+      "title": "Login mit NexusMods",
+      "subtitle": "Warte auf Authorisierung...",
+      "text": "Wenn der Webbrowser sich öffnet, klicke bitte auf \"Authorise\", um dich einzuloggen.",
+      "abort": "Abbrechen"
+    }
+  },
+  "settings": {
+    "title": "Anwendungseinstellungen",
+    "localization": {
+      "title": "Lokalisation",
+      "language": "Sprache",
+      "downloadTranslationsButton": "Übersetzungen herunterladen und aktualisieren",
+      "reloadTranslationsButton": "Übersetzungen von der Festplatte neuladen",
+      "createTemplateButton": "Neue Vorlage von der aktuellen Übersetzung erstellen",
+      "templateCreated": "Vorlagedatei erstellt: {{file}}",
+      "templateCreationFailed": "Vorlagedatei konnte nicht erstellt werden: {{reason}}",
+      "loadingTranslations": "Übersetzungen werden geladen...",
+      "downloadingTranslations": "Übersetzungen werden heruntergeladen...",
+      "couldNotLoadTranslation": "Die Übersetzung {{file}} konnte nicht geladen werden:"
+    },
+    "theme": {
+      "title": "Farbschema",
+      "light": "Hell",
+      "dark": "Dunkel",
+      "system": "System"
+    },
+    "appearance": {
+      "title": "Aussehen",
+      "useGameCursor": "Spielcursor verwenden"
+    },
+    "behavior": {
+      "title": "Verhalten",
+      "quitOnGameLaunch": "App schließen, wenn das Spiel gestartet wird",
+      "quitOnGameLaunchSubtitle": "Nur wenn das Spiel über die App gestartet wird",
+      "fetchServerStatusOnStart": "Serverstatus beim Start abrufen",
+      "fetchServerStatusOnStartSubtitle": "Kontaktiert status.bethesda.net und api.locize.app um den Status anzuzeigen",
+      "checkForUpdates": "Nach Updates beim Start suchen",
+      "checkForUpdatesSubtitle": "Kontaktiert github.com, um zu prüfen ob eine neue Version verfügbar ist"
+    },
+    "updates": {
+      "title": "Updates",
+      "updateAvailable": "Ein Update ist verfügbar",
+      "checkFailed": "Konnte nicht nach Updates suchen",
+      "checkButton": "Nach Updates suchen",
+      "downloadAndInstall": "Jetzt herunterladen und installieren"
+    },
+    "debug": {
+      "title": "Fehlerbehebung",
+      "openLogButton": "Logdatei öffnen"
+    },
+    "profiles": {
+      "title": "Profile",
+      "subtitle": "Suchst du nach Profil-Einstellungen? (Spielpfad, Spieledition, etc.)",
+      "goToProfiles": "Zu den Profilen wechseln"
+    },
+    "migrationInfo": "Deine Einstellungen wurden von v{{fromVersion}} am {{date, datetime}} migriert.",
+    "dismissMigrationInfo": "Ausblenden"
+  },
+  "profiles": {
+    "title": "Profile",
+    "addButton": "Profil hinzufügen",
+    "editButton": "Profil bearbeiten",
+    "deleteButton": "Profil löschen",
+    "confirmDeleteModal": {
+      "title": "Profil \"{{profile}}\" löschen?",
+      "text": "Du bist dabei \"{{profile}}\" zu löschen.\nBist du sicher?"
+    },
+    "noProfileFound": "Keine Profile gefunden",
+    "editProfile": "Profil bearbeiten",
+    "profileName": "Profilname",
+    "advancedOptions": "Erweiterte Optionen",
+    "gameEdition": {
+      "title": "Spieledition",
+      "subtitle": "Wo hast du das Spiel gekauft?",
+      "steam": "Steam",
+      "steamPTS": "Steam (PTS)",
+      "xbox": "Xbox",
+      "other": "Etwas anderes"
+    },
+    "gamePath": {
+      "title": "Spielpfad",
+      "subtitle": "Wird benötigt, wenn du das Spiel modden möchtest.",
+      "clickForTip": "Klick hier, wenn du Schwierigkeiten hast den Spielpfad zu finden."
+    },
+    "modsPath": {
+      "title": "Modspfad",
+      "subtitle": "Wohin kommen die Moddateien?"
+    },
+    "configFiles": {
+      "title": "Konfigurationsdateien",
+      "subtitle": "Nicht ändern, wenn du dir unsicher bist.",
+      "iniPrefix": "*.ini Präfix",
+      "iniParentPath": "*.ini Ordnerpfad"
+    },
+    "launchOptions": {
+      "title": "Startoptionen",
+      "subtitle": "Wird verwendet, wenn das Spiel über die App gestartet wird.",
+      "launchWithLauncher": "Via Steam / Xbox starten (empfohlen)",
+      "runExecutableDirectly": "Starte ausführbare Datei direkt",
+      "executableFile": "Ausführbare Datei",
+      "parameters": "Parameter",
+      "launchUrl": "Start-URL"
+    },
+    "autoDetectGamePathModal": {
+      "title": "Automatische Erkennung des Spielinstallationspfads",
+      "text": "Es wurden folgende Spielpfade gefunden:",
+      "selectGamePath": "Spielpfad wählen",
+      "noPathsFound": "Keine Pfade gefunden",
+      "selectButton": "Auswählen",
+      "closeButton": "Schließen"
+    }
+  },
+  "welcome": {
+    "title": "Willkommen",
+    "subtitle": "Hallo! Es scheint, du hast die App zum ersten Mal gestartet!",
+    "quote": {
+      "text": "Ich weiß, dass du sehr beschäftigt bist, daher werde ich nicht viel Zeit\nin Anspruch nehmen. Ich muss nur einige Informationen überprüfen, das ist alles!",
+      "rep": "— \u00a0 Vault-Tec-Vertreter, Oktober 2077"
+    },
+    "getStarted": "Loslegen"
+  },
+  "updates": {
+    "toasts": {
+      "updateAvailable": "Update verfügbar",
+      "updateAvailableText": "Ein Update auf Version {{version}} ist verfügbar. Navigiere zu den Einstellungen, um es herunterzuladen und zu installieren."
+    },
+    "download": {
+      "text": "{{downloaded}} von {{total}} heruntergeladen..."
+    }
+  },
+  "prereleaseModal": {
+    "title": "Vorabversion",
+    "text": "Du führst derzeit eine Vorabversion aus (<code>{{version}}</code>), die Fehler oder Probleme enthalten kann. Wenn du die Zeit findest, bitte melde jegliche Probleme oder Feedback auf GitHub oder NexusMods. Vielen Dank!"
+  },
+  "dragAndDropWindow": {
+    "title": "Dateiablagefenster",
+    "dragAndDropFilesHere": "Dateien hierher ziehen und ablegen"
+  },
+  "errorBoundary": {
+    "titleOops": "Upps!",
+    "tryAgainButton": "Nochmal probieren",
+    "openLogButton": "Logdatei öffnen"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "dndWindow",
+  "description": "Capability for the drag and drop window",
+  "local": true,
+  "windows": ["dragAndDropWindow"],
+  "permissions": ["core:default", "log:default"]
+}

@@ -1,0 +1,129 @@
+name: "release"
+
+on:
+  # workflow_dispatch:
+  #   inputs:
+  #     upload-artifacts:
+  #       type: boolean
+  #       description: Whether to upload artifacts
+  #       default: false
+  push:
+    #branches:
+    #  - main
+    tags:
+      - "v*"
+
+# This workflow will create or update a GitHub release, build the app, and upload the artifacts to the release.
+# See: https://github.com/tauri-apps/tauri-action and https://v2.tauri.app/distribute/pipelines/github/
+
+jobs:
+  publish-tauri:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        # https://github.com/actions/runner-images
+        include:
+          # - platform: "macos-latest" # for Arm based macs (M1 and above).
+          #   args: "--target aarch64-apple-darwin"
+          # - platform: "macos-latest" # for Intel based macs.
+          #   args: "--target x86_64-apple-darwin"
+          - platform: "ubuntu-24.04"
+            args: ""
+          # - platform: 'ubuntu-24.04-arm' # Only available in public repos.
+          #   args: ''
+          - platform: "windows-latest"
+            args: ""
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies (Ubuntu only)
+        if: matrix.platform == 'ubuntu-24.04' || matrix.platform == 'ubuntu-24.04-arm' # This must match the platform value defined above.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libappindicator3-dev librsvg2-dev patchelf
+
+          # Pin WebKit to avoid blank-webview regression on newer ubuntu-24.04 packages
+          # Credit:
+          # - https://github.com/ActivityWatch/activitywatch/pull/1311/changes
+          # - https://github.com/tauri-apps/tauri/issues/11994#issuecomment-2585913213
+          sudo apt-get install -y --allow-downgrades \
+            libwebkit2gtk-4.1-0=2.44.0-2 \
+            libwebkit2gtk-4.1-dev=2.44.0-2 \
+            libjavascriptcoregtk-4.1-0=2.44.0-2 \
+            libjavascriptcoregtk-4.1-dev=2.44.0-2 \
+            gir1.2-javascriptcoregtk-4.1=2.44.0-2 \
+            gir1.2-webkit2-4.1=2.44.0-2
+
+      # https://pnpm.io/continuous-integration#github-actions
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        # picks version from the package.json with the key "packageManager"
+
+      - name: Install Node.js LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: "pnpm" # Set this to npm, yarn or pnpm.
+
+      - name: Install Rust (stable toolchain)
+        uses: dtolnay/rust-toolchain@stable # Set this to dtolnay/rust-toolchain@nightly
+        with:
+          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: Rust cache (keep target folder for multiple platform builds)
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
+      - name: Install frontend dependencies
+        # If you don't have `beforeBuildCommand` configured you may want to build your frontend here too.
+        run: pnpm install # change this to npm, pnpm or bun depending on which one you use.
+
+      - uses: tauri-apps/tauri-action@v0 # TODO: Test if Windows build works with newer version than @v0.1.18, see https://github.com/tauri-apps/tauri-action/issues/1308
+        env:
+          # Troubleshooting: https://v2.tauri.app/distribute/pipelines/github/#github-environment-token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          # Tip: Simply omit releaseId and tagName and the action will not try to upload anything.
+          tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          releaseName: "Fallout 76 Quick Configuration v__VERSION__"
+          releaseBody: "**Changelog**\n\nThe full changelog can be found here: [CHANGELOG.md](https://github.com/FelisDiligens/QuickConfiguration2/blob/main/CHANGELOG.md)\n\n**Download for Windows**\n\n- [Setup \\*.exe (recommended)](https://github.com/FelisDiligens/QuickConfiguration2/releases/download/v__VERSION__/Fallout.76.Quick.Configuration___VERSION___x64-setup.exe)\n- [Portable \\*.zip](https://github.com/FelisDiligens/QuickConfiguration2/releases/download/v__VERSION__/Fallout.76.Quick.Configuration_x64-portable.zip)\n\n**Download for Linux**\n\n- [AppImage (recommended)](https://github.com/FelisDiligens/QuickConfiguration2/releases/download/v__VERSION__/Fallout.76.Quick.Configuration___VERSION___amd64.AppImage)\n- [\\*.deb package (Debian, Ubuntu)](https://github.com/FelisDiligens/QuickConfiguration2/releases/download/v__VERSION__/Fallout.76.Quick.Configuration___VERSION___amd64.deb)\n- [\\*.rpm package (Fedora)](https://github.com/FelisDiligens/QuickConfiguration2/releases/download/v__VERSION__/Fallout.76.Quick.Configuration-__VERSION__-1.x86_64.rpm)\n"
+          releaseDraft: true
+          prerelease: true
+          updaterJsonPreferNsis: true
+          args: ${{ matrix.args }}
+
+      - name: Build portable binary (Windows)
+        if: ${{ matrix.platform == 'windows-latest' }}
+        run: powershell .\scripts\Create-Portable.ps1
+
+      - name: Upload portable binary (Windows)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        if: ${{ matrix.platform == 'windows-latest' }}
+        run: bash -c 'gh release upload ${{ github.ref_name }} ./src-tauri/target/release/bundle/zip/*.zip --clobber'
+
+      # - name: Upload workflow artifacts
+      #   uses: actions/upload-artifact@v5 # using v5 instead of v6/v7, because: https://github.com/nektos/act/issues/6021 and https://github.com/nektos/act/issues/6022
+      #   if: inputs.upload-artifacts == true
+      #   with:
+      #     path: |
+      #       src-tauri/target/release/bundle/**/*-setup.exe
+      #       src-tauri/target/release/bundle/**/*-setup.exe.sig
+      #       src-tauri/target/release/bundle/**/*.dmg
+      #       src-tauri/target/release/bundle/**/*.app.tar.gz
+      #       src-tauri/target/release/bundle/**/*.app.tar.gz.sig
+      #       src-tauri/target/release/bundle/**/*.deb
+      #       src-tauri/target/release/bundle/**/*.deb.sig
+      #       src-tauri/target/release/bundle/**/*.rpm
+      #       src-tauri/target/release/bundle/**/*.rpm.sig
+      #       src-tauri/target/release/bundle/**/*.AppImage
+      #       src-tauri/target/release/bundle/**/*.AppImage.sig
+      #       src-tauri/target/release/bundle/**/*.zip
