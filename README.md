@@ -1,17 +1,5 @@
 ![Banner](./assets/banner.png)
 
-<!--
-<p align="center">
-  <img src="https://img.shields.io/github/v/release/FelisDiligens/QuickConfiguration2?style=for-the-badge&labelColor=0D0D0D&color=846c23" alt="">
-  <img src="https://img.shields.io/github/downloads/FelisDiligens/QuickConfiguration2/total?style=for-the-badge&labelColor=0D0D0D&color=846c23" alt="">
-  <img src="https://img.shields.io/github/downloads/FelisDiligens/QuickConfiguration2/latest/total?style=for-the-badge&labelColor=0D0D0D&color=846c23" alt="">
-  <img src="https://img.shields.io/github/license/FelisDiligens/QuickConfiguration2?style=for-the-badge&labelColor=0D0D0D&color=846c23" alt="License: MIT">
-  <br/>
-  <img src="https://img.shields.io/badge/platforms-windows-846c23?style=for-the-badge&labelColor=0D0D0D" alt="Platform: Windows">
-  <img src="https://img.shields.io/badge/linux-846c23?style=for-the-badge&logo=linux" alt="Platform: Linux">
-</p>
--->
-
 <h3 align="center">
   Change various game settings and install mods.
 </h3>
@@ -30,6 +18,13 @@
   <a href="https://github.com/FelisDiligens/QuickConfiguration2/wiki">Wiki & Guides</a> |
   <a href="https://www.nexusmods.com/fallout76/mods/546?tab=posts#comment-container">Posts</a> |
   <a href="https://www.nexusmods.com/fallout76/mods/546?tab=bugs#tab-modbugs">Bugs</a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/v/release/FelisDiligens/QuickConfiguration2?style=for-the-badge&labelColor=0D0D0D&color=846c23" alt="">
+  <img src="https://img.shields.io/github/downloads/FelisDiligens/QuickConfiguration2/total?style=for-the-badge&labelColor=0D0D0D&color=846c23" alt="">
+  <img src="https://img.shields.io/github/downloads/FelisDiligens/QuickConfiguration2/latest/total?style=for-the-badge&labelColor=0D0D0D&color=846c23" alt="">
+  <img src="https://img.shields.io/github/license/FelisDiligens/QuickConfiguration2?style=for-the-badge&labelColor=0D0D0D&color=846c23" alt="License: MIT">
 </p>
 
 ## Screenshots
