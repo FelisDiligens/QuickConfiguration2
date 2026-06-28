@@ -10,6 +10,8 @@ export default function ResourceListModals() {
     removeArchive,
     addUnlistedArchives,
     removeNonExistantArchives,
+    addGameVoicesArchives,
+    removeGameArchives,
   } = useResourceListActions();
 
   const [showAddModal, setShowAddModal] = useState(false);
@@ -30,6 +32,12 @@ export default function ResourceListModals() {
             break;
           case "resourcelist-remove-non-existant-archives":
             removeNonExistantArchives().catch(console.error);
+            break;
+          case "resourcelist-add-game-voices-archives":
+            addGameVoicesArchives().catch(console.error);
+            break;
+          case "resourcelist-remove-game-archives":
+            removeGameArchives().catch(console.error);
             break;
           case "resourcelist-remove-archive":
             setShowRemoveModal(true);

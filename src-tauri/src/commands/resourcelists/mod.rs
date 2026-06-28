@@ -90,3 +90,29 @@ pub fn resourcelist_remove_non_existant_archives(
     resourcelist.remove_non_existant_archives(data_path);
     resourcelist
 }
+
+/// Removes archives starting with "SeventySix -", as they belong to the game.
+/// This could be used to cleanup the resource list when accidentally adding game archives.
+/// Returns the modified resource list.
+#[tauri::command]
+#[specta::specta]
+pub fn resourcelist_remove_game_archives(mut resourcelist: ResourceList) -> ResourceList {
+    resourcelist.remove_game_archives();
+    resourcelist
+}
+
+/// Adds all game archives that have a `Voices_` in them.
+/// This should append all voice archives for languages other than English, for example:
+/// `SeventySix - 00UpdateVoices_de.ba2` or `SeventySix - Voices_de.ba2`
+/// This might fix the issue where the game's voice over erroneously changes to English.
+/// Returns the modified resource list.
+#[tauri::command]
+#[specta::specta]
+pub fn resourcelist_add_game_voices_archives(
+    mut resourcelist: ResourceList,
+    game_path: PathBuf,
+) -> CommandResult<ResourceList> {
+    let data_path = game_path.join("Data");
+    resourcelist.add_game_voices_archives(data_path)?;
+    Ok(resourcelist)
+}

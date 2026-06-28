@@ -3,6 +3,8 @@ pub mod tests;
 
 mod models;
 
+pub use models::*;
+
 use std::{
     fs, io,
     path::{Path, PathBuf},
@@ -10,8 +12,9 @@ use std::{
 
 use ini::Ini;
 use itertools::Itertools;
-pub use models::*;
+use regex::Regex;
 
+use crate::features::mods::errors::ModActionResult;
 use crate::utils::{fs_util, ini::IniAccessors};
 
 /// Legacy resources file: "Fallout76\Mods\resources.txt".
@@ -75,17 +78,21 @@ impl ResourceList {
         ini_file.set_string(section, key, &self.serialize(","));
     }
 
-    pub fn prepend<I: Iterator<Item = String>>(&mut self, iter: I) {
-        self.resources = iter.chain(self.resources.clone()).unique().collect();
+    pub fn prepend<S: AsRef<str>, I: Iterator<Item = S>>(&mut self, iter: I) {
+        self.resources = iter
+            .map(|s| s.as_ref().to_owned())
+            .chain(self.resources.clone())
+            .unique()
+            .collect();
     }
 
-    pub fn append<I: Iterator<Item = String>>(&mut self, iter: I) {
+    pub fn append<S: AsRef<str>, I: Iterator<Item = S>>(&mut self, iter: I) {
         // TODO: List should add the resources to the end of the list and dedup it?
         self.resources = self
             .resources
             .clone()
             .into_iter()
-            .chain(iter)
+            .chain(iter.map(|s| s.as_ref().to_owned()))
             .unique()
             .collect();
     }
@@ -162,5 +169,68 @@ impl ResourceList {
             }
         }
         self.resources = resources;
+    }
+
+    /// Removes archives starting with "SeventySix -", as they belong to the game.
+    /// This could be used to cleanup the resource list when accidentally adding game archives.
+    /// Modifies the resource list in place.
+    #[function_name::named]
+    pub fn remove_game_archives(&mut self) {
+        log::trace!("[{}] Removing game archives", function_name!());
+        let mut resources = Vec::new();
+        for resource in self.resources.iter() {
+            if !resource.starts_with("SeventySix - ") {
+                log::trace!("[{}] Found: {:?}", function_name!(), resource);
+                resources.push(resource.clone());
+            } else {
+                log::trace!("[{}] Discarded: {:?}", function_name!(), resource);
+            }
+        }
+        self.resources = resources;
+    }
+
+    /// Searches for all game archives that have a `Voices_` in them.
+    /// This should return all voice archives for languages other than English, for example:
+    /// `SeventySix - 00UpdateVoices_de.ba2` or `SeventySix - Voices_de.ba2`
+    #[function_name::named]
+    pub fn get_game_voices_archives<P: AsRef<Path>>(
+        &mut self,
+        parent_path: P,
+    ) -> ModActionResult<Vec<String>> {
+        log::trace!(
+            "[{}] Searching for voice archives in `{:?}`",
+            function_name!(),
+            parent_path.as_ref()
+        );
+        let re = Regex::new(r"SeventySix - \w*Voices_[a-z]{2}.ba2")?;
+        Ok(fs_util::list_files_with_ext(parent_path.as_ref(), "ba2")?
+            .filter_map(|file_path| file_path.file_name().map(|p| p.to_os_string()))
+            .filter_map(|file_name| file_name.to_str().map(|s| s.to_owned()))
+            .filter(|file_name| file_name.starts_with("SeventySix - "))
+            .filter(|file_name| re.is_match(&file_name))
+            .unique()
+            .sorted()
+            .collect())
+    }
+
+    /// Adds all game archives that have a `Voices_` in them.
+    /// This should append all voice archives for languages other than English, for example:
+    /// `SeventySix - 00UpdateVoices_de.ba2` or `SeventySix - Voices_de.ba2`
+    /// This might fix the issue where the game's voice over erroneously changes to English.
+    /// Modifies the resource list in place.
+    #[function_name::named]
+    pub fn add_game_voices_archives<P: AsRef<Path>>(
+        &mut self,
+        parent_path: P,
+    ) -> ModActionResult<()> {
+        let resources = self.get_game_voices_archives(parent_path)?;
+        log::trace!(
+            "[{}] Found voice resources: {:?}",
+            function_name!(),
+            resources
+        );
+        self.remove_many(&resources);
+        self.append(resources.iter());
+        Ok(())
     }
 }

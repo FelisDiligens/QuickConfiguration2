@@ -319,6 +319,24 @@ async resourcelistAddUnlistedArchives(resourcelist: ResourceList, gamePath: stri
 async resourcelistRemoveNonExistantArchives(resourcelist: ResourceList, gamePath: string) : Promise<ResourceList> {
     return await TAURI_INVOKE("resourcelist_remove_non_existant_archives", { resourcelist, gamePath });
 },
+/**
+ * Removes archives starting with "SeventySix -", as they belong to the game.
+ * This could be used to cleanup the resource list when accidentally adding game archives.
+ * Returns the modified resource list.
+ */
+async resourcelistRemoveGameArchives(resourcelist: ResourceList) : Promise<ResourceList> {
+    return await TAURI_INVOKE("resourcelist_remove_game_archives", { resourcelist });
+},
+/**
+ * Adds all game archives that have a `Voices_` in them.
+ * This should append all voice archives for languages other than English, for example:
+ * `SeventySix - 00UpdateVoices_de.ba2` or `SeventySix - Voices_de.ba2`
+ * This might fix the issue where the game's voice over erroneously changes to English.
+ * Returns the modified resource list.
+ */
+async resourcelistAddGameVoicesArchives(resourcelist: ResourceList, gamePath: string) : Promise<ResourceList> {
+    return await TAURI_INVOKE("resourcelist_add_game_voices_archives", { resourcelist, gamePath });
+},
 async archive2OpenProgram() : Promise<null> {
     return await TAURI_INVOKE("archive2_open_program");
 },
@@ -415,7 +433,7 @@ export type Archive2Format = "General" |
  */
 "DDS" | "XBoxDDS" | "GNF"
 export type Archive2Info = { compression: Archive2Compression; format: Archive2Format; numOfFiles: number }
-export type CommandError = { type: "String"; message: string } | { type: "Anyhow"; message: string } | { type: "UnsupportedPlatform"; message: string } | { type: "Io"; message: string } | { type: "PathError"; message: string; variant: string } | { type: "Utf8Error"; message: string } | { type: "SevenzipError"; message: string; variant: string } | { type: "Archive2Error"; message: string; variant: string } | { type: "Archive2ReadError"; message: string; variant: string } | { type: "MutexLock"; message: string } | { type: "TauriError"; message: string } | { type: "TokioError"; message: string } | { type: "DowncastError"; message: string } | { type: "WindowsError"; message: string } | { type: "ReqwestError"; message: string } | { type: "DownloadError"; message: string; variant: string } | { type: "ModActionError"; message: string; variant: string } | { type: "IniParseError"; fileName: string | null; line: number; col: number; msg: string } | { type: "TranslationParseError"; key: string; filePath: string; fileName: string; line: number; column: number; message: string } | { type: "UrlParseError"; message: string }
+export type CommandError = { type: "String"; message: string } | { type: "Anyhow"; message: string } | { type: "UnsupportedPlatform"; message: string } | { type: "Io"; message: string } | { type: "PathError"; message: string; variant: string } | { type: "Utf8Error"; message: string } | { type: "SevenzipError"; message: string; variant: string } | { type: "Archive2Error"; message: string; variant: string } | { type: "Archive2ReadError"; message: string; variant: string } | { type: "MutexLock"; message: string } | { type: "TauriError"; message: string } | { type: "TokioError"; message: string } | { type: "RegexError"; message: string } | { type: "DowncastError"; message: string } | { type: "WindowsError"; message: string } | { type: "ReqwestError"; message: string } | { type: "DownloadError"; message: string; variant: string } | { type: "ModActionError"; message: string; variant: string } | { type: "IniParseError"; fileName: string | null; line: number; col: number; msg: string } | { type: "TranslationParseError"; key: string; filePath: string; fileName: string; line: number; column: number; message: string } | { type: "UrlParseError"; message: string }
 export type Conflict = { 
 /**
  * ID (UUID) of the mod that overwrites files of the other mod.

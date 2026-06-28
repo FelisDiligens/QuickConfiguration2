@@ -95,6 +95,8 @@ fn main() {
             commands::resourcelists::resourcelist_get_unlisted_archives,
             commands::resourcelists::resourcelist_add_unlisted_archives,
             commands::resourcelists::resourcelist_remove_non_existant_archives,
+            commands::resourcelists::resourcelist_remove_game_archives,
+            commands::resourcelists::resourcelist_add_game_voices_archives,
             commands::archive2::archive2_open_program,
             commands::archive2::archive2_explore_archive,
             commands::archive2::archive2_extract_archive,

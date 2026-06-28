@@ -1,6 +1,7 @@
 import { modsEventBus } from "@/services/mods";
 import {
   faBroom,
+  faFileAudio,
   faMagnifyingGlass,
   faPlusSquare,
 } from "@fortawesome/free-solid-svg-icons";
@@ -26,11 +27,25 @@ export default function ToolRow() {
         {t("mods.resourceListTab.toolbar.addUnlisted")}
       </ToolButton>
       <ToolButton
+        icon={faFileAudio}
+        width={120}
+        onClick={() => modsEventBus.emitResourcelistAddGameVoicesArchives()}
+      >
+        {t("mods.resourceListTab.toolbar.addVoices")}
+      </ToolButton>
+      <ToolButton
         icon={faBroom}
         width={120}
         onClick={() => modsEventBus.emitResourcelistRemoveNonExistantArchives()}
       >
         {t("mods.resourceListTab.toolbar.removeUnavailable")}
+      </ToolButton>
+      <ToolButton
+        icon={faBroom}
+        width={120}
+        onClick={() => modsEventBus.emitResourcelistRemoveGameArchives()}
+      >
+        {t("mods.resourceListTab.toolbar.removeGameArchives")}
       </ToolButton>
     </Toolbar>
   );

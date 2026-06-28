@@ -38,6 +38,8 @@ pub enum ModActionError {
     Archive2(#[from] Archive2Error),
     #[error(transparent)]
     Anyhow(#[from] anyhow::Error),
+    #[error(transparent)]
+    Regex(#[from] regex::Error),
 }
 
 impl From<camino::FromPathError> for ModActionError {

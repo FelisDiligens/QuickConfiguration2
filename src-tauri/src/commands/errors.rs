@@ -58,6 +58,8 @@ pub enum CommandError {
     #[error("{message}")]
     TokioError { message: String },
     #[error("{message}")]
+    RegexError { message: String },
+    #[error("{message}")]
     DowncastError { message: String },
     #[error("{message}")]
     WindowsError { message: String },
@@ -126,6 +128,7 @@ impl_from_for_error!(anyhow::Error, Anyhow);
 impl_from_for_error!(std::io::Error, Io);
 impl_from_for_error!(tauri::Error, TauriError);
 impl_from_for_error!(tokio::task::JoinError, TokioError);
+impl_from_for_error!(regex::Error, RegexError);
 impl_from_for_error!(TryFromIntError, DowncastError);
 impl_from_for_error_with_variant!(Archive2Error, Archive2Error);
 impl_from_for_error_with_variant!(Archive2ReadError, Archive2ReadError);
@@ -230,6 +233,7 @@ impl From<ModActionError> for CommandError {
             ModActionError::Sevenzip(error) => error.into(),
             ModActionError::Archive2(error) => error.into(),
             ModActionError::Anyhow(error) => error.into(),
+            ModActionError::Regex(error) => error.into(),
         }
     }
 }
