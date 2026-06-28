@@ -1,3 +1,12 @@
+## What's new in v2.0.0-beta.2
+
+A small bug fix update:
+
+- Added: "Remove game's archives" button in the resource list tab.
+- Fixed: Switching the resource list in the mod manager should now switch it in the `Fallout76Custom.ini` file instead of leaving duplicates.
+- Fixed: The toast message that an update is available should no longer be shown on start, unless there really is an update.
+- Fixed: The resource list tab might not have refreshed the list properly when the number of items didn't change.
+
 ## What's new in v2.0.0-beta.1
 
 This is the first beta release of version 2, a complete rewrite of the old Quick Configuration.
