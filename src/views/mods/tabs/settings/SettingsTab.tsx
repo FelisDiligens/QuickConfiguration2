@@ -101,21 +101,28 @@ export default function SettingsTab() {
         </RadioRowGroup>
       </PreferencesGroup>
 
-      <PreferencesGroup title={t("mods.settingsTab.deploymentBehavior")}>
-        <ComboRow
-          title={t("mods.settingsTab.resourceListOption")}
+      <PreferencesGroup title={t("mods.settingsTab.resourceListOption")}>
+        <RadioRowGroup
+          name="resourceList"
           value={settings.resourceList}
           onChange={(resourceList) =>
             switchResourcelist(resourceList).catch(console.error)
           }
         >
-          <option value="sResourceArchive2List">
-            [Archive] sResourceArchive2List ({t("mods.settingsTab.default")})
-          </option>
-          <option value="sResourceIndexFileList">
-            [Archive] sResourceIndexFileList
-          </option>
-        </ComboRow>
+          <RadioRow
+            title="[Archive] sResourceArchive2List"
+            subtitle={t("mods.settingsTab.default")}
+            id="sResourceArchive2List"
+          />
+          <RadioRow
+            title="[Archive] sResourceIndexFileList"
+            subtitle={t("mods.settingsTab.sResourceIndexFileListSubtitle")}
+            id="sResourceIndexFileList"
+          />
+        </RadioRowGroup>
+      </PreferencesGroup>
+
+      <PreferencesGroup title={t("mods.settingsTab.deploymentBehavior")}>
         <SwitchRow
           title={t("mods.settingsTab.keepConfigFiles")}
           subtitle={t("mods.settingsTab.keepConfigFilesSubtitle", {

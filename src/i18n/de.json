@@ -785,6 +785,7 @@
       "deploymentBehavior": "Modanwendungsverhalten",
       "resourceListOption": "Welche Ressourcenliste soll verwendet werden?",
       "default": "Standard",
+      "sResourceIndexFileList": "Das hier zu benutzen, könnte helfen, wenn sich die Sprachausgabe zu Englisch ändert.",
       "keepConfigFiles": "Konfigurationsdateien behalten",
       "keepConfigFilesSubtitle": "Überschreibt keine bereits existierenden Konfigurationsdateien ({{extensions}}) und entfernt sie auch nicht.",
       "resourceInsertionPosition": "Wo sollen *.ba2-Archive in der Ressourcenliste beim Anwenden platziert werden?",

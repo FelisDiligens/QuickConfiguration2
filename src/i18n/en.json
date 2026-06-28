@@ -785,6 +785,7 @@
       "deploymentBehavior": "Deployment behavior",
       "resourceListOption": "Which resource list should be used?",
       "default": "Default",
+      "sResourceIndexFileListSubtitle": "Using this might help if the voice over language changes to English.",
       "keepConfigFiles": "Keep config files",
       "keepConfigFilesSubtitle": "Does not overwrite existing config files ({{extensions}}) and also does not remove them.",
       "resourceInsertionPosition": "Where to put *.ba2 archives in the resource list on deployment?",
