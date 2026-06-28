@@ -20,12 +20,14 @@ export function useUpdateCheckOnStart() {
     async function checkForUpdates() {
       if (await commands.isDebug()) return;
       const update = await updaterService.check();
-      useToastsStore.getState().addToast(
-        t("updates.toasts.updateAvailable"),
-        t("updates.toasts.updateAvailableText", {
-          version: update?.version,
-        }),
-      );
+      if (update) {
+        useToastsStore.getState().addToast(
+          t("updates.toasts.updateAvailable"),
+          t("updates.toasts.updateAvailableText", {
+            version: update?.version,
+          }),
+        );
+      }
     }
     checkForUpdates().catch(console.error);
   }, []);
