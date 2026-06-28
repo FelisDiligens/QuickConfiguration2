@@ -96,7 +96,7 @@ jobs:
           releaseName: "Fallout 76 Quick Configuration v__VERSION__"
           releaseBody: "**Changelog**\n\nThe full changelog can be found here: [CHANGELOG.md](https://github.com/FelisDiligens/QuickConfiguration2/blob/main/CHANGELOG.md)\n\n**Download for Windows**\n\n- [Setup \\*.exe (recommended)](https://github.com/FelisDiligens/QuickConfiguration2/releases/download/v__VERSION__/Fallout.76.Quick.Configuration___VERSION___x64-setup.exe)\n- [Portable \\*.zip](https://github.com/FelisDiligens/QuickConfiguration2/releases/download/v__VERSION__/Fallout.76.Quick.Configuration_x64-portable.zip)\n\n**Download for Linux**\n\n- [AppImage (recommended)](https://github.com/FelisDiligens/QuickConfiguration2/releases/download/v__VERSION__/Fallout.76.Quick.Configuration___VERSION___amd64.AppImage)\n- [\\*.deb package (Debian, Ubuntu)](https://github.com/FelisDiligens/QuickConfiguration2/releases/download/v__VERSION__/Fallout.76.Quick.Configuration___VERSION___amd64.deb)\n- [\\*.rpm package (Fedora)](https://github.com/FelisDiligens/QuickConfiguration2/releases/download/v__VERSION__/Fallout.76.Quick.Configuration-__VERSION__-1.x86_64.rpm)\n"
           releaseDraft: true
-          prerelease: true
+          prerelease: false
           updaterJsonPreferNsis: true
           args: ${{ matrix.args }}
 
