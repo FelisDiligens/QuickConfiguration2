@@ -78,34 +78,6 @@ export function useResourceListActions() {
     }
   };
 
-  const addGameVoicesArchives = async () => {
-    try {
-      const resources = useResourceListStore.getState().resources;
-      const gamePath = useProfilesStore.getState().getGamePath();
-      if (!gamePath) throw new Error(t("mods.errors.unsetGamePath"));
-
-      const newResources = await Mods.resourceList.addGameVoicesArchives(
-        resources,
-        gamePath,
-      );
-      setResources(newResources);
-
-      useToastsStore.getState().addToast(
-        t("mods.resourceListTab.toasts.addedGameVoicesArchives"),
-        "", // TODO: Add details, e.g. how many new archives were added
-        "success",
-      );
-    } catch (error) {
-      useToastsStore
-        .getState()
-        .addToast(
-          t("errors.anErrorOccurred"),
-          t("common.error") + ": " + commandErrorToString(error as AnyError),
-          "danger",
-        );
-    }
-  };
-
   const removeGameArchives = async () => {
     try {
       const resources = useResourceListStore.getState().resources;
@@ -134,7 +106,6 @@ export function useResourceListActions() {
     removeArchive,
     addUnlistedArchives,
     removeNonExistantArchives,
-    addGameVoicesArchives,
     removeGameArchives,
   };
 }

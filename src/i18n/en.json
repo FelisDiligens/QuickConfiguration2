@@ -736,7 +736,6 @@
         "addArchiveName": "Add archive name",
         "addUnlisted": "Add unlisted archives",
         "removeUnavailable": "Remove non-existant archives",
-        "addVoices": "Add game's voices archives",
         "removeGameArchives": "Remove game's archives"
       },
       "table": {
@@ -763,7 +762,6 @@
         "savingFailed": "Couldn't save resource list",
         "removedNonExistantArchives": "All non-existing archives were removed from the list",
         "addedUnlistedArchives": "All unlisted archives in the Data folder were added to the list",
-        "addedGameVoicesArchives": "All the game's voice archives in the Data folder were added to the list",
         "removedGameArchives": "All the archives that belong to the game were removed from the list"
       }
     },

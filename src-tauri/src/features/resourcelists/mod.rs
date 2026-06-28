@@ -12,9 +12,7 @@ use std::{
 
 use ini::Ini;
 use itertools::Itertools;
-use regex::Regex;
 
-use crate::features::mods::errors::ModActionResult;
 use crate::utils::{fs_util, ini::IniAccessors};
 
 /// Legacy resources file: "Fallout76\Mods\resources.txt".
@@ -211,50 +209,5 @@ impl ResourceList {
             }
         }
         self.resources = resources;
-    }
-
-    /// Searches for all game archives that have a `Voices_` in them.
-    /// This should return all voice archives for languages other than English, for example:
-    /// `SeventySix - 00UpdateVoices_de.ba2` or `SeventySix - Voices_de.ba2`
-    #[function_name::named]
-    pub fn get_game_voices_archives<P: AsRef<Path>>(
-        &mut self,
-        parent_path: P,
-    ) -> ModActionResult<Vec<String>> {
-        log::trace!(
-            "[{}] Searching for voice archives in `{:?}`",
-            function_name!(),
-            parent_path.as_ref()
-        );
-        let re = Regex::new(r"SeventySix - \w*Voices_[a-z]{2}.ba2")?;
-        Ok(fs_util::list_files_with_ext(parent_path.as_ref(), "ba2")?
-            .filter_map(|file_path| file_path.file_name().map(|p| p.to_os_string()))
-            .filter_map(|file_name| file_name.to_str().map(|s| s.to_owned()))
-            .filter(|file_name| file_name.starts_with("SeventySix - "))
-            .filter(|file_name| re.is_match(&file_name))
-            .unique()
-            .sorted()
-            .collect())
-    }
-
-    /// Adds all game archives that have a `Voices_` in them.
-    /// This should append all voice archives for languages other than English, for example:
-    /// `SeventySix - 00UpdateVoices_de.ba2` or `SeventySix - Voices_de.ba2`
-    /// This might fix the issue where the game's voice over erroneously changes to English.
-    /// Modifies the resource list in place.
-    #[function_name::named]
-    pub fn add_game_voices_archives<P: AsRef<Path>>(
-        &mut self,
-        parent_path: P,
-    ) -> ModActionResult<()> {
-        let resources = self.get_game_voices_archives(parent_path)?;
-        log::trace!(
-            "[{}] Found voice resources: {:?}",
-            function_name!(),
-            resources
-        );
-        self.remove_many(&resources);
-        self.append(resources.iter());
-        Ok(())
     }
 }

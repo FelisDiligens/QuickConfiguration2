@@ -335,16 +335,6 @@ async resourcelistRemoveNonExistantArchives(resourcelist: ResourceList, gamePath
 async resourcelistRemoveGameArchives(resourcelist: ResourceList) : Promise<ResourceList> {
     return await TAURI_INVOKE("resourcelist_remove_game_archives", { resourcelist });
 },
-/**
- * Adds all game archives that have a `Voices_` in them.
- * This should append all voice archives for languages other than English, for example:
- * `SeventySix - 00UpdateVoices_de.ba2` or `SeventySix - Voices_de.ba2`
- * This might fix the issue where the game's voice over erroneously changes to English.
- * Returns the modified resource list.
- */
-async resourcelistAddGameVoicesArchives(resourcelist: ResourceList, gamePath: string) : Promise<ResourceList> {
-    return await TAURI_INVOKE("resourcelist_add_game_voices_archives", { resourcelist, gamePath });
-},
 async archive2OpenProgram() : Promise<null> {
     return await TAURI_INVOKE("archive2_open_program");
 },

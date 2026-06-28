@@ -1,7 +1,6 @@
 import { modsEventBus } from "@/services/mods";
 import {
   faBroom,
-  faFileAudio,
   faMagnifyingGlass,
   faPlusSquare,
 } from "@fortawesome/free-solid-svg-icons";
@@ -25,13 +24,6 @@ export default function ToolRow() {
         onClick={() => modsEventBus.emitResourcelistAddUnlistedArchives()}
       >
         {t("mods.resourceListTab.toolbar.addUnlisted")}
-      </ToolButton>
-      <ToolButton
-        icon={faFileAudio}
-        width={120}
-        onClick={() => modsEventBus.emitResourcelistAddGameVoicesArchives()}
-      >
-        {t("mods.resourceListTab.toolbar.addVoices")}
       </ToolButton>
       <ToolButton
         icon={faBroom}

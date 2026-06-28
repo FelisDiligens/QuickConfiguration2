@@ -16,7 +16,6 @@ const Mods = {
     getUnlistedArchives: commands.resourcelistGetUnlistedArchives,
     addUnlistedArchives: commands.resourcelistAddUnlistedArchives,
     removeNonExistantArchives: commands.resourcelistRemoveNonExistantArchives,
-    addGameVoicesArchives: commands.resourcelistAddGameVoicesArchives,
     removeGameArchives: commands.resourcelistRemoveGameArchives,
   },
   actions: {

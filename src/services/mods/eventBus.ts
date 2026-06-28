@@ -36,7 +36,6 @@ export type UIActionEvent =
   | { type: "resourcelist-add-archive" }
   | { type: "resourcelist-add-unlisted-archives" }
   | { type: "resourcelist-remove-non-existant-archives" }
-  | { type: "resourcelist-add-game-voices-archives" }
   | { type: "resourcelist-remove-game-archives" }
   | { type: "resourcelist-remove-archive"; name: string };
 
@@ -238,10 +237,6 @@ export class ModsEventBus {
     this.emitUIActionEvent({
       type: "resourcelist-remove-non-existant-archives",
     });
-  }
-
-  emitResourcelistAddGameVoicesArchives() {
-    this.emitUIActionEvent({ type: "resourcelist-add-game-voices-archives" });
   }
 
   emitResourcelistRemoveGameArchives() {
