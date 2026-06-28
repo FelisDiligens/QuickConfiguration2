@@ -296,6 +296,14 @@ async resourcelistSaveToTextFile(resourcelist: ResourceList, modsPath: string) :
     return await TAURI_INVOKE("resourcelist_save_to_text_file", { resourcelist, modsPath });
 },
 /**
+ * Switches the ini keys around in the ini (comma-separated).
+ * If the new key already exists, it merges the lists together.
+ * Returns the new resource list.
+ */
+async resourcelistSwitchIniKeys(resourcelist: ResourceList, iniFile: IniFile, section: string | null, oldKey: string, newKey: string) : Promise<ResourceList> {
+    return await TAURI_INVOKE("resourcelist_switch_ini_keys", { resourcelist, iniFile, section, oldKey, newKey });
+},
+/**
  * Search `"${gamePath}/Data"` for archives that are not included in the resource list.
  * Excludes any archive starting with "SeventySix - " (as we don't want to add the game's archives).
  * Returns the list of archives.

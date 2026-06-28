@@ -3,7 +3,8 @@ import {
   ResourceInsertionPosition,
   commands,
 } from "@/commands/bindings";
-import { commandErrorToString } from "@/commands/errors";
+import { AnyError, commandErrorToString } from "@/commands/errors";
+import Mods from "@/commands/mods";
 import ComboRow from "@/components/common/ComboRow";
 import PageAlert from "@/components/common/PageAlert";
 import PathEntryRow from "@/components/common/PathEntryRow";
@@ -12,6 +13,11 @@ import RadioRow from "@/components/common/RadioRow";
 import RadioRowGroup from "@/components/common/RadioRowGroup";
 import SwitchRow from "@/components/common/SwitchRow";
 import { useNxmRegistration } from "@/hooks/nxm";
+import { useProfilesStore } from "@/stores/profiles";
+import {
+  resourceListStoreSync,
+  useResourceListStore,
+} from "@/stores/resourceList";
 import { useSettingsStore } from "@/stores/settings";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -20,6 +26,42 @@ export default function SettingsTab() {
   const settings = useSettingsStore((s) => s.modManager);
   const setSettings = useSettingsStore((s) => s.setModManagerSettings);
   const nxm = useNxmRegistration();
+
+  /**
+   * Switches the ini keys around, then saves the ini file.
+   * Existing resource lists will be merged in order to avoid data loss.
+   */
+  async function switchResourcelist(newIniKey: string) {
+    try {
+      const resources = useResourceListStore.getState().resources;
+      const oldIniKey = useSettingsStore.getState().modManager.resourceList;
+      const iniPath = useProfilesStore.getState().getIniPath();
+      const iniPrefix = useProfilesStore.getState().getIniPrefix();
+      if (!iniPath || !iniPrefix)
+        throw new Error(t("mods.errors.unsetIniPathOrIniPrefix"));
+
+      const newResources = await Mods.resourceList.switchIniKeys(
+        resources,
+        "Custom",
+        "Archive",
+        oldIniKey,
+        newIniKey,
+      );
+      useResourceListStore.getState().setResources(newResources);
+      resourceListStoreSync.cancelSave();
+
+      console.log("Saving ini file after resource list switch");
+      await commands.iniSave(iniPath, iniPrefix);
+    } catch (error) {
+      console.error(
+        "Error while switching resource list:",
+        commandErrorToString(error as AnyError),
+      );
+    }
+    // Changing the settings here will cause the resource list store to reload:
+    // (this is why saving the ini file beforehand is important)
+    setSettings((settings) => ({ ...settings, resourceList: newIniKey }));
+  }
 
   return (
     <div>
@@ -64,7 +106,7 @@ export default function SettingsTab() {
           title={t("mods.settingsTab.resourceListOption")}
           value={settings.resourceList}
           onChange={(resourceList) =>
-            setSettings((settings) => ({ ...settings, resourceList }))
+            switchResourcelist(resourceList).catch(console.error)
           }
         >
           <option value="sResourceArchive2List">

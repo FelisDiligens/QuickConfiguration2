@@ -12,6 +12,7 @@ const Mods = {
     saveToIni: commands.resourcelistSaveToIni,
     loadFromTextFile: commands.resourcelistLoadFromTextFile,
     saveToTextFile: commands.resourcelistSaveToTextFile,
+    switchIniKeys: commands.resourcelistSwitchIniKeys,
     getUnlistedArchives: commands.resourcelistGetUnlistedArchives,
     addUnlistedArchives: commands.resourcelistAddUnlistedArchives,
     removeNonExistantArchives: commands.resourcelistRemoveNonExistantArchives,

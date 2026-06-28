@@ -8,18 +8,21 @@ use crate::features::stores::ini::{IniFile, IniFiles};
 
 #[tauri::command]
 #[specta::specta]
+#[function_name::named]
 pub fn resourcelist_load_from_ini(
     ini_file: IniFile,
     section: Option<String>,
     key: String,
     state: State<'_, IniFiles>,
 ) -> CommandResult<ResourceList> {
+    log::trace!("Called command {}", function_name!());
     let ini = state.get_file(ini_file).lock()?;
     Ok(ResourceList::load_from_ini(&ini, section, key))
 }
 
 #[tauri::command]
 #[specta::specta]
+#[function_name::named]
 pub fn resourcelist_save_to_ini(
     resourcelist: ResourceList,
     ini_file: IniFile,
@@ -27,6 +30,7 @@ pub fn resourcelist_save_to_ini(
     key: String,
     state: State<'_, IniFiles>,
 ) -> CommandResult<()> {
+    log::trace!("Called command {}", function_name!());
     let mut ini = state.get_file(ini_file).lock()?;
     resourcelist.save_to_ini(&mut ini, section.as_deref(), &key);
     Ok(())
@@ -48,6 +52,26 @@ pub fn resourcelist_save_to_text_file(
     let resources_path = get_legacy_mods_resources_path(mods_path);
     resourcelist.save_to_file(resources_path)?;
     Ok(())
+}
+
+/// Switches the ini keys around in the ini (comma-separated).
+/// If the new key already exists, it merges the lists together.
+/// Returns the new resource list.
+#[tauri::command]
+#[specta::specta]
+#[function_name::named]
+pub fn resourcelist_switch_ini_keys(
+    mut resourcelist: ResourceList,
+    ini_file: IniFile,
+    section: Option<String>,
+    old_key: String,
+    new_key: String,
+    state: State<'_, IniFiles>,
+) -> CommandResult<ResourceList> {
+    log::trace!("Called command {}", function_name!());
+    let mut ini = state.get_file(ini_file).lock()?;
+    resourcelist.switch_ini_keys(&mut ini, section.as_deref(), &old_key, &new_key);
+    Ok(resourcelist)
 }
 
 /// Search `"${gamePath}/Data"` for archives that are not included in the resource list.

@@ -21,6 +21,8 @@ pub trait IniAccessors {
 
     fn list(&self, section: Option<&str>, key: &str, sep: &str) -> Option<Vec<String>>;
     fn set_list(&mut self, section: Option<&str>, key: &str, sep: &str, value: Vec<String>);
+
+    fn has(&self, section: Option<&str>, key: &str) -> bool;
 }
 
 impl IniAccessors for Ini {
@@ -102,6 +104,10 @@ impl IniAccessors for Ini {
 
     fn set_list(&mut self, section: Option<&str>, key: &str, sep: &str, value: Vec<String>) {
         self.with_section(section).set(key, value.join(sep));
+    }
+
+    fn has(&self, section: Option<&str>, key: &str) -> bool {
+        self.get_from(section, key).is_some()
     }
 }
 

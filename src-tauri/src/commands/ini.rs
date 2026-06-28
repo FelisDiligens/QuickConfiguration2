@@ -83,7 +83,7 @@ pub fn ini_has_key(
         .get_file(ini_file)
         .lock()
         .expect("couldn't lock ini file");
-    ini.get_from(section, key).is_some()
+    ini.has(section, key)
 }
 
 #[tauri::command]

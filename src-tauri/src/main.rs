@@ -92,6 +92,7 @@ fn main() {
             commands::resourcelists::resourcelist_save_to_ini,
             commands::resourcelists::resourcelist_load_from_text_file,
             commands::resourcelists::resourcelist_save_to_text_file,
+            commands::resourcelists::resourcelist_switch_ini_keys,
             commands::resourcelists::resourcelist_get_unlisted_archives,
             commands::resourcelists::resourcelist_add_unlisted_archives,
             commands::resourcelists::resourcelist_remove_non_existant_archives,

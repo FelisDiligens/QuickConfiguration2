@@ -61,9 +61,10 @@ impl ResourceList {
     }
 
     /// Gets and parses from an INI file.
-    pub fn load_from_ini(ini_file: &Ini, section: Option<String>, key: String) -> Self {
+    pub fn load_from_ini<S: AsRef<str>>(ini_file: &Ini, section: Option<S>, key: S) -> Self {
+        let section = section.map(|s| s.as_ref().to_owned());
         let raw_list = ini_file
-            .get_from(section.as_ref(), &key)
+            .get_from(section.as_ref(), key.as_ref())
             .unwrap_or_default();
         Self::parse(raw_list)
     }
@@ -76,6 +77,29 @@ impl ResourceList {
     /// Saves to ini struct, comma-separated
     pub fn save_to_ini(&self, ini_file: &mut Ini, section: Option<&str>, key: &str) {
         ini_file.set_string(section, key, &self.serialize(","));
+    }
+
+    /// Switches the ini keys around and saves to ini struct, comma-separated.
+    /// If the new key already exists, it merges the lists together.
+    pub fn switch_ini_keys(
+        &mut self,
+        ini_file: &mut Ini,
+        section: Option<&str>,
+        old_key: &str,
+        new_key: &str,
+    ) {
+        log::trace!("Switching ini keys for resource list from {old_key} to {new_key}");
+        if ini_file.has(section, new_key) {
+            let new_list = Self::load_from_ini(ini_file, section, new_key);
+            self.prepend(new_list.resources.iter());
+            log::trace!(
+                "{new_key} already exists, merging resource lists: {}",
+                self.resources.join(", ")
+            );
+        }
+        ini_file.set_string(section, new_key, &self.serialize(","));
+        ini_file.delete_from(section, old_key);
+        log::trace!("Set new key and removed old key, finished.");
     }
 
     pub fn prepend<S: AsRef<str>, I: Iterator<Item = S>>(&mut self, iter: I) {
