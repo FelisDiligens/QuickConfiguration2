@@ -22,8 +22,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/github/v/release/FelisDiligens/QuickConfiguration2?style=for-the-badge&labelColor=0D0D0D&color=846c23" alt="">
-  <img src="https://img.shields.io/github/downloads/FelisDiligens/QuickConfiguration2/total?style=for-the-badge&labelColor=0D0D0D&color=846c23" alt="">
-  <img src="https://img.shields.io/github/downloads/FelisDiligens/QuickConfiguration2/latest/total?style=for-the-badge&labelColor=0D0D0D&color=846c23" alt="">
+  <img src="https://img.shields.io/github/release-date/FelisDiligens/QuickConfiguration2?style=for-the-badge&labelColor=0D0D0D&color=846c23" alt="License: MIT">
   <img src="https://img.shields.io/github/license/FelisDiligens/QuickConfiguration2?style=for-the-badge&labelColor=0D0D0D&color=846c23" alt="License: MIT">
 </p>
 
