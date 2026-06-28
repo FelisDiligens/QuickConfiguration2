@@ -71,8 +71,8 @@ export default function ResourceListTab() {
     const alreadyMapped =
       resources.length == mappedResources.length &&
       _.zip(resources, mappedResources).find(
-        ([resource, mappedResource]) => resource === mappedResource?.name,
-      ) !== undefined;
+        ([resource, mappedResource]) => resource !== mappedResource?.name,
+      ) === undefined;
 
     if (!alreadyMapped) {
       mapResources().catch((error) => {
