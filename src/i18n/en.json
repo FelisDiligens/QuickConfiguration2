@@ -209,6 +209,7 @@
       "resolution": "Resolution",
       "customResolution": "Custom resolution",
       "customResolutionOption": "Custom",
+      "customResolutionButton": "Show custom resolution",
       "autoDetectResolutionButton": "Auto-detect resolution",
       "vsync": "Vertical synchronization (frame rate cap)",
       "topMostWindow": "Top-most window",

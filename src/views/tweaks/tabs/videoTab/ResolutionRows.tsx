@@ -3,10 +3,15 @@ import ComboRow from "@/components/common/ComboRow";
 import { FlexCol, FlexRow } from "@/components/common/Flex";
 import useDisplaySize, { Size } from "@/hooks/tweaks/video/useDisplaySize";
 import { css } from "@emotion/react";
-import { faMagicWandSparkles } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronDown,
+  faChevronUp,
+  faMagicWandSparkles,
+  faWrench,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { Form, ListGroup } from "react-bootstrap";
+import { Button, Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
 const resolutions = [
@@ -115,6 +120,7 @@ export default function ResolutionRows() {
 
   const [displaySize, setDisplaySize] = useDisplaySize();
   const [displaySizeOption, setDisplaySizeOption] = useState("custom");
+  const [showCustom, setShowCustom] = useState(false);
 
   useEffect(() => {
     setDisplaySizeOption(findMatchingResolution(displaySize));
@@ -147,6 +153,28 @@ export default function ResolutionRows() {
         title={t("tweaks.video.resolution")}
         value={displaySizeOption}
         onChange={handleDisplaySizeOptionChange}
+        suffix={
+          <Button
+            variant="outline-primary"
+            title={t("tweaks.video.customResolutionButton")}
+            onClick={() => setShowCustom((v) => !v)}
+            disabled={displaySizeOption === "custom"}
+          >
+            <FlexRow
+              center
+              gap="4px"
+              css={css`padding: 3px;`}
+              className="ignore-click"
+            >
+              <FontAwesomeIcon icon={faWrench} />
+              {showCustom ? (
+                <FontAwesomeIcon icon={faChevronUp} />
+              ) : (
+                <FontAwesomeIcon icon={faChevronDown} />
+              )}
+            </FlexRow>
+          </Button>
+        }
       >
         {resolutions.map((group, index) => {
           if (group.options) {
@@ -172,9 +200,9 @@ export default function ResolutionRows() {
           }
         })}
       </ComboRow>
-      {displaySizeOption === "custom" && (
+      {(displaySizeOption === "custom" || showCustom) && (
         <ListGroup.Item>
-          <FlexRow>
+          <FlexRow center>
             <FlexCol grow>{t("tweaks.video.customResolution")}</FlexCol>
             <FlexCol>
               <Form.Control
@@ -191,7 +219,7 @@ export default function ResolutionRows() {
                 `}
               />
             </FlexCol>
-            <FlexCol>x</FlexCol>
+            <FlexCol css={css`padding: 6px;`}>x</FlexCol>
             <FlexCol>
               <Form.Control
                 type="number"

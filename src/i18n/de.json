@@ -209,6 +209,7 @@
       "resolution": "Auflösung",
       "customResolution": "Benutzerdefinierte Auflösung",
       "customResolutionOption": "Benutzerdefiniert",
+      "customResolutionButton": "Benutzerdefinierte Auflösung anzeigen",
       "autoDetectResolutionButton": "Auflösung automatisch erkennen",
       "vsync": "Vertikale Synchronisation (Bildratenbegrenzung)",
       "topMostWindow": "Immer im Vordergrund",

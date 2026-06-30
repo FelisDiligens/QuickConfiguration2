@@ -10,6 +10,7 @@ interface Props {
   arrangement?: "lr" | "td";
   children: React.ReactNode;
   afterTitleSlot?: React.ReactNode;
+  suffix?: React.ReactNode;
   value?: string;
   onChange?: (value: string) => void;
 }
@@ -43,7 +44,14 @@ interface HTMLSelectElementEx extends HTMLSelectElement {
 export default function ComboRow(props: Props) {
   const ref = useRef<HTMLSelectElement | null>(null);
   function onActivate(ev: React.MouseEvent) {
-    if (ref.current && !(ev.target instanceof HTMLSelectElement)) {
+    let el = ev.target as HTMLElement;
+    if (
+      ref.current &&
+      !(ev.target instanceof HTMLSelectElement) &&
+      !["button", "svg", "path"].includes(el?.tagName?.toLowerCase()) &&
+      !el?.className.includes("ignore-click")
+    ) {
+      console.log(el?.tagName?.toLowerCase(), ev.target);
       if ("showPicker" in ref.current) {
         // For Chromium:
         (ref.current as HTMLSelectElementEx).showPicker();
@@ -60,6 +68,7 @@ export default function ComboRow(props: Props) {
       arrangement={props.arrangement}
       onActivate={onActivate}
       afterTitleSlot={props.afterTitleSlot}
+      suffix={props.suffix}
     >
       <Form.Select
         ref={ref}
