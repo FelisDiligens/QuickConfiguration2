@@ -17,6 +17,7 @@ interface Actions {
   setLanguage: (value: string) => void;
   setFetchServerStatusOnStart: (value: boolean) => void;
   setCheckForUpdatesOnStart: (value: boolean) => void;
+  setDownloadTranslationsOnStart: (value: boolean) => void;
   setQuitOnGameLaunch: (value: boolean) => void;
   setNavigationCollapsed: (value: boolean) => void;
   setMigrationDismissed: (value: boolean) => void;
@@ -33,6 +34,7 @@ export const useSettingsStore = create<SettingsStore>()((set, get) => ({
   translationsLastUpdated: null,
   fetchServerStatusOnStart: true,
   checkForUpdatesOnStart: true,
+  downloadTranslationsOnStart: true,
   quitOnGameLaunch: true,
   navigationCollapsed: false,
   modManager: {
@@ -64,6 +66,9 @@ export const useSettingsStore = create<SettingsStore>()((set, get) => ({
   },
   setCheckForUpdatesOnStart: (value: boolean) => {
     set({ checkForUpdatesOnStart: value });
+  },
+  setDownloadTranslationsOnStart: (value: boolean) => {
+    set({ downloadTranslationsOnStart: value });
   },
   setQuitOnGameLaunch: (value: boolean) => {
     set({ quitOnGameLaunch: value });

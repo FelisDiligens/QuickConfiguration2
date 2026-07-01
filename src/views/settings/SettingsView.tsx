@@ -13,11 +13,13 @@ import PreferencesGroup from "@/components/common/PreferencesGroup";
 import RadioRow from "@/components/common/RadioRow";
 import RadioRowGroup from "@/components/common/RadioRowGroup";
 import SwitchRow from "@/components/common/SwitchRow";
-import { useLazyAsync } from "@/hooks/async";
+import { useTranslationUpdateState } from "@/hooks/translations";
 import { useUpdateCheckState } from "@/hooks/updater";
 import { useTranslationsStore } from "@/lib/i18n/store";
+import { translationUpdateService } from "@/services/translations";
 import { updaterService } from "@/services/updater";
 import { useSettingsStore } from "@/stores/settings";
+import { useToastsStore } from "@/stores/toasts";
 import { css } from "@emotion/react";
 import {
   faArrowsRotate,
@@ -59,6 +61,12 @@ export default function SettingsView() {
   const setCheckForUpdatesOnStart = useSettingsStore(
     (s) => s.setCheckForUpdatesOnStart,
   );
+  const downloadTranslationsOnStart = useSettingsStore(
+    (s) => s.downloadTranslationsOnStart,
+  );
+  const setDownloadTranslationsOnStart = useSettingsStore(
+    (s) => s.setDownloadTranslationsOnStart,
+  );
   const quitOnGameLaunch = useSettingsStore((s) => s.quitOnGameLaunch);
   const setQuitOnGameLaunch = useSettingsStore((s) => s.setQuitOnGameLaunch);
   const migratedFromV1 = useSettingsStore((s) => s.migratedFromV1);
@@ -73,21 +81,37 @@ export default function SettingsView() {
     error: useTranslationsStore((s) => s.error),
     isPending: useTranslationsStore((s) => s.isPending),
   };
+  const translationsDownloadState = useTranslationUpdateState();
   const loadTranslations = useTranslationsStore((s) => s.loadTranslations);
   const storeCreateTranslationTemplate = useTranslationsStore(
     (s) => s.createTranslationTemplate,
   );
 
-  const { run: downloadAndReloadTranslations, ...translationsDownloadState } =
-    useLazyAsync({
-      promiseFn: async () => {
-        await commands.downloadTranslations();
-        loadTranslations().catch(console.error);
-      },
-    });
-
   const translationsPending =
     translationsLoadState.isPending || translationsDownloadState.isPending;
+
+  const downloadTranslations = () => {
+    translationUpdateService
+      .update()
+      .then((newTranslations) => {
+        if (newTranslations == null) return;
+        if (newTranslations.length > 0) {
+          useToastsStore.getState().addToast(
+            t("updates.toasts.translationsDownloaded"),
+            t("updates.toasts.translationsDownloadedText", {
+              count: newTranslations.length,
+              files: newTranslations.join(", "),
+            }),
+            "success",
+          );
+        } else {
+          useToastsStore
+            .getState()
+            .addToast(t("updates.toasts.noTranslationsDownloaded"), "");
+        }
+      })
+      .catch(console.error);
+  };
 
   const createTranslationTemplate = () => {
     storeCreateTranslationTemplate(i18next.language)
@@ -221,7 +245,7 @@ export default function SettingsView() {
           >
             <ButtonRow
               center
-              onClick={() => downloadAndReloadTranslations()}
+              onClick={() => downloadTranslations()}
               disabled={translationsPending}
             >
               <FontAwesomeIcon icon={faDownload} />
@@ -283,13 +307,6 @@ export default function SettingsView() {
             checked={quitOnGameLaunch}
             onChange={setQuitOnGameLaunch}
           />
-          {/*
-          <SwitchRow title="Backup *.ini files on start" />
-          <SwitchRow
-            title="Check for updates on start"
-            subtitle="This includes translation updates"
-          />
-          */}
           <SwitchRow
             title={t("settings.behavior.fetchServerStatusOnStart")}
             subtitle={t("settings.behavior.fetchServerStatusOnStartSubtitle")}
@@ -301,6 +318,12 @@ export default function SettingsView() {
             subtitle={t("settings.behavior.checkForUpdatesSubtitle")}
             checked={checkForUpdatesOnStart}
             onChange={setCheckForUpdatesOnStart}
+          />
+          <SwitchRow
+            title={t("settings.behavior.downloadTranslations")}
+            subtitle={t("settings.behavior.downloadTranslationsSubtitle")}
+            checked={downloadTranslationsOnStart}
+            onChange={setDownloadTranslationsOnStart}
           />
         </PreferencesGroup>
 
