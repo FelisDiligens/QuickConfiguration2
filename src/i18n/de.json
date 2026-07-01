@@ -904,7 +904,9 @@
       "fetchServerStatusOnStart": "Serverstatus beim Start abrufen",
       "fetchServerStatusOnStartSubtitle": "Kontaktiert status.bethesda.net und api.locize.app um den Status anzuzeigen",
       "checkForUpdates": "Nach Updates beim Start suchen",
-      "checkForUpdatesSubtitle": "Kontaktiert github.com, um zu prüfen ob eine neue Version verfügbar ist"
+      "checkForUpdatesSubtitle": "Kontaktiert github.com, um zu prüfen ob eine neue Version verfügbar ist",
+      "downloadTranslations": "Neue Übersetzungen beim Start herunterladen",
+      "downloadTranslationsSubtitle": "Kontaktiert github.com, um nach neuen Übersetzungen zu schauen und diese herunterzuladen"
     },
     "updates": {
       "title": "Updates",
@@ -991,7 +993,10 @@
   "updates": {
     "toasts": {
       "updateAvailable": "Update verfügbar",
-      "updateAvailableText": "Ein Update auf Version {{version}} ist verfügbar. Navigiere zu den Einstellungen, um es herunterzuladen und zu installieren."
+      "updateAvailableText": "Ein Update auf Version {{version}} ist verfügbar. Navigiere zu den Einstellungen, um es herunterzuladen und zu installieren.",
+      "translationsDownloaded": "Übersetzungen heruntergeladen",
+      "translationsDownloadedText": "Übersetzungen heruntergeladen",
+      "noTranslationsDownloaded": "Keine Übersetzungen gefunden"
     },
     "download": {
       "text": "{{downloaded}} von {{total}} heruntergeladen..."

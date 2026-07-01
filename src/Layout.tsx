@@ -4,6 +4,7 @@ import FirstRunModal from "@/components/modals/FirstRunModal";
 import PrereleaseModal from "@/components/modals/PrereleaseModal";
 import Navigation from "@/components/navigation/Navigation";
 import { useNxmRedirect } from "@/hooks/nxm";
+import { useTranslationUpdateOnStart } from "@/hooks/translations";
 import useShowToastOnIniSaveError from "@/hooks/tweaks/useShowToastOnIniSaveError";
 import { useUpdateCheckOnStart } from "@/hooks/updater";
 import { useBlockFileDragAndDrop } from "@/hooks/useBlockFileDragAndDrop";
@@ -16,6 +17,7 @@ function Globals() {
   useNxmRedirect();
   useBlockFileDragAndDrop();
   useUpdateCheckOnStart();
+  useTranslationUpdateOnStart();
   useShowToastOnIniSaveError();
   return (
     <>

@@ -68,7 +68,7 @@ export class UpdaterService {
 
   public async downloadAndInstall(relaunch = true) {
     if (this.updateState.isPending) return;
-    console.log("[UpdaterService] Downloading and instaling update...");
+    console.log("[UpdaterService] Downloading and installing update...");
     this.updateState = {
       isPending: true,
       error: null,

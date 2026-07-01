@@ -904,7 +904,9 @@
       "fetchServerStatusOnStart": "Fetch server status on start",
       "fetchServerStatusOnStartSubtitle": "Contacts status.bethesda.net and api.locize.app to display the status",
       "checkForUpdates": "Check for updates on start",
-      "checkForUpdatesSubtitle": "Contacts github.com to check if a new version is available"
+      "checkForUpdatesSubtitle": "Contacts github.com to check if a new version is available",
+      "downloadTranslations": "Download new translations on start",
+      "downloadTranslationsSubtitle": "Contacts github.com to check for new translations and download them"
     },
     "updates": {
       "title": "Updates",
@@ -991,7 +993,10 @@
   "updates": {
     "toasts": {
       "updateAvailable": "Update available",
-      "updateAvailableText": "An update to version {{version}} is available. Go to the settings to download and install."
+      "updateAvailableText": "An update to version {{version}} is available. Go to the settings to download and install.",
+      "translationsDownloaded": "Translations downloaded",
+      "translationsDownloadedText": "{{count}} downloaded: {{files}}",
+      "noTranslationsDownloaded": "No translations found"
     },
     "download": {
       "text": "{{downloaded}} of {{total}} downloaded..."
