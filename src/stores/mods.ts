@@ -167,6 +167,16 @@ export const useModsStore = create<ModsStore>()((set, get) => ({
       return true;
     }
 
+    // Check if a mod was moved (e.g. drag and drop in mod order):
+    const enabledModKeys = get()
+      .mods.filter((mod) => mod.enabled)
+      .map((mod) => mod.key);
+    const deployedModKeys = get().state.map((state) => state.key);
+    if (!fastDeepEqual(enabledModKeys, deployedModKeys)) {
+      return true;
+    }
+
+    // Compare deployment state of each mod:
     for (const mod of mods) {
       const state = get().getModState(mod.key);
       const deployed = !!state;
@@ -178,6 +188,7 @@ export const useModsStore = create<ModsStore>()((set, get) => ({
       }
     }
 
+    // Check if mods were removed:
     for (const state of get().state) {
       const mod = get().getMod(state.key);
       const exists = !!mod;
