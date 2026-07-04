@@ -79,12 +79,13 @@ export default function EditProfileModal(props: Props) {
     const defaultModsPath = useProfilesStore
       .getState()
       .getDefaultModsPath(path);
+    const oldDefaultModsPath = useProfilesStore
+      .getState()
+      .getDefaultModsPath(oldGamePath);
+
     setModsPath((oldModsPath) => {
       // If the previously set mod path was the default one, then overwrite it:
-      if (
-        oldModsPath ==
-        useProfilesStore.getState().getDefaultModsPath(oldGamePath)
-      )
+      if (oldDefaultModsPath == undefined || oldModsPath == oldDefaultModsPath)
         return defaultModsPath || "";
 
       // Otherwise only change it if the mod path is unset:
