@@ -31,6 +31,7 @@ export default function Entry(props: Props) {
       disabled={props.disabled}
       placeholder={props.placeholder || " "}
       className={props.className}
+      autoComplete="off"
     />
   );
   return props.label ? (

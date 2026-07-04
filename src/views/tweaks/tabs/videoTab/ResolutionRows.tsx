@@ -217,6 +217,7 @@ export default function ResolutionRows() {
                 css={css`
                   width: 100px;
                 `}
+                autoComplete="off"
               />
             </FlexCol>
             <FlexCol css={css`padding: 6px;`}>x</FlexCol>
@@ -233,6 +234,7 @@ export default function ResolutionRows() {
                 css={css`
                   width: 100px;
                 `}
+                autoComplete="off"
               />
             </FlexCol>
           </FlexRow>

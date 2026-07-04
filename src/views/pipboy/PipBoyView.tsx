@@ -137,8 +137,9 @@ function SuspendedPipBoyView() {
                   })
                 }
                 css={css`
-                    min-width: 100px;
-                  `}
+                  min-width: 100px;
+                `}
+                autoComplete="off"
               />
               <InputGroup.Text>x</InputGroup.Text>
               <Form.Control
@@ -151,8 +152,9 @@ function SuspendedPipBoyView() {
                   })
                 }
                 css={css`
-                    min-width: 100px;
-                  `}
+                  min-width: 100px;
+                `}
+                autoComplete="off"
               />
             </InputGroup>
           </ListGroup.Item>

@@ -49,6 +49,7 @@ export default function SliderRow(props: Props) {
               onChange={(ev) => {
                 if (props.onChange) props.onChange(parseFloat(ev.target.value));
               }}
+              autoComplete="off"
             />
           </FlexCol>
         </>
