@@ -41,6 +41,7 @@ Please use the following commands while working on the code base:
 - Avoid deeply nested code, keep logic as flat as possible.
 - Don't use comments in the code. The code should be self-documentating.
 - If the unit tests you wrote are failing due to bugs in the tested code, let them fail. Don't comment out asserts, just to make the test work.
+- If Markdown (\*.md) files were changed, it probably wasn't the formatter but me. Please let them be, don't restore them unless asked explicitly.
 
 **Rust**
 - Prefer to split up imports in Rust code.
