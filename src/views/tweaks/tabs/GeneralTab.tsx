@@ -9,6 +9,7 @@ import useQuickHealStimpakPriority, {
   QuickHealStimpakPriority,
 } from "@/hooks/tweaks/general/useQuickHealStimpakPriority";
 import useRejectSharedPerksEnabled from "@/hooks/tweaks/general/useRejectSharedPerksEnabled";
+import useShowGrenadeTrajectory from "@/hooks/tweaks/general/useShowGrenadeTrajectory";
 import useSkipStartupSplash from "@/hooks/tweaks/general/useSkipStartupSplash";
 import useVATSGrenadeMineTargetingMode, {
   VATSGrenadeMineTargetingMode,
@@ -19,6 +20,9 @@ import useActiveEffectsOnHUD, {
   ActiveEffectsOnHUD,
 } from "@/hooks/tweaks/interface/useActiveEffectsOnHUD";
 import useAdvancedModDescriptions from "@/hooks/tweaks/interface/useAdvancedModDescriptions";
+import useAskScrapFavorite from "@/hooks/tweaks/interface/useAskScrapFavorite";
+import useAskScrapLegendary from "@/hooks/tweaks/interface/useAskScrapLegendary";
+import useAskScrapPremium from "@/hooks/tweaks/interface/useAskScrapPremium";
 import useAutoScrollPipboyItemStats from "@/hooks/tweaks/interface/useAutoScrollPipboyItemStats";
 import useAutoTrackQuestWhenStarted from "@/hooks/tweaks/interface/useAutoTrackQuestWhenStarted";
 import useConversationHistorySize from "@/hooks/tweaks/interface/useConversationHistorySize";
@@ -31,6 +35,7 @@ import useEnableQuestTrackNotification from "@/hooks/tweaks/interface/useEnableQ
 import useFloatingQuestMarkersDistance from "@/hooks/tweaks/interface/useFloatingQuestMarkersDistance";
 import useGeneralSubtitles from "@/hooks/tweaks/interface/useGeneralSubtitles";
 import useHUDOpacity from "@/hooks/tweaks/interface/useHUDOpacity";
+import useItemLockSettingAllowStashTransfer from "@/hooks/tweaks/interface/useItemLockSettingAllowStashTransfer";
 import useShowCAMPWeather from "@/hooks/tweaks/interface/useShowCAMPWeather";
 import useShowCompass from "@/hooks/tweaks/interface/useShowCompass";
 import useShowCrosshair from "@/hooks/tweaks/interface/useShowCrosshair";
@@ -38,8 +43,11 @@ import useShowDamageNumbersAdventure from "@/hooks/tweaks/interface/useShowDamag
 import useShowDialogueHistory from "@/hooks/tweaks/interface/useShowDialogueHistory";
 import useShowFloatingQuestMarkers from "@/hooks/tweaks/interface/useShowFloatingQuestMarkers";
 import useShowFloatingQuestText from "@/hooks/tweaks/interface/useShowFloatingQuestText";
+import useShowMapRegionNames from "@/hooks/tweaks/interface/useShowMapRegionNames";
 import useShowOtherPlayersNames from "@/hooks/tweaks/interface/useShowOtherPlayersNames";
 import useShowPublicTeamNotifications from "@/hooks/tweaks/interface/useShowPublicTeamNotifications";
+import useTransferLockSettingAllowConsumableUse from "@/hooks/tweaks/interface/useTransferLockSettingAllowConsumableUse";
+import useTransferLockSettingAllowCraftingUse from "@/hooks/tweaks/interface/useTransferLockSettingAllowCraftingUse";
 import { useTranslation } from "react-i18next";
 
 export default function GeneralTab() {
@@ -53,6 +61,8 @@ export default function GeneralTab() {
   // Gameplay:
   const [corpseHighlighting, setCorpseHighlighting] = useCorpseHighlighting();
   const [showBackpack, setShowBackpack] = useShowBackpack();
+  const [showGrenadeTrajectory, setShowGrenadeTrajectory] =
+    useShowGrenadeTrajectory();
   const [rejectSharedPerksEnabled, setRejectSharedPerksEnabled] =
     useRejectSharedPerksEnabled();
   const [vatsGrenadeMineTargetingMode, setVATSGrenadeMineTargetingMode] =
@@ -73,6 +83,7 @@ export default function GeneralTab() {
   const [hudOpacity, setHUDOpacity] = useHUDOpacity();
   const [activeEffectsOnHUD, setActiveEffectsOnHUD] = useActiveEffectsOnHUD();
   const [showCrosshair, setShowCrosshair] = useShowCrosshair();
+  const [showMapRegionNames, setShowMapRegionNames] = useShowMapRegionNames();
   const [enablePowerArmorHUD, setEnablePowerArmorHUD] =
     useEnablePowerArmorHUD();
   const [showPublicTeamNotifications, setShowPublicTeamNotifications] =
@@ -97,6 +108,19 @@ export default function GeneralTab() {
     useShowFloatingQuestMarkers();
   const [showFloatingQuestText, setShowFloatingQuestText] =
     useShowFloatingQuestText();
+
+  // Item scrapping:
+  const [askScrapLegendary, setAskScrapLegendary] = useAskScrapLegendary();
+  const [askScrapFavorite, setAskScrapFavorite] = useAskScrapFavorite();
+  const [askScrapPremium, setAskScrapPremium] = useAskScrapPremium();
+
+  // Locked items:
+  const [allowLockedConsumableUse, setAllowLockedConsumableUse] =
+    useTransferLockSettingAllowConsumableUse();
+  const [allowLockedMaterialsUse, setAllowLockedMaterialsUse] =
+    useTransferLockSettingAllowCraftingUse();
+  const [allowLockedStashTransfers, setAllowLockedStashTransfers] =
+    useItemLockSettingAllowStashTransfer();
 
   // Quests:
   const [enableQuestTrackNotification, setEnableQuestTrackNotification] =
@@ -155,6 +179,12 @@ export default function GeneralTab() {
           title={t("tweaks.general.showBackpack")}
           checked={showBackpack}
           onChange={setShowBackpack}
+        />
+        <SwitchRow
+          title={t("tweaks.general.showThrowingArc")}
+          subtitle={t("tweaks.general.showThrowingArcSubtitle")}
+          checked={showGrenadeTrajectory}
+          onChange={setShowGrenadeTrajectory}
         />
         <SwitchRow
           title={t("tweaks.general.rejectSharedPerks")}
@@ -256,6 +286,12 @@ export default function GeneralTab() {
           onChange={setShowCrosshair}
         />
         <SwitchRow
+          title={t("tweaks.general.showMapRegionNames")}
+          subtitle={t("tweaks.general.showMapRegionNamesSubtitle")}
+          checked={showMapRegionNames}
+          onChange={setShowMapRegionNames}
+        />
+        <SwitchRow
           title={t("tweaks.general.enablePowerArmorHud")}
           checked={enablePowerArmorHUD}
           onChange={setEnablePowerArmorHUD}
@@ -320,6 +356,48 @@ export default function GeneralTab() {
           title={t("tweaks.general.showFloatingQuestText")}
           checked={showFloatingQuestText}
           onChange={setShowFloatingQuestText}
+        />
+      </PreferencesGroup>
+
+      <PreferencesGroup title={t("tweaks.general.itemScrappingGroup")}>
+        <SwitchRow
+          title={t("tweaks.general.askScrapLegendary")}
+          subtitle={t("tweaks.general.askScrapLegendarySubtitle")}
+          checked={askScrapLegendary}
+          onChange={setAskScrapLegendary}
+        />
+        <SwitchRow
+          title={t("tweaks.general.askScrapFavorite")}
+          subtitle={t("tweaks.general.askScrapFavoriteSubtitle")}
+          checked={askScrapFavorite}
+          onChange={setAskScrapFavorite}
+        />
+        <SwitchRow
+          title={t("tweaks.general.askScrapPremium")}
+          subtitle={t("tweaks.general.askScrapPremiumSubtitle")}
+          checked={askScrapPremium}
+          onChange={setAskScrapPremium}
+        />
+      </PreferencesGroup>
+
+      <PreferencesGroup title={t("tweaks.general.lockedItemsGroup")}>
+        <SwitchRow
+          title={t("tweaks.general.allowLockedConsumableUse")}
+          subtitle={t("tweaks.general.allowLockedConsumableUseSubtitle")}
+          checked={allowLockedConsumableUse}
+          onChange={setAllowLockedConsumableUse}
+        />
+        <SwitchRow
+          title={t("tweaks.general.allowLockedMaterialsUse")}
+          subtitle={t("tweaks.general.allowLockedMaterialsUseSubtitle")}
+          checked={allowLockedMaterialsUse}
+          onChange={setAllowLockedMaterialsUse}
+        />
+        <SwitchRow
+          title={t("tweaks.general.allowLockedStashTransfers")}
+          subtitle={t("tweaks.general.allowLockedStashTransfersSubtitle")}
+          checked={allowLockedStashTransfers}
+          onChange={setAllowLockedStashTransfers}
         />
       </PreferencesGroup>
 
