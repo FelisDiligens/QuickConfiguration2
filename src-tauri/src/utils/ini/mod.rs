@@ -126,12 +126,12 @@ pub fn escape_windows_path_separators<S: AsRef<str>>(s: S) -> String {
                 let transformed_value = value.replace(r"\", r"\\");
                 let transformed_line = line.replacen(value, &transformed_value, 1);
                 result.push_str(&transformed_line);
-                result.push_str("\n");
+                result.push('\n');
                 continue;
             }
         }
-        result.push_str(&line);
-        result.push_str("\n");
+        result.push_str(line);
+        result.push('\n');
     }
     result
 }

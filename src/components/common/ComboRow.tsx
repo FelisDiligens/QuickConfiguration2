@@ -44,7 +44,7 @@ interface HTMLSelectElementEx extends HTMLSelectElement {
 export default function ComboRow(props: Props) {
   const ref = useRef<HTMLSelectElement | null>(null);
   function onActivate(ev: React.MouseEvent) {
-    let el = ev.target as HTMLElement;
+    const el = ev.target as HTMLElement;
     if (
       ref.current &&
       !(ev.target instanceof HTMLSelectElement) &&
