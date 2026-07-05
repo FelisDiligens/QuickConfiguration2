@@ -1,3 +1,16 @@
+## What's new in v2.0.0-beta.3
+
+This update adds new game settings, automatic translation downloads and some smaller bug fixes:
+
+- Added: New game settings (throwing arc, item scrap prompts, locked item use, map region names)
+- Added: Automatic download of translations on app start (opt-out)
+- Added: Button to show custom resolution picker
+- Fixed: Show that deployment is necessary when reordering mods
+- Fixed: Create the `languages` folder when opening the translation folder from the app instead of displaying an error
+- Fixed: Prevent a possible race condition when saving profiles and settings which might have caused corruption / data loss
+- Fixed: Disable autocomplete suggestions on input fields
+- Fixed: Empty mods path was not set when game path was changed in the profile editing dialog in some situations
+
 ## What's new in v2.0.0-beta.2
 
 A small bug fix update:
