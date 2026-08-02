@@ -45,7 +45,7 @@ Please use the following commands while working on the code base:
 
 **Rust**
 - Prefer to split up imports in Rust code.
-- Never use `unwrap` or `expect`. Always try to propagate errors with `?` operator.
+- Never use `unwrap` or `expect`. Always try to propagate errors with `?` operator. This does not include `unwrap_or` or `unwrap_or_default`.
 - Always log errors (e.g. with `tap_err`) and add additional log messages where it might be informative.
 - Create test functions (`#[test]`) and run nextest to check if code works. Don't compile code with `rustc` to run tests.
 
