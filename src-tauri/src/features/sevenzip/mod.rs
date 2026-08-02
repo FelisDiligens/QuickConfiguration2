@@ -66,6 +66,29 @@ fn get_7z_path() -> SevenzipResult<PathBuf> {
         _ => {}
     }
 
+    if cfg!(target_os = "windows") {
+        // Assuming the default installation path:
+        let system_drive = std::env::var("SystemDrive").unwrap_or("C:".to_string());
+        let program_files =
+            std::env::var("ProgramFiles").unwrap_or(system_drive.clone() + r"\Program Files");
+        let program_files_x86 =
+            std::env::var("ProgramFiles(x86)").unwrap_or(system_drive + r"\Program Files (x86)");
+        let global_path = vec![
+            PathBuf::from(program_files).join("7-Zip").join("7z.exe"),
+            PathBuf::from(program_files_x86)
+                .join("7-Zip")
+                .join("7z.exe"),
+        ]
+        .into_iter()
+        .map(|p| p.canonicalize().unwrap_or(p))
+        .find(|p| p.is_file());
+
+        if let Some(path) = global_path {
+            log::trace!("Found 7z in Program Files: {path:?}");
+            return Ok(path);
+        }
+    }
+
     Err(SevenzipError::SevenzipNotFound)
 }
 
