@@ -1,3 +1,12 @@
+## What's new in v2.0.0-beta.4
+
+This update should fix issues with extracting RAR archives:
+
+- Updated: Bundling 7z instead of 7za for UnRAR support on Windows.
+- Added: More helpful error message if RAR archives cannot be extracted.
+- Added: Fallback to WinRAR to extract RAR archives if it is installed and 7-Zip doesn't support RAR extraction.
+- Fixed: If Windows was installed on a different drive than `C:`, then Steam should be found now.
+
 ## What's new in v2.0.0-beta.3
 
 This update adds new game settings, automatic translation downloads and some smaller bug fixes:
