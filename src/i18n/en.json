@@ -61,6 +61,14 @@
     "dndWarning": {
       "title": "Drag and drop not possible",
       "text": "Can only drag and drop files into the \"Drag and drop window\". Please click \"Install mod\" in the tool row above and select \"Show drag and drop window\"."
+    },
+    "7zNotFound": {
+      "windows": "7z was not found. Please make sure the app was correctly installed.",
+      "linux": "7z was not found. Please extract the archive manually or install 7z from the package repositories."
+    },
+    "rarNotSupported": {
+      "windows": "RAR archives cannot be extracted. Please extract the RAR archive manually or install 7-Zip from 7zip.org (or WinRAR), then restart the app.",
+      "linux": "RAR archives cannot be extracted. Please extract the RAR archive manually or install unrar from the package repositories, then restart the app."
     }
   },
   "navigation": {

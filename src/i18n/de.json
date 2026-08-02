@@ -61,6 +61,14 @@
     "dndWarning": {
       "title": "Ziehen und Ablegen nicht möglich",
       "text": "Ziehen und Ablegen von Dateien nur im \"Dateiablagefenster\" möglich. Bitte klicke \"Mod hinzufügen\" in der Werkzeugleiste oben und wähle \"Dateiablagefenster anzeigen\" aus."
+    },
+    "7zNotFound": {
+      "windows": "7z konnte nicht gefunden werden. Bitte stelle sicher, dass die Anwendung korrekt installiert wurde.",
+      "linux": "7z konnte nicht gefunden werden. Bitte extrahiere das Archiv manuell oder installiere 7z aus den Paketquellen."
+    },
+    "rarNotSupported": {
+      "windows": "RAR-Archive können nicht extrahiert werden. Bitte extrahiere das RAR-Archiv manuell oder installiere 7-Zip von 7zip.org (oder WinRAR) und starte die App dann neu.",
+      "linux": "RAR-Archive können nicht extrahiert werden. Bitte extrahiere das RAR-Archiv manuell oder installiere unrar aus den Paketquellen und starte die App dann neu."
     }
   },
   "navigation": {

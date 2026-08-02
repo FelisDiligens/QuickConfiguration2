@@ -1,3 +1,5 @@
+import { platform } from "@tauri-apps/plugin-os";
+import { t } from "i18next";
 import objectInspect from "object-inspect";
 import { CommandError, SerializableCommandResult } from "./bindings";
 
@@ -48,6 +50,10 @@ export function commandErrorToString(error: AnyError) {
     typeof error.message === "string" &&
     typeof error.variant === "string"
   ) {
+    if (error.type === "SevenzipError" && error.variant === "RARNotSupported")
+      return t("errors.rarNotSupported." + platform());
+    if (error.type === "SevenzipError" && error.variant === "SevenzipNotFound")
+      return t("errors.7zNotFound." + platform());
     return `${error.type}::${error.variant}: ${error.message}`;
   } else if (
     "type" in error &&
