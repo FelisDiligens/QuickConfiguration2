@@ -103,6 +103,44 @@ fn get_unrar_path() -> Option<PathBuf> {
         .ok()
 }
 
+fn get_winrar_path() -> Option<PathBuf> {
+    match which("rar") {
+        Ok(path) => {
+            log::trace!("Found rar in PATH: {path:?}");
+            return Some(path);
+        }
+        Err(e) if !matches!(e, which::Error::CannotFindBinaryPath) => {
+            log::error!("Error while searching for rar: {e:?}");
+        }
+        _ => {}
+    }
+
+    if cfg!(target_os = "windows") {
+        // Assuming the default installation path:
+        let system_drive = std::env::var("SystemDrive").unwrap_or("C:".to_string());
+        let program_files =
+            std::env::var("ProgramFiles").unwrap_or(system_drive.clone() + r"\Program Files");
+        let program_files_x86 =
+            std::env::var("ProgramFiles(x86)").unwrap_or(system_drive + r"\Program Files (x86)");
+        let global_path = vec![
+            PathBuf::from(program_files).join("WinRAR").join("Rar.exe"),
+            PathBuf::from(program_files_x86)
+                .join("WinRAR")
+                .join("Rar.exe"),
+        ]
+        .into_iter()
+        .map(|p| p.canonicalize().unwrap_or(p))
+        .find(|p| p.is_file());
+
+        if let Some(path) = global_path {
+            log::trace!("Found WinRAR in Program Files: {path:?}");
+            return Some(path);
+        }
+    }
+
+    None
+}
+
 /// Runs `7z i` to "Show information about supported formats".
 /// Checks for the presence of Rar (= RAR versions 2, 3, and 4) and Rar5
 fn is_rar_supported<P: AsRef<Path>>(sevenzip_path: P) -> bool {
@@ -132,7 +170,7 @@ pub fn extract_archive<P: AsRef<Path>>(source: P, destination: P) -> SevenzipRes
 
     let sevenzip_path = get_7z_path()?;
 
-    // If the 7z version doesn't support `rar`, then fallback to `unrar`:
+    // If the 7z version doesn't support `rar`, then fallback to `unrar`/`rar`:
     if extension == "rar" && !is_rar_supported(&sevenzip_path) {
         if let Some(unrar_path) = get_unrar_path() {
             let cmd = duct::cmd!(unrar_path, "x", source, "-y", destination);
@@ -145,6 +183,17 @@ pub fn extract_archive<P: AsRef<Path>>(source: P, destination: P) -> SevenzipRes
                 ));
             }
             log::trace!("unrar success");
+        } else if let Some(winrar_path) = get_winrar_path() {
+            let cmd = duct::cmd!(winrar_path, "x", source, "-y", destination);
+            log::trace!("rar cmd: {:?}", cmd);
+            let output = cmd.read()?;
+            log::trace!("rar output: {}", output);
+            if !destination.exists() || fs_util::is_empty(destination)? {
+                return Err(SevenzipError::DestinationNotFound(
+                    destination.to_string_lossy().to_string(),
+                ));
+            }
+            log::trace!("rar success");
         } else {
             return Err(SevenzipError::RARNotSupported);
         }
