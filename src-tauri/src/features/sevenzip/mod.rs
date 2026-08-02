@@ -151,7 +151,7 @@ fn is_rar_supported<P: AsRef<Path>>(sevenzip_path: P) -> bool {
         Ok(output) => {
             log::trace!("7z output: {}", output);
             if let Some(codecs_section) = output.split("Codecs:").nth(1) {
-                let re = Regex::new(r"Rar\d$").unwrap();
+                let re = Regex::new(r"(?m)Rar\d\r?$").unwrap();
                 re.is_match(codecs_section)
             } else {
                 false
