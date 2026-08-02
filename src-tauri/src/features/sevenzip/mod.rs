@@ -6,6 +6,7 @@ use std::io;
 use std::path::{Path, PathBuf};
 
 use duct;
+use regex::Regex;
 use tap::{TapFallible, TapOptional};
 use thiserror::Error;
 use which::which;
@@ -142,14 +143,19 @@ fn get_winrar_path() -> Option<PathBuf> {
 }
 
 /// Runs `7z i` to "Show information about supported formats".
-/// Checks for the presence of Rar (= RAR versions 2, 3, and 4) and Rar5
+/// Checks for the presence of Rar1/2/3/5 in the "Codecs" section of the output.
 fn is_rar_supported<P: AsRef<Path>>(sevenzip_path: P) -> bool {
     let cmd = duct::cmd(sevenzip_path.as_ref(), vec![OsStr::new("i")]);
     log::trace!("7z cmd: {:?}", cmd);
     match cmd.read() {
         Ok(output) => {
             log::trace!("7z output: {}", output);
-            output.contains("Rar") && output.contains("Rar5")
+            if let Some(codecs_section) = output.split("Codecs:").nth(1) {
+                let re = Regex::new(r"Rar\d$").unwrap();
+                re.is_match(codecs_section)
+            } else {
+                false
+            }
         }
         Err(error) => {
             log::error!("7z error: {}", error);
@@ -172,6 +178,7 @@ pub fn extract_archive<P: AsRef<Path>>(source: P, destination: P) -> SevenzipRes
 
     // If the 7z version doesn't support `rar`, then fallback to `unrar`/`rar`:
     if extension == "rar" && !is_rar_supported(&sevenzip_path) {
+        log::info!("7-Zip version does not support RAR extraction, falling back to UnRAR/WinRAR.");
         if let Some(unrar_path) = get_unrar_path() {
             let cmd = duct::cmd!(unrar_path, "x", source, "-y", destination);
             log::trace!("unrar cmd: {:?}", cmd);
@@ -195,6 +202,7 @@ pub fn extract_archive<P: AsRef<Path>>(source: P, destination: P) -> SevenzipRes
             }
             log::trace!("rar success");
         } else {
+            log::error!("Neither UnRAR nor WinRAR are installed.");
             return Err(SevenzipError::RARNotSupported);
         }
     } else {
