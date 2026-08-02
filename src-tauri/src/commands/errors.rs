@@ -181,6 +181,10 @@ impl From<SevenzipError> for CommandError {
                 message: value.to_string(),
                 variant: value.as_ref().to_owned(),
             },
+            SevenzipError::RARNotSupported => Self::SevenzipError {
+                message: value.to_string(),
+                variant: value.as_ref().to_owned(),
+            },
             SevenzipError::Io(error) => error.into(),
             SevenzipError::DestinationNotFound(ref destination) => Self::SevenzipError {
                 message: destination.to_string(),

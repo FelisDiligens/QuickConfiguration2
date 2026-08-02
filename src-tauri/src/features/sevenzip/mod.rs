@@ -1,12 +1,12 @@
 #[cfg(test)]
 pub mod tests;
 
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsStr;
 use std::io;
 use std::path::{Path, PathBuf};
 
 use duct;
-use tap::{Tap, TapFallible};
+use tap::{TapFallible, TapOptional};
 use thiserror::Error;
 use which::which;
 
@@ -14,7 +14,8 @@ use crate::osstring_concat;
 use crate::utils::{fs_util, paths::get_resources_path};
 
 /// Note: 7za does not support unpacking rar archives. Only 7z does.
-pub const SUPPORTED_ARCHIVE_EXTENSIONS: &[&str] = &["7z", "zip", "rar", "tar", "xz", "gz", "bz2"];
+/// Also, 7z unfortunately doesn't extract compressed tarballs (`*.tar.[xz|gz|bz2|zstd]`) in one go. So I removed them for the list for now.
+pub const SUPPORTED_ARCHIVE_EXTENSIONS: &[&str] = &["7z", "zip", "rar", "tar"]; // "xz", "gz", "bz2", "zst", "zstd"
 
 pub type SevenzipResult<T> = Result<T, SevenzipError>;
 
@@ -22,30 +23,20 @@ pub type SevenzipResult<T> = Result<T, SevenzipError>;
 pub enum SevenzipError {
     #[error("Couldn't find 7z")]
     SevenzipNotFound,
+    #[error("RAR archives are not supported")]
+    RARNotSupported,
     #[error(transparent)]
     Io(#[from] io::Error),
     #[error("Command completed successfully but destination `{0}` doesn't exist")]
     DestinationNotFound(String),
 }
 
-fn get_7z_path() -> Option<PathBuf> {
-    match which("7z")
-        .or_else(|_| which("7za"))
-        .or_else(|_| which("7zz"))
-        .or_else(|_| which("p7zip"))
-    {
-        Ok(path) => {
-            log::trace!("Found 7z in PATH: {path:?}");
-            return Some(path);
-        }
-        Err(e) if !matches!(e, which::Error::CannotFindBinaryPath) => {
-            log::error!("Error while searching for 7z: {e:?}");
-        }
-        _ => {}
-    }
-
+fn get_7z_path() -> SevenzipResult<PathBuf> {
     if cfg!(target_os = "windows") {
-        let resources_path = get_resources_path()?;
+        // First, look into the resources folder:
+        let resources_path = get_resources_path()
+            .tap_none(|| log::error!("Couldn't find the resources path in get_7z_path"))
+            .ok_or(SevenzipError::SevenzipNotFound)?;
         let local_path = vec![
             resources_path.join("7z").join("7z.exe"),
             resources_path.join("7z").join("7za.exe"),
@@ -56,16 +47,31 @@ fn get_7z_path() -> Option<PathBuf> {
 
         if let Some(path) = local_path {
             log::trace!("Found included 7z: {path:?}");
-            return Some(path);
+            return Ok(path);
         }
     }
 
-    None
+    match which("7z")
+        .or_else(|_| which("7za"))
+        .or_else(|_| which("7zz"))
+        .or_else(|_| which("7zr"))
+    {
+        Ok(path) => {
+            log::trace!("Found 7z in PATH: {path:?}");
+            return Ok(path);
+        }
+        Err(e) if !matches!(e, which::Error::CannotFindBinaryPath) => {
+            log::error!("Error while searching for 7z: {e:?}");
+        }
+        _ => {}
+    }
+
+    Err(SevenzipError::SevenzipNotFound)
 }
 
 fn get_unrar_path() -> Option<PathBuf> {
     which("unrar")
-        .tap(|path| log::trace!("Found unrar in PATH: {path:?}"))
+        .tap_ok(|path| log::trace!("Found unrar in PATH: {path:?}"))
         .tap_err(|e| {
             if !matches!(e, which::Error::CannotFindBinaryPath) {
                 log::error!("Error while searching for unrar: {e:?}");
@@ -74,49 +80,61 @@ fn get_unrar_path() -> Option<PathBuf> {
         .ok()
 }
 
-fn sevenzip_cmd<U>(args: U) -> SevenzipResult<duct::Expression>
-where
-    U: IntoIterator,
-    U::Item: Into<OsString>,
-{
-    match get_7z_path() {
-        Some(path) => Ok(duct::cmd(path, args)),
-        None => Err(SevenzipError::SevenzipNotFound),
+/// Runs `7z i` to "Show information about supported formats".
+/// Checks for the presence of Rar (= RAR versions 2, 3, and 4) and Rar5
+fn is_rar_supported<P: AsRef<Path>>(sevenzip_path: P) -> bool {
+    let cmd = duct::cmd(sevenzip_path.as_ref(), vec![OsStr::new("i")]);
+    log::trace!("7z cmd: {:?}", cmd);
+    match cmd.read() {
+        Ok(output) => {
+            log::trace!("7z output: {}", output);
+            output.contains("Rar") && output.contains("Rar5")
+        }
+        Err(error) => {
+            log::error!("7z error: {}", error);
+            false
+        }
     }
 }
 
-/// Extracts an archive (.7z, .zip, .tar, ...) into the given destination folder.
+/// Extracts an archive (.7z, .zip, .rar, .tar, ...) into the given destination folder.
 pub fn extract_archive<P: AsRef<Path>>(source: P, destination: P) -> SevenzipResult<()> {
     let (source, destination) = (source.as_ref(), destination.as_ref());
     let extension = source
         .extension()
         .and_then(|ext| ext.to_str())
-        .map(|ext| ext.to_string())
-        .unwrap_or_default()
-        .to_lowercase();
+        .map(|ext| ext.to_lowercase())
+        .tap_none(|| log::warn!("Couldn't determine file extension for {source:?}"))
+        .unwrap_or_default();
 
-    // On Linux, use `unrar` for rar archives:
-    // (unsure if there's an "unrar" on Windows...)
-    if extension == "rar"
-        && let Some(unrar_path) = get_unrar_path()
-    {
-        let cmd = duct::cmd!(unrar_path, "x", source, "-y", destination);
-        log::trace!("unrar cmd: {:?}", cmd);
-        let output = cmd.read()?;
-        log::trace!("unrar output: {}", output);
-        if !destination.exists() || fs_util::is_empty(destination)? {
-            return Err(SevenzipError::DestinationNotFound(
-                destination.to_string_lossy().to_string(),
-            ));
+    let sevenzip_path = get_7z_path()?;
+
+    // If the 7z version doesn't support `rar`, then fallback to `unrar`:
+    if extension == "rar" && !is_rar_supported(&sevenzip_path) {
+        if let Some(unrar_path) = get_unrar_path() {
+            let cmd = duct::cmd!(unrar_path, "x", source, "-y", destination);
+            log::trace!("unrar cmd: {:?}", cmd);
+            let output = cmd.read()?;
+            log::trace!("unrar output: {}", output);
+            if !destination.exists() || fs_util::is_empty(destination)? {
+                return Err(SevenzipError::DestinationNotFound(
+                    destination.to_string_lossy().to_string(),
+                ));
+            }
+            log::trace!("unrar success");
+        } else {
+            return Err(SevenzipError::RARNotSupported);
         }
-        log::trace!("unrar success");
     } else {
-        let cmd = sevenzip_cmd(vec![
-            OsStr::new("x"),
-            source.as_ref(),
-            OsStr::new("-y"),
-            &osstring_concat!(OsStr::new("-o"), destination.as_ref()),
-        ])?;
+        let cmd = duct::cmd(
+            sevenzip_path,
+            vec![
+                OsStr::new("x"),
+                source.as_ref(),
+                OsStr::new("-y"),
+                &osstring_concat!(OsStr::new("-o"), destination.as_ref()),
+            ],
+        );
         log::trace!("7z cmd: {:?}", cmd);
         let output = cmd.read()?;
         log::trace!("7z output: {}", output);
