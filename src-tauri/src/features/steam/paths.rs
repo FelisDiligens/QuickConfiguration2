@@ -17,10 +17,21 @@ use crate::utils::fs_util;
 /// * On macOS, it will try to find the native installation path as well as looking into all CrossOver bottles.
 pub fn find_steam_installation_folders() -> Result<Vec<PathBuf>> {
     Ok(if cfg!(target_os = "windows") {
-        Some(Path::new(r"C:\Program Files (x86)\Steam").to_path_buf())
-            .into_iter()
-            .filter(|p| p.is_dir())
-            .collect()
+        let system_drive = std::env::var("SystemDrive").unwrap_or("C:".to_string());
+        let program_files =
+            std::env::var("ProgramFiles").unwrap_or(system_drive.clone() + r"\Program Files");
+        let program_files_x86 =
+            std::env::var("ProgramFiles(x86)").unwrap_or(system_drive + r"\Program Files (x86)");
+
+        vec![
+            PathBuf::from(program_files).join("Steam"),
+            PathBuf::from(program_files_x86).join("Steam"),
+            PathBuf::from(r"C:\Program Files (x86)\Steam"),
+        ]
+        .into_iter()
+        .map(|p| fs::canonicalize(&p).unwrap_or(p))
+        .filter(|p| p.is_dir())
+        .collect()
     } else if cfg!(target_os = "linux") {
         let home_dir = dirs::home_dir()
             .ok_or(anyhow!("Couldn't get home folder"))
