@@ -145,8 +145,13 @@ fn get_winrar_path() -> Option<PathBuf> {
 /// Runs `7z i` to "Show information about supported formats".
 /// Checks for the presence of Rar1/2/3/5 in the "Codecs" section of the output.
 fn is_rar_supported<P: AsRef<Path>>(sevenzip_path: P) -> bool {
-    let cmd = duct::cmd(sevenzip_path.as_ref(), vec![OsStr::new("i")]);
+    #[allow(unused_mut)]
+    let mut cmd = duct::cmd(sevenzip_path.as_ref(), vec![OsStr::new("i")]);
     log::trace!("7z cmd: {:?}", cmd);
+    #[cfg(windows)]
+    {
+        cmd = cmd.before_spawn(crate::utils::windows::process::create_no_window);
+    }
     match cmd.read() {
         Ok(output) => {
             log::trace!("7z output: {}", output);
@@ -180,8 +185,13 @@ pub fn extract_archive<P: AsRef<Path>>(source: P, destination: P) -> SevenzipRes
     if extension == "rar" && !is_rar_supported(&sevenzip_path) {
         log::info!("7-Zip version does not support RAR extraction, falling back to UnRAR/WinRAR.");
         if let Some(unrar_path) = get_unrar_path() {
-            let cmd = duct::cmd!(unrar_path, "x", source, "-y", destination);
+            #[allow(unused_mut)]
+            let mut cmd = duct::cmd!(unrar_path, "x", source, "-y", destination);
             log::trace!("unrar cmd: {:?}", cmd);
+            #[cfg(windows)]
+            {
+                cmd = cmd.before_spawn(crate::utils::windows::process::create_no_window);
+            }
             let output = cmd.read()?;
             log::trace!("unrar output: {}", output);
             if !destination.exists() || fs_util::is_empty(destination)? {
@@ -191,8 +201,13 @@ pub fn extract_archive<P: AsRef<Path>>(source: P, destination: P) -> SevenzipRes
             }
             log::trace!("unrar success");
         } else if let Some(winrar_path) = get_winrar_path() {
-            let cmd = duct::cmd!(winrar_path, "x", source, "-y", destination);
+            #[allow(unused_mut)]
+            let mut cmd = duct::cmd!(winrar_path, "x", source, "-y", destination);
             log::trace!("rar cmd: {:?}", cmd);
+            #[cfg(windows)]
+            {
+                cmd = cmd.before_spawn(crate::utils::windows::process::create_no_window);
+            }
             let output = cmd.read()?;
             log::trace!("rar output: {}", output);
             if !destination.exists() || fs_util::is_empty(destination)? {
@@ -206,7 +221,8 @@ pub fn extract_archive<P: AsRef<Path>>(source: P, destination: P) -> SevenzipRes
             return Err(SevenzipError::RARNotSupported);
         }
     } else {
-        let cmd = duct::cmd(
+        #[allow(unused_mut)]
+        let mut cmd = duct::cmd(
             sevenzip_path,
             vec![
                 OsStr::new("x"),
@@ -216,6 +232,10 @@ pub fn extract_archive<P: AsRef<Path>>(source: P, destination: P) -> SevenzipRes
             ],
         );
         log::trace!("7z cmd: {:?}", cmd);
+        #[cfg(windows)]
+        {
+            cmd = cmd.before_spawn(crate::utils::windows::process::create_no_window);
+        }
         let output = cmd.read()?;
         log::trace!("7z output: {}", output);
         if !destination.exists() || fs_util::is_empty(destination)? {

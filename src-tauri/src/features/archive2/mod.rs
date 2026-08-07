@@ -86,8 +86,13 @@ where
     T: IntoIterator,
     T::Item: Into<OsString>,
 {
-    let cmd = archive2_cmd(args)?.stderr_to_stdout();
+    #[allow(unused_mut)]
+    let mut cmd = archive2_cmd(args)?.stderr_to_stdout();
     log::trace!("Archive2 cmd: {:?}", cmd);
+    #[cfg(windows)]
+    {
+        cmd = cmd.before_spawn(crate::utils::windows::process::create_no_window);
+    }
     let output = cmd.read()?;
     log::trace!("Archive2 output: {}", output);
 
