@@ -186,6 +186,9 @@ export const useModsStore = create<ModsStore>()((set, get) => ({
       if (deployed && mod.options.rootFolder !== state?.rootFolder) {
         return true; // The mod's root folder changed after deployment
       }
+      if (state?.outdated) {
+        return true; // The mod's state was invalidated, e.g. after updating it's folder contents
+      }
     }
 
     // Check if mods were removed:

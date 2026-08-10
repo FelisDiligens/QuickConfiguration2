@@ -278,6 +278,7 @@ fn test_deploy_mods_2() {
         key: "mod1-key".to_string(),
         root_folder: "Data".to_string(),
         files: vec!["Managed.ba2".to_string()],
+        outdated: false,
     });
     mods.mods.push(mod1);
 
@@ -320,6 +321,7 @@ fn test_deploy_mods_2() {
         key: "mod2-key".to_string(),
         root_folder: "Data".to_string(),
         files: vec!["SubFolder\\SubSubFolder/MixedPath.txt".to_string()],
+        outdated: false,
     });
     mods.mods.push(mod2);
 
@@ -350,6 +352,7 @@ fn test_deploy_mods_2() {
         key: "mod3-key".to_string(),
         root_folder: "Data".to_string(),
         files: vec!["CustomConfig.ini".to_string()],
+        outdated: false,
     });
     mods.mods.push(mod3);
 
@@ -485,6 +488,7 @@ fn test_deploy_mods_3() {
         key: "mod3-key".to_string(),
         root_folder: "Data".to_string(),
         files: vec!["BackupFile.txt".to_string()],
+        outdated: false,
     });
     mods.mods.push(mod3);
 

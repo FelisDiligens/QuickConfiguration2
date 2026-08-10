@@ -202,6 +202,7 @@ fn deploy_mod_internal<P: AsRef<Path>>(
             key: r#mod.key.clone(),
             root_folder: r#mod.options.root_folder.clone(),
             files: Vec::new(),
+            outdated: false,
         };
         return Ok(mod_state);
     }
@@ -339,6 +340,7 @@ fn deploy_mod_internal<P: AsRef<Path>>(
         key: r#mod.key.clone(),
         root_folder: r#mod.options.root_folder.clone(),
         files,
+        outdated: false,
     };
     Ok(mod_state)
 }

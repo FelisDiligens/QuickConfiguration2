@@ -67,6 +67,9 @@ pub struct ModInstallationState {
     pub root_folder: String,
     /// Relative paths of the mod files that have previously been copied.
     pub files: Vec<String>,
+    /// Flags the mod state as outdated which always makes deployment necessary
+    #[serde(default)]
+    pub outdated: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Type)]
@@ -183,6 +186,7 @@ impl From<xml::ManagedMod> for Option<ModInstallationState> {
                     .into_iter()
                     .map(|file| file.path)
                     .collect(),
+                outdated: false,
             })
         } else {
             None

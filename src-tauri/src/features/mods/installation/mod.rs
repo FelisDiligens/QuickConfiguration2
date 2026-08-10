@@ -106,6 +106,7 @@ impl ManagedMods {
                 .iter()
                 .map(|s| s.as_ref().to_owned())
                 .collect(),
+            outdated: false,
         };
         self.mods.push(r#mod);
         self.state.push(state);

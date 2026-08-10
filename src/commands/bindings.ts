@@ -585,7 +585,11 @@ rootFolder: string;
 /**
  * Relative paths of the mod files that have previously been copied.
  */
-files: string[] }
+files: string[]; 
+/**
+ * Flags the mod state as outdated which always makes deployment necessary
+ */
+outdated?: boolean }
 /**
  * Settings that only apply to the mod manager portion of the tool.
  */
