@@ -1,6 +1,6 @@
 import { DirEntry } from "@/commands/bindings";
 import { FlexRow } from "@/components/common/Flex";
-import { getPathSep, pathJoinSync } from "@/utils";
+import { clamp } from "@/utils/math";
 import { css } from "@emotion/react";
 import {
   faChevronDown,
@@ -10,156 +10,194 @@ import {
   faFolder,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { createContext, useContext, useId, useMemo } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { useId, useMemo, useRef } from "react";
 import { Form } from "react-bootstrap";
-import { useTranslation } from "react-i18next";
 
 export type File = Extract<DirEntry, { type: "file" }>;
 export type Folder = Extract<DirEntry, { type: "folder" }>;
-
-export interface FileProps extends Omit<File, "type"> {
-  indent?: number;
-}
-
-export interface FolderProps extends Omit<Folder, "type"> {
-  indent?: number;
-  root?: boolean;
-}
 
 const indentWidth = 26;
 const gapWidth = 8;
 const checkBoxWidth = 16;
 const expanderButtonWidth = 15;
+const nodeIconWidth = 25;
+const rowHeight = 26;
 
-export function FileComponent(props: FileProps) {
+export interface FileContentsProps {
+  contents: DirEntry[];
+  maxHeight: number;
+  enabledPaths: Set<string>;
+  expandedPaths: Set<string>;
+  setEnabledPaths: React.Dispatch<React.SetStateAction<Set<string>>>;
+  setExpandedPaths: React.Dispatch<React.SetStateAction<Set<string>>>;
+}
+
+interface FlattenedNode {
+  key: string;
+  label: string;
+  icon?: "file" | "file-zipper" | "folder";
+  iconColor?: string;
+  selectable?: boolean;
+  selected?: boolean;
+  expandable?: boolean;
+  expanded?: boolean;
+  indent?: number;
+}
+
+/**
+ * Displays the given folder contents as a nested tree with collapsable folders
+ * and checkboxes to select individual files.
+ * @param props Getter and setter for the folder contents.
+ */
+export default function FileContents(props: FileContentsProps) {
+  const parentRef = useRef(null);
+
+  const nodes = useMemo(
+    () => flattenTree(props.contents, props.enabledPaths, props.expandedPaths),
+    [props.contents, props.enabledPaths, props.expandedPaths],
+  );
+
+  const childMap = useMemo(
+    () => populateChildMap(props.contents, new Map()),
+    [props.contents],
+  );
+
+  const height = useMemo(
+    () => clamp(nodes.length * rowHeight, 50, props.maxHeight),
+    [nodes, props.maxHeight],
+  );
+
+  const virtualizer = useVirtualizer({
+    count: nodes.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => rowHeight,
+  });
+
+  function setSelected(
+    key: string,
+    selected: boolean,
+    skipReconstructSet?: boolean,
+  ) {
+    const childKeys = childMap.get(key);
+    if (childKeys && childKeys.length > 0) {
+      childKeys.forEach((child) => setSelected(child, selected, true));
+      if (!skipReconstructSet)
+        props.setEnabledPaths(new Set([...props.enabledPaths]));
+      return;
+    }
+    if (selected) {
+      props.enabledPaths.add(key);
+    } else {
+      props.enabledPaths.delete(key);
+    }
+    if (!skipReconstructSet)
+      props.setEnabledPaths(new Set([...props.enabledPaths]));
+  }
+
+  function setExpanded(key: string, expanded: boolean) {
+    if (expanded) props.expandedPaths.add(key);
+    else props.expandedPaths.delete(key);
+    props.setExpandedPaths(new Set([...props.expandedPaths]));
+  }
+
+  return (
+    <div
+      ref={parentRef}
+      style={{
+        height: `${height}px`,
+      }}
+      css={css`
+        overflow: auto;
+      `}
+    >
+      <div
+        style={{
+          height: `${virtualizer.getTotalSize()}px`,
+        }}
+        css={css`
+          width: 100%;
+          position: relative;
+        `}
+      >
+        {virtualizer.getVirtualItems().map((virtualItem) => (
+          <div
+            key={virtualItem.key}
+            style={{
+              height: `${virtualItem.size}px`,
+              transform: `translateY(${virtualItem.start}px)`,
+            }}
+            css={css`
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+            `}
+          >
+            <TreeNode
+              label={nodes[virtualItem.index].label}
+              icon={nodes[virtualItem.index].icon}
+              iconColor={nodes[virtualItem.index].iconColor}
+              selectable={nodes[virtualItem.index].selectable}
+              selected={nodes[virtualItem.index].selected}
+              expandable={nodes[virtualItem.index].expandable}
+              expanded={nodes[virtualItem.index].expanded}
+              indent={nodes[virtualItem.index].indent}
+              setSelected={
+                nodes[virtualItem.index].selectable
+                  ? (selected: boolean) =>
+                      setSelected(nodes[virtualItem.index].key, selected)
+                  : undefined
+              }
+              setExpanded={
+                nodes[virtualItem.index].expandable
+                  ? (expanded: boolean) =>
+                      setExpanded(nodes[virtualItem.index].key, expanded)
+                  : undefined
+              }
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TreeNode(props: {
+  label: string;
+  icon?: string;
+  iconColor?: string;
+  selectable?: boolean;
+  selected?: boolean;
+  expandable?: boolean;
+  expanded?: boolean;
+  indent?: number;
+  setSelected?: (selected: boolean) => void;
+  setExpanded?: (expanded: boolean) => void;
+}) {
   const id = useId();
-  const { enabledPaths, setEnabledPath } = useContext(FileContentsContext);
   const indent = props.indent || 0;
-  const enabled = enabledPaths.has(props.path);
-
-  let icon = faFile;
-  if (props.name.endsWith(".ba2")) {
-    icon = faFileZipper;
+  let icon;
+  switch (props.icon) {
+    case "file":
+      icon = faFile;
+      break;
+    case "file-zipper":
+      icon = faFileZipper;
+      break;
+    case "folder":
+      icon = faFolder;
+      break;
   }
 
   return (
     <FlexRow
       center
       gap={gapWidth + "px"}
-      css={css`margin-left: ${expanderButtonWidth + gapWidth + indentWidth * indent}px;`}
+      css={css`margin-left: ${indentWidth * indent}px;`}
     >
-      {/* Checkbox, icon, and label */}
-      <Form.Check id={id}>
-        <Form.Check.Input
-          checked={enabled}
-          onChange={(ev) => setEnabledPath(props.path, ev.target.checked)}
-        />
-        <Form.Check.Label>
-          <FontAwesomeIcon
-            icon={icon}
-            css={css`
-              opacity: 0.7;
-              margin-right: 4px;
-            `}
-          />
-          <span>{props.name}</span>
-        </Form.Check.Label>
-      </Form.Check>
-    </FlexRow>
-  );
-}
-
-export function FolderComponent(props: FolderProps) {
-  const { t } = useTranslation();
-  const id = useId();
-  const indent = props.indent || 0;
-  const { enabledPaths, setEnabledPath, expandedPaths, setExpandedPath } =
-    useContext(FileContentsContext);
-  const expanded = expandedPaths.has(props.path);
-
-  // Determine if the folder's checkbox should be checked, depending on
-  // whether at least one child at any depth is enabled:
-  const isChildEnabled = () => {
-    const pathSep = getPathSep();
-    const path = props.path.endsWith(pathSep)
-      ? props.path
-      : props.path + pathSep;
-    for (const childPath of enabledPaths) {
-      if (childPath.startsWith(path)) {
-        return true;
-      }
-    }
-    return false;
-  };
-  const enabled = useMemo(() => isChildEnabled(), [enabledPaths]);
-
-  // Determine if the folder is empty:
-  const empty = props.contents.length == 0;
-
-  // Enable all child files,
-  // recursively iterates over every child folder's contents:
-  const recursivelySetEnabledOnAllChildren = (
-    contents: DirEntry[],
-    enabled: boolean,
-  ) => {
-    for (const child of contents) {
-      if (child.type === "folder") {
-        recursivelySetEnabledOnAllChildren(child.contents, enabled);
-      } else {
-        setEnabledPath(child.path, enabled);
-      }
-    }
-  };
-
-  const children = props.contents.map((child) => {
-    const path = pathJoinSync(props.path, child.name);
-    return child.type === "folder" ? (
-      <FolderComponent
-        {...child}
-        key={path}
-        path={path}
-        indent={props.root ? 0 : indent + 1}
-      />
-    ) : (
-      <FileComponent
-        {...child}
-        key={path}
-        path={path}
-        indent={props.root ? 0 : indent + 1}
-      />
-    );
-  });
-
-  // If this folder is set as "root",
-  // only show it's children and set their indentation to 0:
-  if (props.root) {
-    return empty ? <p>{t("common.noContent")}</p> : <>{children}</>;
-  }
-
-  if (empty) {
-    return (
-      <FlexRow
-        center
-        css={css`margin-left: ${expanderButtonWidth + checkBoxWidth + gapWidth * 2 + indentWidth * indent}px;`}
-      >
-        <FontAwesomeIcon
-          icon={faFolder}
-          color="#ffa500"
-          css={css`margin-right: 4px;`}
-        />
-        <span>{props.name}</span>
-      </FlexRow>
-    );
-  }
-
-  return (
-    <>
-      <FlexRow
-        center
-        gap={gapWidth + "px"}
-        css={css`margin-left: ${indentWidth * indent}px;`}
-      >
-        {/* Expand/collapse */}
+      {/* Expand/collapse */}
+      {props.expandable && (
         <button
           css={css`
             padding: 0;
@@ -168,106 +206,129 @@ export function FolderComponent(props: FolderProps) {
             width: ${expanderButtonWidth}px;
             flex-shrink: 0;
           `}
-          onClick={() => setExpandedPath(props.path, !expanded)}
+          onClick={() => {
+            if (props.setExpanded) props.setExpanded(!props.expanded);
+          }}
         >
-          {expanded ? (
+          {props.expanded ? (
             <FontAwesomeIcon icon={faChevronDown} size="xs" />
           ) : (
             <FontAwesomeIcon icon={faChevronRight} size="xs" />
           )}
         </button>
+      )}
 
-        {/* Checkbox, icon, and label */}
-        <Form.Check id={id}>
+      {/* Checkbox, icon, and label */}
+      {props.selectable ? (
+        <Form.Check
+          id={id}
+          css={
+            !props.expandable &&
+            css`margin-left: ${expanderButtonWidth + gapWidth}px;`
+          }
+        >
           <Form.Check.Input
-            checked={enabled}
-            onChange={(ev) =>
-              recursivelySetEnabledOnAllChildren(
-                props.contents,
-                ev.target.checked,
-              )
-            }
+            checked={props.selected}
+            onChange={(ev) => {
+              if (props.setSelected) props.setSelected(ev.target.checked);
+            }}
           />
           <Form.Check.Label>
-            <FontAwesomeIcon
-              icon={faFolder}
-              color="#ffa500"
-              css={css`margin-right: 4px;`}
-            />
-            <span>{props.name}</span>
+            {icon && (
+              <FontAwesomeIcon
+                icon={icon}
+                color={props.iconColor}
+                css={css`margin-right: 4px;`}
+              />
+            )}
+            <span css={!icon && css`margin-left: ${nodeIconWidth}px;`}>
+              {props.label}
+            </span>
           </Form.Check.Label>
         </Form.Check>
-      </FlexRow>
-
-      {/* Show all children with their indentation incremented underneath */}
-      {expanded && children}
-    </>
+      ) : (
+        <div css={css`margin-left: ${checkBoxWidth + gapWidth}px;`}>
+          {icon && (
+            <FontAwesomeIcon
+              icon={icon}
+              color={props.iconColor}
+              css={css`margin-right: 4px;`}
+            />
+          )}
+          <span css={!icon && css`margin-left: ${nodeIconWidth}px;`}>
+            {props.label}
+          </span>
+        </div>
+      )}
+    </FlexRow>
   );
 }
-
-export interface FileContentsProps {
-  contents: DirEntry[];
-  enabledPaths: Set<string>;
-  expandedPaths: Set<string>;
-  setContents: React.Dispatch<React.SetStateAction<DirEntry[]>>;
-  setEnabledPaths: React.Dispatch<React.SetStateAction<Set<string>>>;
-  setExpandedPaths: React.Dispatch<React.SetStateAction<Set<string>>>;
-}
-
-const FileContentsContext = createContext({
-  enabledPaths: new Set<string>(),
-  setEnabledPath: (_path: string, _enabled: boolean) => {
-    console.log("Context not initialized");
-  },
-  expandedPaths: new Set<string>(),
-  setExpandedPath: (_path: string, _expanded: boolean) => {
-    console.log("Context not initialized");
-  },
-});
 
 /**
- * Displays the given folder contents as a nested tree with collapsable folders
- * and checkboxes to select individual files.
- * @param props Getter and setter for the folder contents.
+ * Determine if the folder's checkbox should be checked, depending on
+ * whether at least one child at any depth is enabled.
  */
-export default function FileContents(props: FileContentsProps) {
-  const setExpandedPath = (path: string, expanded: boolean) => {
-    props.setExpandedPaths((expandedPaths) => {
-      if (expanded) {
-        return new Set([...expandedPaths, path]);
-      } else {
-        return new Set(
-          [...expandedPaths].filter((thisPath) => path != thisPath),
-        );
-      }
-    });
-  };
-  const setEnabledPath = (path: string, enabled: boolean) => {
-    props.setEnabledPaths((enabledPaths) => {
-      if (enabled) {
-        return new Set([...enabledPaths, path]);
-      } else {
-        return new Set(
-          [...enabledPaths].filter((thisPath) => path != thisPath),
-        );
-      }
-    });
-  };
-  return (
-    <FileContentsContext
-      value={{
-        enabledPaths: props.enabledPaths,
-        setEnabledPath,
-        expandedPaths: props.expandedPaths,
-        setExpandedPath,
-      }}
-    >
-      <FolderComponent
-        root={true}
-        path="."
-        name="."
-        contents={props.contents}
-      />
-    </FileContentsContext>
-  );
+function isChildEnabled(entries: DirEntry[], selectedLeafNodes: Set<string>) {
+  for (const entry of entries) {
+    if (selectedLeafNodes.has(entry.path)) {
+      return true;
+    } else if (
+      entry.type === "folder" &&
+      entry.contents.length > 0 &&
+      isChildEnabled(entry.contents, selectedLeafNodes)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function flattenTree(
+  entries: DirEntry[],
+  selectedLeafNodes: Set<string>,
+  expandedNodes: Set<string>,
+  indent?: number,
+): FlattenedNode[] {
+  let result: FlattenedNode[] = [];
+  for (const entry of entries) {
+    const isBa2 = entry.type === "file" && entry.name.endsWith(".ba2");
+    const flattenedNode: FlattenedNode = {
+      key: entry.path,
+      label: entry.name,
+      icon: isBa2 ? "file-zipper" : entry.type,
+      iconColor: entry.type === "folder" ? "#ffa500" : undefined,
+      selectable: true,
+      selected:
+        entry.type === "folder" && entry.contents.length > 0
+          ? isChildEnabled(entry.contents, selectedLeafNodes)
+          : selectedLeafNodes.has(entry.path),
+      expandable: entry.type === "folder" && entry.contents.length > 0,
+      expanded: expandedNodes.has(entry.path),
+      indent: indent,
+    };
+    result.push(flattenedNode);
+    if (flattenedNode.expandable && flattenedNode.expanded) {
+      result = result.concat(
+        flattenTree(
+          (entry as Folder).contents,
+          selectedLeafNodes,
+          expandedNodes,
+          (indent || 0) + 1,
+        ),
+      );
+    }
+  }
+  return result;
+}
+
+function populateChildMap(entries: DirEntry[], map: Map<string, string[]>) {
+  for (const entry of entries) {
+    if (entry.type !== "folder" || entry.contents.length == 0) continue;
+    map.set(
+      entry.path,
+      entry.contents.map((child) => child.path),
+    );
+    populateChildMap(entry.contents, map);
+  }
+  return map;
 }

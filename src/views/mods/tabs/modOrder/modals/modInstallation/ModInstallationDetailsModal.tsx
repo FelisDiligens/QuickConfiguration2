@@ -44,7 +44,7 @@ interface Props {
 }
 
 const textFileExtensions = ["txt", "md", "rst", "html", "rtf"];
-const maxFileCountExpandedFolders = 100;
+const maxFileCountExpandedFolders = 1000;
 
 function DiagnosticIssueAlert(props: {
   issue: DiagnosticIssue;
@@ -417,9 +417,9 @@ export default function ModInstallationDetailsModal(props: Props) {
               </p>
               <FileContents
                 contents={fileContents}
+                maxHeight={400}
                 enabledPaths={enabledPaths}
                 expandedPaths={expandedPaths}
-                setContents={setFileContents}
                 setEnabledPaths={setEnabledPaths}
                 setExpandedPaths={setExpandedPaths}
               />
