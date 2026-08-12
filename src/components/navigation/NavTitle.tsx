@@ -1,6 +1,6 @@
 import { F76LogoBlack, F76LogoWhite } from "@/assets/img";
+import useTheme from "@/hooks/useTheme";
 import { useTranslation } from "react-i18next";
-import useTheme from "../../hooks/useTheme";
 import styles from "./NavTitle.styles";
 
 export default function NavTitle() {

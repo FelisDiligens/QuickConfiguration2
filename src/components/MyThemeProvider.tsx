@@ -1,7 +1,7 @@
+import useTheme from "@/hooks/useTheme";
 import { useSettingsStore } from "@/stores/settings";
 import { Global, ThemeProvider, css } from "@emotion/react";
 import { useEffect } from "react";
-import useTheme from "../hooks/useTheme";
 
 export interface AppTheme {
   titleFontFamily: string;
