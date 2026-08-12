@@ -44,6 +44,7 @@
     "@fortawesome/free-brands-svg-icons": "^7.2.0",
     "@fortawesome/free-solid-svg-icons": "^7.2.0",
     "@fortawesome/react-fontawesome": "^3.2.0",
+    "@tanstack/react-virtual": "^3.14.9",
     "@tauri-apps/api": "^2.10.1",
     "@tauri-apps/plugin-dialog": "^2.6.0",
     "@tauri-apps/plugin-http": "~2.5.7",
