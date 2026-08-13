@@ -296,24 +296,30 @@ export default function ModInstallationDetailsModal(props: Props) {
                     "mods.modOrderTab.modals.installationModal.readmeCardText",
                   )}
                 </p>
-                {readmes.map((readme) => (
-                  <Button
-                    key={readme.path}
-                    variant="secondary"
-                    onClick={() =>
-                      commands
-                        .openPathInFileExplorer(readme.path)
-                        .catch((error) => {
-                          console.error(error);
-                          setError(error);
-                        })
-                    }
-                  >
-                    <FontAwesomeIcon icon={faFileText} />
-                    &nbsp;
-                    <span>{readme.name}</span>
-                  </Button>
-                ))}
+                <FlexRow
+                  wrap
+                  gap="8px"
+                  css={css`max-height: 200px; overflow: auto;`}
+                >
+                  {readmes.map((readme) => (
+                    <Button
+                      key={readme.path}
+                      variant="secondary"
+                      onClick={() =>
+                        commands
+                          .openPathInFileExplorer(readme.path)
+                          .catch((error) => {
+                            console.error(error);
+                            setError(error);
+                          })
+                      }
+                    >
+                      <FontAwesomeIcon icon={faFileText} />
+                      &nbsp;
+                      <span>{readme.name}</span>
+                    </Button>
+                  ))}
+                </FlexRow>
               </CardBody>
             </Card>
           )}
