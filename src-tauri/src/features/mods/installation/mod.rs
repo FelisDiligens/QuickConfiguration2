@@ -187,9 +187,7 @@ pub fn create_temp_folder_from_files_or_folders<P1: AsRef<Path>, P2: AsRef<Path>
     }
 
     // Returns folder contents:
-    fs_util::list_entries(temp_path)?
-        .map(DirEntry::try_from)
-        .collect::<ModActionResult<Vec<_>>>()
+    DirEntry::folder_contents(temp_path)
 }
 
 /// Extracts archive to temporary folder. Returns folder contents.
@@ -216,9 +214,7 @@ pub fn create_temp_folder_from_archive<P: AsRef<Path>>(
     sevenzip::extract_archive(file_path.as_ref(), &temp_path)?;
 
     // Returns folder contents:
-    fs_util::list_entries(temp_path)?
-        .map(DirEntry::try_from)
-        .collect::<ModActionResult<Vec<_>>>()
+    DirEntry::folder_contents(temp_path)
 }
 
 /// Copies contents of folder to temporary folder. Returns folder contents.
@@ -245,9 +241,7 @@ pub fn create_temp_folder_from_folder_contents<P: AsRef<Path>>(
     fs_util::copy_dir_all(folder_path.as_ref(), &temp_path, fs_util::CopyMethod::Copy)?;
 
     // Returns folder contents:
-    fs_util::list_entries(temp_path)?
-        .map(DirEntry::try_from)
-        .collect::<ModActionResult<Vec<_>>>()
+    DirEntry::folder_contents(temp_path)
 }
 
 /// Deletes the temporary folder. If the folder doesn't exist, returns `Ok(())`.

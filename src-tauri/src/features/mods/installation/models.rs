@@ -1,5 +1,7 @@
+use std::cmp::Ordering;
 use std::path::{Path, PathBuf};
 
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
@@ -38,11 +40,19 @@ impl DirEntry {
             Self::Folder {
                 name,
                 contents: fs_util::list_entries(&path)?
+                    .sorted_by(cmp_paths_by_type_and_name)
                     .map(|path| DirEntry::new(&path, &relative_path))
                     .collect::<Result<Vec<_>, _>>()?,
                 path: relative_path,
             }
         })
+    }
+
+    pub fn folder_contents<P: AsRef<Path>>(path: P) -> ModActionResult<Vec<DirEntry>> {
+        fs_util::list_entries(path.as_ref())?
+            .sorted_by(cmp_paths_by_type_and_name)
+            .map(DirEntry::try_from)
+            .collect::<ModActionResult<Vec<_>>>()
     }
 }
 
@@ -51,5 +61,13 @@ impl TryFrom<PathBuf> for DirEntry {
 
     fn try_from(path: PathBuf) -> Result<Self, Self::Error> {
         DirEntry::new(path, ".")
+    }
+}
+
+fn cmp_paths_by_type_and_name(a: &PathBuf, b: &PathBuf) -> Ordering {
+    match (a.is_dir(), b.is_dir()) {
+        (true, false) => std::cmp::Ordering::Less,
+        (false, true) => std::cmp::Ordering::Greater,
+        _ => a.file_name().cmp(&b.file_name()),
     }
 }
