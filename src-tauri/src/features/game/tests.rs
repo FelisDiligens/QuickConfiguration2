@@ -4,11 +4,11 @@ use std::{fs, path::Path};
 
 use super::*;
 
-use tempdir::TempDir;
+use tempfile::TempDir;
 
 #[test]
 fn test_get_game_screenshots() {
-    let tmp_dir = TempDir::new("unittest").unwrap();
+    let tmp_dir = TempDir::new().unwrap();
     let jpg_file = Path::new("tests/fixtures/pixel.jpg");
     fs::copy(jpg_file, tmp_dir.path().join("pixel.jpg")).unwrap();
 
@@ -25,7 +25,7 @@ fn test_get_game_screenshots() {
 
 #[test]
 fn test_get_game_photos() {
-    let tmp_dir = TempDir::new("unittest").unwrap();
+    let tmp_dir = TempDir::new().unwrap();
     let photos_path = tmp_dir.path().join("Photos").join("subdir");
     fs::create_dir_all(&photos_path).unwrap();
 

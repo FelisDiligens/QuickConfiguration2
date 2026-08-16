@@ -2,7 +2,7 @@
 
 use std::{fs, path::PathBuf};
 
-use tempdir::TempDir;
+use tempfile::TempDir;
 
 use crate::features::mods::deployment::deploy_mods;
 use crate::features::mods::models::json::{
@@ -22,7 +22,7 @@ struct TestPaths {
 
 impl TestPaths {
     fn new() -> TestPaths {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         TestPaths {
             game_path: tmp_dir.path().to_path_buf(),
             game_data_path: tmp_dir.path().join("Data"),

@@ -4,7 +4,7 @@ use crate::utils::fs_util;
 
 use super::*;
 
-use tempdir::TempDir;
+use tempfile::TempDir;
 use wiremock::{
     Mock, MockServer, ResponseTemplate,
     matchers::{method, path},
@@ -12,7 +12,7 @@ use wiremock::{
 
 #[test]
 fn test_create_thumbnail_png() {
-    let tmp_dir = TempDir::new("unittest").unwrap();
+    let tmp_dir = TempDir::new().unwrap();
     let orig_file = Path::new("tests/fixtures/pixel.png").to_path_buf();
     assert!(orig_file.is_file());
 
@@ -24,7 +24,7 @@ fn test_create_thumbnail_png() {
 
 #[test]
 fn test_create_thumbnail_jpg() {
-    let tmp_dir = TempDir::new("unittest").unwrap();
+    let tmp_dir = TempDir::new().unwrap();
     let orig_file = Path::new("tests/fixtures/pixel.jpg").to_path_buf();
     assert!(orig_file.is_file());
 
@@ -46,7 +46,7 @@ async fn test_create_thumbnail_from_url() {
         .mount(&mock_server)
         .await;
 
-    let tmp_dir = TempDir::new("unittest").unwrap();
+    let tmp_dir = TempDir::new().unwrap();
 
     let thumb_file = tmp_dir.path().join("thumb.jpg");
     assert!(!thumb_file.exists());
@@ -58,7 +58,7 @@ async fn test_create_thumbnail_from_url() {
 
 #[test]
 fn test_create_thumbnail_safe() {
-    let tmp_dir = TempDir::new("unittest").unwrap();
+    let tmp_dir = TempDir::new().unwrap();
     let orig_file = Path::new("tests/fixtures/pixel.png").to_path_buf();
     assert!(orig_file.is_file());
 
@@ -75,7 +75,7 @@ fn test_create_thumbnail_safe() {
 
 #[test]
 fn test_create_thumbnail_safe_with_suffix() {
-    let tmp_dir = TempDir::new("unittest").unwrap();
+    let tmp_dir = TempDir::new().unwrap();
     let orig_file = Path::new("tests/fixtures/pixel.png").to_path_buf();
     assert!(orig_file.is_file());
 

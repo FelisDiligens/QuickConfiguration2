@@ -1,10 +1,9 @@
-use std::{
-    fmt,
-    fs::File,
-    io::{BufRead, BufReader, Write},
-    path::Path,
-};
+use std::fmt;
+use std::fs::File;
+use std::io::{BufRead, BufReader, Write};
+use std::path::Path;
 
+use quick_xml::se::EmptyElementHandling;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
 /// Deserialize an instance of type `T` from a file.
@@ -36,7 +35,7 @@ where
 }
 
 /// Pretty-formats the serializable data of type  `T` to XML with an indent of 2 spaces.
-pub fn xml_to_writer_pretty<W, T>(writer: &mut W, value: &T) -> Result<(), quick_xml::DeError>
+pub fn xml_to_writer_pretty<W, T>(writer: &mut W, value: &T) -> Result<(), quick_xml::SeError>
 where
     W: fmt::Write,
     T: ?Sized + Serialize,
@@ -45,12 +44,13 @@ where
     writeln!(writer, "<?xml version=\"1.0\" encoding=\"utf-8\"?>")?;
     let mut serializer = quick_xml::se::Serializer::new(writer);
     serializer.indent(' ', 2);
-    serializer.expand_empty_elements(true);
-    value.serialize(serializer)
+    serializer.empty_element_handling(EmptyElementHandling::SelfClosedWithSpace);
+    value.serialize(serializer)?;
+    Ok(())
 }
 
 /// Pretty-formats the serializable data of type  `T` to XML with an indent of 2 spaces.
-pub fn xml_to_string_pretty<T>(value: &T) -> Result<String, quick_xml::DeError>
+pub fn xml_to_string_pretty<T>(value: &T) -> Result<String, quick_xml::SeError>
 where
     T: ?Sized + Serialize,
 {

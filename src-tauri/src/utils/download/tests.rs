@@ -3,7 +3,7 @@
 use std::path::Path;
 
 use reqwest::Client;
-use tempdir::TempDir;
+use tempfile::TempDir;
 use tokio::fs;
 use tokio::sync::mpsc::channel;
 use wiremock::matchers::method;
@@ -16,7 +16,7 @@ use super::{DownloadProgress, download_file};
 #[tokio::test]
 pub async fn test_download_file_with_given_filename() {
     test_utils::setup_stdout_logger();
-    let tmp_dir = TempDir::new("unittest").unwrap();
+    let tmp_dir = TempDir::new().unwrap();
     let mock_server = MockServer::start().await;
     let (tx, mut rx) = channel::<DownloadProgress>(3);
 
@@ -65,7 +65,7 @@ pub async fn test_download_file_with_given_filename() {
 #[tokio::test]
 pub async fn test_download_file_with_filename_from_url() {
     test_utils::setup_stdout_logger();
-    let tmp_dir = TempDir::new("unittest").unwrap();
+    let tmp_dir = TempDir::new().unwrap();
     let mock_server = MockServer::start().await;
     let (tx, mut rx) = channel::<DownloadProgress>(3);
 
@@ -115,7 +115,7 @@ pub async fn test_download_file_with_filename_from_url() {
 #[tokio::test]
 pub async fn test_download_file_with_filename_from_content_disposition() {
     test_utils::setup_stdout_logger();
-    let tmp_dir = TempDir::new("unittest").unwrap();
+    let tmp_dir = TempDir::new().unwrap();
     let mock_server = MockServer::start().await;
     let (tx, mut rx) = channel::<DownloadProgress>(3);
 

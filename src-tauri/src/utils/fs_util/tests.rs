@@ -175,9 +175,9 @@ pub mod copy_dir_all_with_progress_tests {
 
     #[tokio::test]
     async fn test_copy_dir_all_with_progress() {
-        use tempdir::TempDir;
+        use tempfile::TempDir;
 
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let src_dir = tmp_dir.path().join("source");
         let dst_dir = tmp_dir.path().join("destination");
 

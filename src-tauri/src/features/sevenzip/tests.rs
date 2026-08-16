@@ -4,11 +4,11 @@ use std::fs;
 
 use super::*;
 
-use tempdir::TempDir;
+use tempfile::TempDir;
 
 #[test]
 fn test_extract_archive() {
-    let tmp_dir = TempDir::new("unittest").unwrap();
+    let tmp_dir = TempDir::new().unwrap();
     let zip_file = Path::new("tests/fixtures/test.zip");
     let extracted_file = tmp_dir.path().join("test.txt");
 

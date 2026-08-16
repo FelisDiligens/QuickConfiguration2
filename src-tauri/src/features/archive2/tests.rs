@@ -5,12 +5,12 @@ use std::fs;
 use super::models::{Archive2Compression, Archive2Format};
 use super::*;
 
-use tempdir::TempDir;
+use tempfile::TempDir;
 
 #[ignore = "Can take up to 15 seconds to complete with wine"]
 #[test]
 fn test_extract_archive2_general() {
-    let tmp_dir = TempDir::new("unittest").unwrap();
+    let tmp_dir = TempDir::new().unwrap();
     let ba2_file = Path::new("tests/fixtures/general_default.ba2");
     let extracted_file = tmp_dir.path().join("test.txt");
 
@@ -23,7 +23,7 @@ fn test_extract_archive2_general() {
 #[ignore = "Can take up to 15 seconds to complete with wine"]
 #[test]
 fn test_extract_archive2_dds() {
-    let tmp_dir = TempDir::new("unittest").unwrap();
+    let tmp_dir = TempDir::new().unwrap();
     let ba2_file = Path::new("tests/fixtures/dds_default.ba2");
     let extracted_file = tmp_dir.path().join("pixel.dds");
 
@@ -40,7 +40,7 @@ fn test_extract_archive2_dds() {
 #[ignore = "Can take up to 15 seconds to complete with wine"]
 #[test]
 fn test_create_archive2_general() {
-    let tmp_dir = TempDir::new("unittest").unwrap();
+    let tmp_dir = TempDir::new().unwrap();
     let source_folder = tmp_dir.path().join("folder");
     fs::create_dir(&source_folder).unwrap();
     fs::copy(
@@ -69,7 +69,7 @@ fn test_create_archive2_general() {
 #[ignore = "Can take up to 15 seconds to complete with wine"]
 #[test]
 fn test_create_archive2_dds() {
-    let tmp_dir = TempDir::new("unittest").unwrap();
+    let tmp_dir = TempDir::new().unwrap();
     let source_folder = tmp_dir.path().join("folder");
     fs::create_dir(&source_folder).unwrap();
     fs::copy(

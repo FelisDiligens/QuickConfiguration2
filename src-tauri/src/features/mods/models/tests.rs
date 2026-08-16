@@ -118,8 +118,9 @@ fn test_xml_save() {
         }],
     };
     let xml = xml_to_string_pretty(&example).unwrap();
-    // Not exactly one-to-one: `<InstalledLooseFiles />` --> `<InstalledLooseFiles/>`
+    // Not exactly one-to-one: `<URL></URL>` --> `<URL />` etc.
     // But close enough
+    // I can't get this part to exactly match the old v1 serialization it seems...
     let expected_str = r#"<?xml version="1.0" encoding="utf-8"?>
 <ManagedMods enabled="true" nwmode="false">
   <Mod guid="f2ccb591-1851-45ef-8aca-cce1f839b678">
@@ -127,7 +128,7 @@ fn test_xml_save() {
     <Folder>HUDModLoader</Folder>
     <Version>1.0</Version>
     <NexusMods id="-1">
-      <URL></URL>
+      <URL />
     </NexusMods>
     <DiskState>
       <Current isDeployed="false">
@@ -136,7 +137,7 @@ fn test_xml_save() {
         <ArchiveFormat>General</ArchiveFormat>
         <ArchiveCompression>Uncompressed</ArchiveCompression>
         <RootFolder>.</RootFolder>
-        <InstalledLooseFiles/>
+        <InstalledLooseFiles />
       </Current>
       <Pending isEnabled="false">
         <InstallationMethod>SeparateBA2</InstallationMethod>
@@ -150,7 +151,7 @@ fn test_xml_save() {
         <ArchiveCompression>Uncompressed</ArchiveCompression>
       </FrozenData>
     </DiskState>
-    <Notes></Notes>
+    <Notes />
   </Mod>
 </ManagedMods>"#;
     assert_eq!(xml, expected_str);

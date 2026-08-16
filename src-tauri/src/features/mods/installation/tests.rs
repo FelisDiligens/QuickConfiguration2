@@ -5,7 +5,7 @@ pub use super::*;
 pub mod install_tests {
     use std::{fs, path::Path};
 
-    use tempdir::TempDir;
+    use tempfile::TempDir;
 
     use crate::features::mods::models::json::{ManagedMod, ManagedMods, ModInstallationOptions};
     use crate::utils::test_utils;
@@ -15,7 +15,7 @@ pub mod install_tests {
     #[test]
     fn test_install_from_temp_folder() {
         test_utils::setup_stdout_logger();
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let destination_file = tmp_dir.path().join("modfolder").join("test.txt");
 
         // Create test fixtures in temporary folder:
@@ -57,7 +57,7 @@ pub mod install_tests {
     #[test]
     fn test_install_from_existing_archives() {
         test_utils::setup_stdout_logger();
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let game_path = tmp_dir.as_ref().to_path_buf();
         let game_data_path = game_path.join("Data");
         let mods_path = game_path.join("Mods");
@@ -108,7 +108,7 @@ pub mod install_tests {
 pub mod create_temp_folder_tests {
     use std::{fs, path::Path};
 
-    use tempdir::TempDir;
+    use tempfile::TempDir;
 
     use crate::utils::test_utils;
 
@@ -116,7 +116,7 @@ pub mod create_temp_folder_tests {
 
     #[test]
     fn test_create_temp_folder_from_file_success() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let example_file = Path::new("tests/fixtures/test.txt");
         let destination_file = tmp_dir.path().join("_tmp").join("test.txt");
 
@@ -133,7 +133,7 @@ pub mod create_temp_folder_tests {
 
     #[test]
     fn test_create_temp_folder_from_file_failure() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let non_existant_file = Path::new("this_file_should_not_exist.txt");
 
         assert!(!non_existant_file.exists());
@@ -143,7 +143,7 @@ pub mod create_temp_folder_tests {
 
     #[test]
     fn test_create_temp_folder_from_archive_success() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let example_file = Path::new("tests/fixtures/test.zip");
         let destination_file = tmp_dir.path().join("_tmp").join("test.txt");
 
@@ -160,7 +160,7 @@ pub mod create_temp_folder_tests {
 
     #[test]
     fn test_create_temp_folder_from_file_or_archive_with_txt_success() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let example_file = Path::new("tests/fixtures/test.txt");
         let destination_file = tmp_dir.path().join("_tmp").join("test.txt");
 
@@ -177,7 +177,7 @@ pub mod create_temp_folder_tests {
 
     #[test]
     fn test_create_temp_folder_from_file_or_archive_with_zip_success() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let example_file = Path::new("tests/fixtures/test.zip");
         let destination_file = tmp_dir.path().join("_tmp").join("test.txt");
 
@@ -194,7 +194,7 @@ pub mod create_temp_folder_tests {
 
     #[test]
     fn test_create_temp_folder_from_folder_success() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let example_file = Path::new("tests/fixtures/test.txt");
         let source_folder = tmp_dir.path().join("folder");
         let source_file = source_folder.join("test.txt");
@@ -218,7 +218,7 @@ pub mod create_temp_folder_tests {
 
     #[test]
     fn test_create_temp_folder_from_folder_failure() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let non_existant_folder = Path::new("this_folder_should_not_exist");
 
         assert!(!non_existant_folder.exists());
@@ -229,7 +229,7 @@ pub mod create_temp_folder_tests {
     #[test]
     fn test_create_temp_folder_from_multiple_files_and_folders_success() {
         test_utils::setup_stdout_logger();
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let example_file = Path::new("tests/fixtures/test.txt");
 
         let source_folder = tmp_dir.path().join("src");
@@ -294,13 +294,13 @@ pub mod create_temp_folder_tests {
 pub mod detect_root_folder_tests {
     use std::fs;
 
-    use tempdir::TempDir;
+    use tempfile::TempDir;
 
     pub use super::*;
 
     #[test]
     fn test_detect_root_folder_dlls() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let mod_path = tmp_dir.path();
 
         fs_util::write_to_file(mod_path.join("file.dll"), "").unwrap();
@@ -311,7 +311,7 @@ pub mod detect_root_folder_tests {
 
     #[test]
     fn test_detect_root_folder_ba2_in_root() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let mod_path = tmp_dir.path();
 
         fs_util::write_to_file(mod_path.join("file.ba2"), "").unwrap();
@@ -322,7 +322,7 @@ pub mod detect_root_folder_tests {
 
     #[test]
     fn test_detect_root_folder_ba2_in_data() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let mod_path = tmp_dir.path();
 
         fs::create_dir_all(mod_path.join("Data")).unwrap();
@@ -334,7 +334,7 @@ pub mod detect_root_folder_tests {
 
     #[test]
     fn test_detect_root_folder_strings_in_root() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let mod_path = tmp_dir.path();
 
         fs_util::write_to_file(mod_path.join("file.dlstrings"), "").unwrap();
@@ -345,7 +345,7 @@ pub mod detect_root_folder_tests {
 
     #[test]
     fn test_detect_root_folder_strings_in_strings() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let mod_path = tmp_dir.path();
 
         fs::create_dir_all(mod_path.join("Strings")).unwrap();
@@ -357,7 +357,7 @@ pub mod detect_root_folder_tests {
 
     #[test]
     fn test_detect_root_folder_strings_in_data_strings() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let mod_path = tmp_dir.path();
 
         fs::create_dir_all(mod_path.join("Data").join("Strings")).unwrap();
@@ -373,13 +373,13 @@ pub mod detect_root_folder_tests {
 }
 
 pub mod diagnose_issues_tests {
-    use tempdir::TempDir;
+    use tempfile::TempDir;
 
     pub use super::*;
 
     #[test]
     fn test_diagnose_issues_empty_folder() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let game_path = tmp_dir.path();
         let mod_path = game_path.join("Mods").join("Mod folder");
         let mod_details = ManagedMod::default();
@@ -393,7 +393,7 @@ pub mod diagnose_issues_tests {
 
     #[test]
     fn test_diagnose_issues_no_mod_files() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let game_path = tmp_dir.path();
         let mod_path = game_path.join("Mods").join("Mod folder");
         let mod_details = ManagedMod::default();
@@ -411,7 +411,7 @@ pub mod diagnose_issues_tests {
 
     #[test]
     fn test_diagnose_issues_wrong_folder_for_archives_1() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let game_path = tmp_dir.path();
         let mod_path = game_path.join("Mods").join("Mod folder");
         let mut mod_details = ManagedMod::default();
@@ -430,7 +430,7 @@ pub mod diagnose_issues_tests {
 
     #[test]
     fn test_diagnose_issues_wrong_folder_for_archives_2() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let game_path = tmp_dir.path();
         let mod_path = game_path.join("Mods").join("Mod folder");
         let mut mod_details = ManagedMod::default();
@@ -450,7 +450,7 @@ pub mod diagnose_issues_tests {
 
     #[test]
     fn test_diagnose_issues_wrong_folder_for_strings_1() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let game_path = tmp_dir.path();
         let mod_path = game_path.join("Mods").join("Mod folder");
         let mut mod_details = ManagedMod::default();
@@ -471,7 +471,7 @@ pub mod diagnose_issues_tests {
 
     #[test]
     fn test_diagnose_issues_wrong_folder_for_strings_2() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let game_path = tmp_dir.path();
         let mod_path = game_path.join("Mods").join("Mod folder");
         let mut mod_details = ManagedMod::default();
@@ -493,7 +493,7 @@ pub mod diagnose_issues_tests {
 
     #[test]
     fn test_diagnose_issues_wrong_folder_for_dlls_1() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let game_path = tmp_dir.path();
         let mod_path = game_path.join("Mods").join("Mod folder");
         let mut mod_details = ManagedMod::default();
@@ -512,7 +512,7 @@ pub mod diagnose_issues_tests {
 
     #[test]
     fn test_diagnose_issues_multiple_ba2_roots() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let game_path = tmp_dir.path();
         let mod_path = game_path.join("Mods").join("Mod folder");
         let mod_details = ManagedMod::default();
@@ -534,7 +534,7 @@ pub mod diagnose_issues_tests {
 
     #[test]
     fn test_diagnose_issues_unpacked_files() {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         let game_path = tmp_dir.path();
         let mod_path = game_path.join("Mods").join("Mod folder");
         let mod_details = ManagedMod::default();

@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 
 use indoc::indoc;
 use ini::Ini;
-use tempdir::TempDir;
+use tempfile::TempDir;
 
 use crate::features::mods::{get_mods_temp_path, load_mods};
 use crate::utils::{fs_util, test_utils};
@@ -21,7 +21,7 @@ struct TestPaths {
 
 impl TestPaths {
     fn new() -> TestPaths {
-        let tmp_dir = TempDir::new("unittest").unwrap();
+        let tmp_dir = TempDir::new().unwrap();
         TestPaths {
             game_path: tmp_dir.path().to_path_buf(),
             game_data_path: tmp_dir.path().join("Data"),

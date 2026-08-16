@@ -1,6 +1,6 @@
 use std::fs;
 
-use tempdir::TempDir;
+use tempfile::TempDir;
 
 use crate::features::mods::models::json::{ManagedMod, ModInstallationOptions};
 use crate::features::mods::utils::get_conflicting_files;
@@ -8,7 +8,7 @@ use crate::utils::fs_util;
 
 #[test]
 fn test_get_conflicting_files() {
-    let temp_dir = TempDir::new("f76qc_test").expect("Failed to create temp dir");
+    let temp_dir = TempDir::new().expect("Failed to create temp dir");
     let mods_path = temp_dir.path();
 
     // Create mod folders
