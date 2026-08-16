@@ -7,6 +7,7 @@ pub mod install_tests {
 
     use tempfile::TempDir;
 
+    use crate::features::mods::errors::ModActionError;
     use crate::features::mods::models::json::{ManagedMod, ManagedMods, ModInstallationOptions};
     use crate::utils::test_utils;
 
@@ -52,6 +53,278 @@ pub mod install_tests {
         assert_eq!(fs::read_to_string(destination_file).unwrap(), "test");
         assert_eq!(mods.mods.len(), 1);
         assert_eq!(mods.mods[0].folder_name, "modfolder");
+    }
+
+    #[test]
+    fn test_install_from_temp_folder_reinstall_same_key() {
+        test_utils::setup_stdout_logger();
+        let tmp_dir = TempDir::new().unwrap();
+        let mod_folder = tmp_dir.path().join("modfolder");
+        let destination_file = mod_folder.join("test.txt");
+
+        // Create test fixtures in temporary folder:
+        fs::create_dir(tmp_dir.path().join("_tmp")).unwrap();
+        fs::copy(
+            Path::new("tests/fixtures/test.txt"),
+            tmp_dir.path().join("_tmp").join("test.txt").as_path(),
+        )
+        .unwrap();
+
+        // First install:
+        let mut mods = ManagedMods::default();
+        let mod_key = uuid::Uuid::new_v4().to_string();
+        let result = mods
+            .install_from_temp_folder(
+                tmp_dir.path(),
+                ManagedMod {
+                    key: mod_key.clone(),
+                    title: "Original Mod".to_string(),
+                    folder_name: "modfolder".to_string(),
+                    version: "1.0".to_string(),
+                    url: "".to_string(),
+                    notes: "".to_string(),
+                    enabled: true,
+                    options: ModInstallationOptions {
+                        root_folder: ".".to_string(),
+                    },
+                },
+                vec!["./test.txt"],
+            )
+            .unwrap();
+
+        assert!(destination_file.is_file());
+        assert_eq!(fs::read_to_string(&destination_file).unwrap(), "test");
+        assert_eq!(mods.mods.len(), 1);
+        assert_eq!(mods.mods[0].key, mod_key);
+        assert_eq!(mods.mods[0].title, "Original Mod");
+        assert_eq!(mods.mods[0].version, "1.0");
+        assert!(matches!(result.1, ModInstallationResult::Added));
+
+        // Add a state so we can test that it gets marked as outdated on reinstall
+        use crate::features::mods::models::json::ModInstallationState;
+        mods.state.push(ModInstallationState {
+            key: mod_key.clone(),
+            root_folder: ".".to_string(),
+            files: vec!["./test.txt".to_string()],
+            outdated: false,
+        });
+
+        // Reinstall with same key - should update the mod
+        // Need to recreate the _tmp folder since it was deleted by the first install
+        fs::create_dir(tmp_dir.path().join("_tmp")).unwrap();
+        fs::copy(
+            Path::new("tests/fixtures/test.txt"),
+            tmp_dir.path().join("_tmp").join("test.txt").as_path(),
+        )
+        .unwrap();
+
+        let result = mods
+            .install_from_temp_folder(
+                tmp_dir.path(),
+                ManagedMod {
+                    key: mod_key.clone(),
+                    title: "Updated Mod".to_string(),
+                    folder_name: "modfolder".to_string(),
+                    version: "2.0".to_string(),
+                    url: "".to_string(),
+                    notes: "".to_string(),
+                    enabled: true,
+                    options: ModInstallationOptions {
+                        root_folder: ".".to_string(),
+                    },
+                },
+                vec!["./test.txt"],
+            )
+            .unwrap();
+
+        assert!(destination_file.is_file());
+        assert_eq!(fs::read_to_string(&destination_file).unwrap(), "test");
+        assert_eq!(mods.mods.len(), 1);
+        assert_eq!(mods.mods[0].key, mod_key);
+        assert_eq!(mods.mods[0].title, "Updated Mod");
+        assert_eq!(mods.mods[0].version, "2.0");
+        assert!(matches!(result.1, ModInstallationResult::Updated));
+
+        // Check that state is marked as outdated
+        assert_eq!(mods.state.len(), 1);
+        assert!(mods.state[0].outdated);
+    }
+
+    #[test]
+    fn test_install_from_temp_folder_reinstall_different_folder_name_fails() {
+        test_utils::setup_stdout_logger();
+        let tmp_dir = TempDir::new().unwrap();
+
+        // Create test fixtures in temporary folder:
+        fs::create_dir(tmp_dir.path().join("_tmp")).unwrap();
+        fs::copy(
+            Path::new("tests/fixtures/test.txt"),
+            tmp_dir.path().join("_tmp").join("test.txt").as_path(),
+        )
+        .unwrap();
+
+        // First install:
+        let mut mods = ManagedMods::default();
+        let mod_key = uuid::Uuid::new_v4().to_string();
+        mods.install_from_temp_folder(
+            tmp_dir.path(),
+            ManagedMod {
+                key: mod_key.clone(),
+                title: "Mod".to_string(),
+                folder_name: "modfolder".to_string(),
+                version: "1.0".to_string(),
+                url: "".to_string(),
+                notes: "".to_string(),
+                enabled: true,
+                options: ModInstallationOptions {
+                    root_folder: ".".to_string(),
+                },
+            },
+            vec!["./test.txt"],
+        )
+        .unwrap();
+
+        // Try to reinstall with different folder name - should fail
+        let result = mods.install_from_temp_folder(
+            tmp_dir.path(),
+            ManagedMod {
+                key: mod_key.clone(),
+                title: "Mod".to_string(),
+                folder_name: "different_folder".to_string(),
+                version: "2.0".to_string(),
+                url: "".to_string(),
+                notes: "".to_string(),
+                enabled: true,
+                options: ModInstallationOptions {
+                    root_folder: ".".to_string(),
+                },
+            },
+            vec!["./test.txt"],
+        );
+
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            ModActionError::InvalidFolderName(_)
+        ));
+    }
+
+    #[test]
+    fn test_install_from_temp_folder_folder_already_exists() {
+        test_utils::setup_stdout_logger();
+        let tmp_dir = TempDir::new().unwrap();
+        let mod_folder = tmp_dir.path().join("modfolder");
+
+        // Create the mod folder beforehand to simulate it already existing
+        fs::create_dir(&mod_folder).unwrap();
+
+        // Create test fixtures in temporary folder:
+        fs::create_dir(tmp_dir.path().join("_tmp")).unwrap();
+        fs::copy(
+            Path::new("tests/fixtures/test.txt"),
+            tmp_dir.path().join("_tmp").join("test.txt").as_path(),
+        )
+        .unwrap();
+
+        // Try to install a mod with a folder that already exists (not a reinstall)
+        let mut mods = ManagedMods::default();
+        let result = mods.install_from_temp_folder(
+            tmp_dir.path(),
+            ManagedMod {
+                key: "new-mod-key".to_string(),
+                title: "New Mod".to_string(),
+                folder_name: "modfolder".to_string(),
+                version: "1.0".to_string(),
+                url: "".to_string(),
+                notes: "".to_string(),
+                enabled: true,
+                options: ModInstallationOptions {
+                    root_folder: ".".to_string(),
+                },
+            },
+            vec!["./test.txt"],
+        );
+
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            ModActionError::FolderAlreadyExists(_)
+        ));
+    }
+
+    #[test]
+    fn test_install_from_temp_folder_reinstall_with_different_files() {
+        test_utils::setup_stdout_logger();
+        let tmp_dir = TempDir::new().unwrap();
+        let mod_folder = tmp_dir.path().join("modfolder");
+        let old_file = mod_folder.join(".").join("test.txt");
+        let new_file = mod_folder.join(".").join("test2.txt");
+
+        // Create test fixtures in temporary folder:
+        fs::create_dir(tmp_dir.path().join("_tmp")).unwrap();
+        fs::copy(
+            Path::new("tests/fixtures/test.txt"),
+            tmp_dir.path().join("_tmp").join("test.txt").as_path(),
+        )
+        .unwrap();
+
+        // First install with test.txt:
+        let mut mods = ManagedMods::default();
+        let mod_key = uuid::Uuid::new_v4().to_string();
+        mods.install_from_temp_folder(
+            tmp_dir.path(),
+            ManagedMod {
+                key: mod_key.clone(),
+                title: "Mod".to_string(),
+                folder_name: "modfolder".to_string(),
+                version: "1.0".to_string(),
+                url: "".to_string(),
+                notes: "".to_string(),
+                enabled: true,
+                options: ModInstallationOptions {
+                    root_folder: ".".to_string(),
+                },
+            },
+            vec!["./test.txt"],
+        )
+        .unwrap();
+
+        assert!(old_file.is_file());
+        assert!(!new_file.exists());
+
+        // Reinstall with different file - should replace the old file with new file
+        // Need to recreate the _tmp folder since it was deleted by the first install
+        fs::create_dir(tmp_dir.path().join("_tmp")).unwrap();
+        fs::copy(
+            Path::new("tests/fixtures/test.txt"),
+            tmp_dir.path().join("_tmp").join("test2.txt").as_path(),
+        )
+        .unwrap();
+
+        mods.install_from_temp_folder(
+            tmp_dir.path(),
+            ManagedMod {
+                key: mod_key.clone(),
+                title: "Updated Mod".to_string(),
+                folder_name: "modfolder".to_string(),
+                version: "2.0".to_string(),
+                url: "".to_string(),
+                notes: "".to_string(),
+                enabled: true,
+                options: ModInstallationOptions {
+                    root_folder: ".".to_string(),
+                },
+            },
+            vec!["./test2.txt"],
+        )
+        .unwrap();
+
+        assert!(!old_file.exists());
+        assert!(new_file.is_file());
+        assert_eq!(fs::read_to_string(&new_file).unwrap(), "test");
+        assert_eq!(mods.mods.len(), 1);
+        assert_eq!(mods.mods[0].title, "Updated Mod");
+        assert_eq!(mods.mods[0].version, "2.0");
     }
 
     #[test]

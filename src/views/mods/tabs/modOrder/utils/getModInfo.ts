@@ -5,7 +5,7 @@ import { ManagedMod, NexusModsModInfo } from "@/commands/bindings";
  * @param url The url to the mod page. Example: "https://www.nexusmods.com/fallout76/mods/546?tab=files"
  * @returns The mod ID. Example: 546
  */
-function getModIdFromUrl(url: string): number | undefined {
+export function getModIdFromUrl(url: string): number | undefined {
   if (!url || !url.includes("www.nexusmods.com/") || !url.includes("/mods/")) {
     return undefined;
   }

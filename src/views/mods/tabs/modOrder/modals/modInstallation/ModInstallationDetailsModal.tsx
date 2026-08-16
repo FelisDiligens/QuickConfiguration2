@@ -8,8 +8,10 @@ import { AnyError, commandErrorToString } from "@/commands/errors";
 import Mods from "@/commands/mods";
 import Entry from "@/components/common/Entry";
 import { FlexCol, FlexRow } from "@/components/common/Flex";
+import Select from "@/components/common/Select";
 import { AppTheme } from "@/components/MyThemeProvider";
 import { useAsync } from "@/hooks/async";
+import { useModsStore } from "@/stores/mods";
 import { useProfilesStore } from "@/stores/profiles";
 import { pathJoinSync } from "@/utils";
 import { css } from "@emotion/react";
@@ -33,6 +35,7 @@ import {
   Modal,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
+import { getModIdFromUrl } from "../../utils/getModInfo";
 import FileContents from "./FileContents";
 
 interface Props {
@@ -40,6 +43,7 @@ interface Props {
   onInstall: (mod: ManagedMod, paths: string[]) => void;
   onAbort: () => void;
   mod: ManagedMod;
+  updateModKey?: string;
   fileContents: DirEntry[];
 }
 
@@ -110,8 +114,13 @@ function DiagnosticIssueAlert(props: {
 
 export default function ModInstallationDetailsModal(props: Props) {
   const { t } = useTranslation();
+  const mods = useModsStore((store) => store.mods);
+  const getMod = useModsStore((store) => store.getMod);
   const tmpPath = useProfilesStore.getState().getModsTmpPath();
   const [mod, setMod] = useState(props.mod);
+  const [updateModKey, setUpdateModKey] = useState(
+    props.updateModKey ?? "none",
+  );
   const [fileContents, setFileContents] = useState(props.fileContents);
   const [expandedPaths, setExpandedPaths] = useState(new Set<string>());
   const [enabledPaths, setEnabledPaths] = useState(new Set<string>());
@@ -226,7 +235,7 @@ export default function ModInstallationDetailsModal(props: Props) {
       console.error(error);
       setError(error);
     },
-    watch: [mod, tmpPath],
+    watch: [mod.options.rootFolder, tmpPath],
     enabled: props.show,
   });
 
@@ -234,6 +243,7 @@ export default function ModInstallationDetailsModal(props: Props) {
   useEffect(() => {
     const filePaths = getFilePaths(props.fileContents);
     setMod(props.mod);
+    setUpdateModKey(props.updateModKey ?? "none");
     setFileContents(props.fileContents);
     setEnabledPaths(new Set(filePaths));
     if (filePaths.length <= maxFileCountExpandedFolders)
@@ -250,12 +260,44 @@ export default function ModInstallationDetailsModal(props: Props) {
           console.error(error);
           setError(error);
         });
-  }, [props.mod, props.fileContents]);
+  }, [props.mod, props.updateModKey, props.fileContents]);
+
+  // Update mod details if `updateModKey` changes:
+  useEffect(() => {
+    const updateMod =
+      updateModKey === "none" ? props.mod : getMod(updateModKey);
+    if (!updateMod) return;
+    setMod((mod) => ({
+      ...mod,
+      key: updateMod.key,
+      title: updateMod.title,
+      version:
+        updateModKey === "none"
+          ? updateMod.version
+          : mod.version || updateMod.version,
+      url: updateMod.url,
+      folderName: updateMod.folderName,
+      enabled: updateMod.enabled,
+      options: {
+        ...mod.options,
+        rootFolder: updateMod.options.rootFolder,
+      },
+    }));
+  }, [updateModKey]);
 
   const readmes = useMemo(() => {
     const tmpPath = useProfilesStore.getState().getModsTmpPath();
     return tmpPath ? getReadmes(tmpPath, fileContents) : [];
   }, [useProfilesStore, fileContents]);
+
+  const modId = useMemo(() => getModIdFromUrl(mod.url), [mod.url]);
+  const matchingMods = useMemo(
+    () =>
+      modId != undefined
+        ? mods.filter((currMod) => getModIdFromUrl(currMod.url) === modId)
+        : [],
+    [mods, modId],
+  );
 
   return (
     <Modal
@@ -328,6 +370,59 @@ export default function ModInstallationDetailsModal(props: Props) {
           ))}
           <Card>
             <CardHeader>
+              {t("mods.modOrderTab.modals.installationModal.updateGroup")}
+            </CardHeader>
+            <CardBody>
+              <Select
+                value={updateModKey}
+                onChange={setUpdateModKey}
+                style={{
+                  fontStyle: updateModKey === "none" ? "italic" : undefined,
+                }}
+                label={t("mods.modOrderTab.modals.installationModal.mod", {
+                  count: 1,
+                })}
+              >
+                <option value="none">
+                  {t("mods.modOrderTab.modals.installationModal.newMod")}
+                </option>
+                {matchingMods.length > 0 && (
+                  <optgroup
+                    label={t(
+                      "mods.modOrderTab.modals.installationModal.matchingMod",
+                      {
+                        count: matchingMods.length,
+                      },
+                    )}
+                  >
+                    {matchingMods.map((mod) => (
+                      <option key={mod.key} value={mod.key}>
+                        {mod.title}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {mods.length > 0 && (
+                  <optgroup
+                    label={t(
+                      "mods.modOrderTab.modals.installationModal.allMods",
+                      {
+                        count: mods.length,
+                      },
+                    )}
+                  >
+                    {mods.map((mod) => (
+                      <option key={mod.key} value={mod.key}>
+                        {mod.title}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+              </Select>
+            </CardBody>
+          </Card>
+          <Card>
+            <CardHeader>
               {t("mods.modOrderTab.modals.installationModal.detailsGroup")}
             </CardHeader>
             <CardBody>
@@ -387,6 +482,7 @@ export default function ModInstallationDetailsModal(props: Props) {
                   onChange={(folderName) =>
                     setMod((mod) => ({ ...mod, folderName }))
                   }
+                  disabled={updateModKey !== "none"}
                 />
               </FlexCol>
             </CardBody>

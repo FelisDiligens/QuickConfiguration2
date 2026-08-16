@@ -8,6 +8,12 @@ use specta::Type;
 use crate::features::mods::errors::{ModActionError, ModActionResult};
 use crate::utils::fs_util;
 
+#[derive(Debug)]
+pub enum ModInstallationResult {
+    Added,
+    Updated,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Type)]
 #[serde(rename_all = "lowercase", tag = "type")]
 pub enum DirEntry {

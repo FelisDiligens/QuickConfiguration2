@@ -98,6 +98,30 @@ impl ManagedMods {
             .position(|r#mod| r#mod.key == key.as_ref())
             .map(|index| self.mods.remove(index))
     }
+
+    /// Replaces mod with key in the list while preserving the index.
+    pub fn replace_mod<S: AsRef<str>>(
+        &mut self,
+        key: S,
+        replacement: ManagedMod,
+    ) -> Option<ManagedMod> {
+        self.mods
+            .iter()
+            .position(|r#mod| r#mod.key == key.as_ref())
+            .map(|index| std::mem::replace(&mut self.mods[index], replacement))
+    }
+
+    /// Replaces state of mod with key in the list while preserving the index.
+    pub fn replace_mod_state<S: AsRef<str>>(
+        &mut self,
+        key: S,
+        replacement: ModInstallationState,
+    ) -> Option<ModInstallationState> {
+        self.state
+            .iter()
+            .position(|state| state.key == key.as_ref())
+            .map(|index| std::mem::replace(&mut self.state[index], replacement))
+    }
 }
 
 impl Default for ManagedMods {

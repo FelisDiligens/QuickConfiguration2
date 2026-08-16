@@ -7,7 +7,7 @@ use crate::commands::errors::{CommandError, CommandResult};
 use crate::commands::mods::ModsStateUpdate;
 use crate::features::mods;
 use crate::features::mods::errors::ModActionResult;
-use crate::features::mods::installation::DirEntry;
+use crate::features::mods::installation::{DirEntry, ModInstallationResult};
 use crate::features::mods::models::json::{ManagedMod, ManagedMods};
 use crate::utils::fs_util;
 
@@ -126,7 +126,7 @@ pub async fn mods_install_from_temp_folder(
 ) -> CommandResult<ModsStateUpdate> {
     log::trace!("Called command {}", function_name!());
     spawn_blocking(move || {
-        let mod_details = mods
+        let (mod_details, result) = mods
             .install_from_temp_folder(&mods_path, mod_details, selected_relative_paths)
             .tap_err(|e| log::error!("Couldn't install mod from temp folder: {e}"))?;
 
@@ -139,7 +139,10 @@ pub async fn mods_install_from_temp_folder(
 
         mods::save_mods(mods_path, &mods)
             .tap_err(|e| log::error!("Couldn't save mods metadata: {e}"))?;
-        Ok(ModsStateUpdate::AppendedMod(mod_details))
+        match result {
+            ModInstallationResult::Added => Ok(ModsStateUpdate::AppendedMod(mod_details)),
+            ModInstallationResult::Updated => Ok(ModsStateUpdate::UpdatedAll(mods)),
+        }
     })
     .await
     .tap_err(|e| log::error!("Couldn't join handle in {}: {}", function_name!(), e))

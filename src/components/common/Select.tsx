@@ -12,6 +12,7 @@ interface Props {
   children?: React.ReactNode;
   className?: string;
   css?: SerializedStyles;
+  style?: React.CSSProperties;
 }
 
 export default function Select(props: Props) {
@@ -25,6 +26,7 @@ export default function Select(props: Props) {
       isInvalid={props.isInvalid}
       disabled={props.disabled}
       className={props.className}
+      style={props.style}
     >
       {props.children}
     </Form.Select>

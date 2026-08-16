@@ -26,15 +26,36 @@ impl ManagedMods {
         mods_path: P1,
         r#mod: ManagedMod,
         selected_relative_paths: Vec<P2>,
-    ) -> ModActionResult<ManagedMod> {
+    ) -> ModActionResult<(ManagedMod, ModInstallationResult)> {
+        let existing_mod = self.get_mod(&r#mod.key);
+        if let Some(existing_mod) = existing_mod {
+            log::trace!(
+                "Found existing mod with identical key {}, assuming reinstallation/update.",
+                r#mod.key
+            );
+            if existing_mod.folder_name != r#mod.folder_name {
+                log::error!("Folder names between new and old version of mod do not match");
+                return Err(ModActionError::InvalidFolderName(
+                    "Folder names between new and old version of mod do not match".to_string(),
+                ));
+            }
+        }
+
         let folder_path = mods_path.as_ref().join(&r#mod.folder_name);
         if folder_path.exists() {
-            log::error!(
-                "Error in install_from_temp_folder: Folder {folder_path:?} already exists! Aborting",
-            );
-            return Err(ModActionError::FolderAlreadyExists(
-                folder_path.to_string_lossy().into_owned(),
-            ));
+            if let Some(existing_mod) = existing_mod
+                && existing_mod.folder_name == r#mod.folder_name
+            {
+                log::trace!("Folder {folder_path:?} already exists, deleting contents.");
+                fs::remove_dir_all(&folder_path)?;
+            } else {
+                log::error!(
+                    "Error in install_from_temp_folder: Folder {folder_path:?} already exists! Aborting",
+                );
+                return Err(ModActionError::FolderAlreadyExists(
+                    folder_path.to_string_lossy().into_owned(),
+                ));
+            }
         }
         fs::create_dir(&folder_path)?;
 
@@ -53,10 +74,33 @@ impl ManagedMods {
             fs_util::move_file(&source_path, &destination_path)?;
         }
 
-        self.mods.push(r#mod.clone());
+        let updated;
+        if existing_mod.is_some() && self.replace_mod(&r#mod.key, r#mod.clone()).is_some() {
+            log::trace!("Replaced mod details by key {}", r#mod.key);
+            updated = true;
+        } else {
+            self.mods.push(r#mod.clone());
+            log::trace!("Added mod details with key {}", r#mod.key);
+            updated = false;
+        }
+
+        if updated && let Some(state) = self.get_mod_state(&r#mod.key) {
+            let mut state = state.clone();
+            state.outdated = true;
+            if self.replace_mod_state(&r#mod.key, state).is_some() {
+                log::trace!("Updated mod installation state to flag it as outdated");
+            }
+        }
 
         delete_temp_folder(mods_path)?;
-        Ok(r#mod)
+        Ok((
+            r#mod,
+            if updated {
+                ModInstallationResult::Updated
+            } else {
+                ModInstallationResult::Added
+            },
+        ))
     }
 
     /// Installs the mod with the given details and the given archives from the Data folder.
