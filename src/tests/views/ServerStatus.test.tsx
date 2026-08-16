@@ -26,26 +26,24 @@ vi.mock("@/hooks/useTheme", () => ({
   default: vi.fn(() => Promise.resolve("light")),
 }));
 
-beforeAll(() => {
-  // Mock Zustand store:
-  vi.mock("@/stores/settings", () => ({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    useSettingsStore: (fn: any) =>
-      fn({
-        language: "en",
-        theme: "light",
-      }),
-  }));
+// Mock Zustand store:
+vi.mock("@/stores/settings", () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  useSettingsStore: (fn: any) =>
+    fn({
+      language: "en",
+      theme: "light",
+    }),
+}));
 
-  // Mock status API:
-  vi.mock("@/api/bethesdaServerStatus", async (importOriginal) => {
-    const actual =
-      await importOriginal<typeof import("@/api/bethesdaServerStatus")>();
-    return {
-      Status: actual.Status,
-      fetchLocalizedServerStatus: vi.fn(),
-    };
-  });
+// Mock status API:
+vi.mock("@/api/bethesdaServerStatus", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/api/bethesdaServerStatus")>();
+  return {
+    Status: actual.Status,
+    fetchLocalizedServerStatus: vi.fn(),
+  };
 });
 
 beforeEach(() => {

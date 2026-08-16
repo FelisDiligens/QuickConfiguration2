@@ -1,19 +1,20 @@
 import eslint from "@eslint/js";
 import { Linter } from "eslint";
+// import { createTypeScriptImportResolver } from "eslint-import-resolver-typescript";
 import i18next from "eslint-plugin-i18next";
-import importPlugin from "eslint-plugin-import";
+// import { importX as importPlugin } from "eslint-plugin-import-x";
 import reactPlugin from "eslint-plugin-react";
-import { globalIgnores } from "eslint/config";
+import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
 
-export default tseslint.config(
+export default defineConfig(
   eslint.configs.recommended,
   tseslint.configs.strict,
   tseslint.configs.stylistic,
   reactPlugin.configs.flat.recommended,
   reactPlugin.configs.flat["jsx-runtime"],
-  importPlugin.flatConfigs.recommended,
-  importPlugin.flatConfigs.typescript,
+  // importPlugin.flatConfigs.recommended, // TODO: Broken, can't resolve aliases
+  // importPlugin.flatConfigs.typescript, // TODO: Broken, can't resolve aliases
   i18next.configs["flat/recommended"] as Linter.Config, // https://github.com/edvardchen/eslint-plugin-i18next/issues/142
   {
     plugins: {
@@ -54,7 +55,6 @@ export default tseslint.config(
         { considerDefaultExhaustiveForUnions: true },
       ],
       "no-warning-comments": "warn",
-      "import/no-unresolved": "error",
       "i18next/no-literal-string": [
         "warn",
         {
@@ -81,9 +81,13 @@ export default tseslint.config(
   },
   {
     settings: {
-      "import/resolver": {
-        typescript: true,
-      },
+      // TODO: Broken, can't resolve aliases
+      // "import-x/resolver-next": [
+      //   createTypeScriptImportResolver({
+      //     alwaysTryTypes: true,
+      //     project: ["./tsconfig.json"],
+      //   }),
+      // ],
       react: {
         version: "detect",
       },
