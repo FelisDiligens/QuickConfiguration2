@@ -1,6 +1,6 @@
 import { useTranslationsStore } from "@/lib/i18n/store";
 import LoadingScreen from "@/views/loading/LoadingScreen";
-import React from "react";
+import * as React from "react";
 
 interface Props {
   children?: React.ReactNode;

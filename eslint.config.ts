@@ -1,10 +1,11 @@
 import eslint from "@eslint/js";
 import { Linter } from "eslint";
-// import { createTypeScriptImportResolver } from "eslint-import-resolver-typescript";
+import { createTypeScriptImportResolver } from "eslint-import-resolver-typescript";
 import i18next from "eslint-plugin-i18next";
-// import { importX as importPlugin } from "eslint-plugin-import-x";
+import { importX as importPlugin } from "eslint-plugin-import-x";
 import reactPlugin from "eslint-plugin-react";
 import { defineConfig, globalIgnores } from "eslint/config";
+import path from "path";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
@@ -13,8 +14,8 @@ export default defineConfig(
   tseslint.configs.stylistic,
   reactPlugin.configs.flat.recommended,
   reactPlugin.configs.flat["jsx-runtime"],
-  // importPlugin.flatConfigs.recommended, // TODO: Broken, can't resolve aliases
-  // importPlugin.flatConfigs.typescript, // TODO: Broken, can't resolve aliases
+  importPlugin.flatConfigs.recommended,
+  importPlugin.flatConfigs.typescript,
   i18next.configs["flat/recommended"] as Linter.Config, // https://github.com/edvardchen/eslint-plugin-i18next/issues/142
   {
     plugins: {
@@ -78,16 +79,17 @@ export default defineConfig(
         project: ["./tsconfig.json"],
       },
     },
-  },
-  {
     settings: {
-      // TODO: Broken, can't resolve aliases
-      // "import-x/resolver-next": [
-      //   createTypeScriptImportResolver({
-      //     alwaysTryTypes: true,
-      //     project: ["./tsconfig.json"],
-      //   }),
-      // ],
+      "import-x/resolver-next": [
+        createTypeScriptImportResolver({
+          // The resolver refuses to use the alias defined in tsconfig.json for some reason,
+          // so it has to be defined with an absolute path here (and relative paths don't work either)
+          alias: {
+            "@/*": [path.resolve(__dirname, "./src/*")],
+          },
+          alwaysTryTypes: true,
+        }),
+      ],
       react: {
         version: "detect",
       },

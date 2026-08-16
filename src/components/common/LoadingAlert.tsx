@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import React from "react";
+import * as React from "react";
 import { Alert, Spinner } from "react-bootstrap";
 import { AppTheme } from "../MyThemeProvider";
 import { FlexCol, FlexRow } from "./Flex";
