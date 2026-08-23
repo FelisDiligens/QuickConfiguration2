@@ -72,6 +72,9 @@ body {
     button.btn-outline-primary:not(:hover) {
         color: #775907;
     }
+    .nav-pills a[role=tab].active {
+        background-color: #94782a;
+    }
 }
 
 @include color-mode(dark) {
@@ -86,6 +89,11 @@ body {
 
     summary {
         color: #fed664;
+    }
+    
+    /* Primary color is too bright for text */
+    .nav-pills a[role=tab].active {
+        background-color: #94782a;
     }
 }
 

@@ -33,6 +33,8 @@ import {
   CardBody,
   CardHeader,
   Modal,
+  Nav,
+  Tab,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { getModIdFromUrl } from "../../utils/getModInfo";
@@ -118,6 +120,9 @@ export default function ModInstallationDetailsModal(props: Props) {
   const getMod = useModsStore((store) => store.getMod);
   const tmpPath = useProfilesStore.getState().getModsTmpPath();
   const [mod, setMod] = useState(props.mod);
+  const [updateModOption, setUpdateModOption] = useState<"new" | "update">(
+    "new",
+  );
   const [updateModKey, setUpdateModKey] = useState(
     props.updateModKey ?? "none",
   );
@@ -126,6 +131,9 @@ export default function ModInstallationDetailsModal(props: Props) {
   const [enabledPaths, setEnabledPaths] = useState(new Set<string>());
   const [issues, setIssues] = useState<DiagnosticIssue[]>([]);
   const [error, setError] = useState<AnyError>(null);
+
+  const disableInstallButton =
+    updateModOption === "update" && updateModKey === "none";
 
   const getReadmes = (
     path: string,
@@ -244,6 +252,11 @@ export default function ModInstallationDetailsModal(props: Props) {
     const filePaths = getFilePaths(props.fileContents);
     setMod(props.mod);
     setUpdateModKey(props.updateModKey ?? "none");
+    if (props.updateModKey && props.updateModKey !== "none") {
+      setUpdateModOption("update");
+    } else {
+      setUpdateModOption("new");
+    }
     setFileContents(props.fileContents);
     setEnabledPaths(new Set(filePaths));
     if (filePaths.length <= maxFileCountExpandedFolders)
@@ -369,56 +382,84 @@ export default function ModInstallationDetailsModal(props: Props) {
             <DiagnosticIssueAlert key={issue} issue={issue} />
           ))}
           <Card>
-            <CardHeader>
-              {t("mods.modOrderTab.modals.installationModal.updateGroup")}
-            </CardHeader>
             <CardBody>
-              <Select
-                value={updateModKey}
-                onChange={setUpdateModKey}
-                style={{
-                  fontStyle: updateModKey === "none" ? "italic" : undefined,
+              <Tab.Container
+                activeKey={updateModOption}
+                onSelect={(eventKey) => {
+                  if (eventKey)
+                    setUpdateModOption(eventKey as typeof updateModOption);
+                  if (eventKey === "new") setUpdateModKey("none");
                 }}
-                label={t("mods.modOrderTab.modals.installationModal.mod", {
-                  count: 1,
-                })}
               >
-                <option value="none">
-                  {t("mods.modOrderTab.modals.installationModal.newMod")}
-                </option>
-                {matchingMods.length > 0 && (
-                  <optgroup
-                    label={t(
-                      "mods.modOrderTab.modals.installationModal.matchingMod",
-                      {
-                        count: matchingMods.length,
-                      },
-                    )}
-                  >
-                    {matchingMods.map((mod) => (
-                      <option key={mod.key} value={mod.key}>
-                        {mod.title}
+                <Nav variant="pills">
+                  <Nav.Item>
+                    <Nav.Link eventKey="new">
+                      {t("mods.modOrderTab.modals.installationModal.newMod")}
+                    </Nav.Link>
+                  </Nav.Item>
+                  <Nav.Item>
+                    <Nav.Link eventKey="update">
+                      {t("mods.modOrderTab.modals.installationModal.updateMod")}
+                    </Nav.Link>
+                  </Nav.Item>
+                </Nav>
+                <Tab.Content>
+                  <Tab.Pane eventKey="new"></Tab.Pane>
+                  <Tab.Pane eventKey="update">
+                    <Select
+                      value={updateModKey}
+                      onChange={setUpdateModKey}
+                      css={css`margin-top: 10px;`}
+                      style={{
+                        fontStyle:
+                          updateModKey === "none" ? "italic" : undefined,
+                      }}
+                      label={t(
+                        "mods.modOrderTab.modals.installationModal.mod",
+                        {
+                          count: 1,
+                        },
+                      )}
+                    >
+                      <option value="none">
+                        {t("mods.modOrderTab.modals.installationModal.pickMod")}
                       </option>
-                    ))}
-                  </optgroup>
-                )}
-                {mods.length > 0 && (
-                  <optgroup
-                    label={t(
-                      "mods.modOrderTab.modals.installationModal.allMods",
-                      {
-                        count: mods.length,
-                      },
-                    )}
-                  >
-                    {mods.map((mod) => (
-                      <option key={mod.key} value={mod.key}>
-                        {mod.title}
-                      </option>
-                    ))}
-                  </optgroup>
-                )}
-              </Select>
+                      {matchingMods.length > 0 && (
+                        <optgroup
+                          label={t(
+                            "mods.modOrderTab.modals.installationModal.matchingMod",
+                            {
+                              count: matchingMods.length,
+                            },
+                          )}
+                        >
+                          {matchingMods.map((mod) => (
+                            <option key={mod.key} value={mod.key}>
+                              {mod.title}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {mods.length > 0 && (
+                        <optgroup
+                          label={t(
+                            "mods.modOrderTab.modals.installationModal.allMods",
+                            {
+                              count: mods.length,
+                            },
+                          )}
+                        >
+                          {mods.map((mod) => (
+                            <option key={mod.key} value={mod.key}>
+                              {mod.title}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                    </Select>
+                  </Tab.Pane>
+                </Tab.Content>
+              </Tab.Container>
             </CardBody>
           </Card>
           <Card>
@@ -533,6 +574,7 @@ export default function ModInstallationDetailsModal(props: Props) {
         <Button
           variant="primary"
           onClick={() => props.onInstall(mod, [...enabledPaths])}
+          disabled={disableInstallButton}
         >
           {t("mods.modOrderTab.modals.installationModal.installButton")}
         </Button>
