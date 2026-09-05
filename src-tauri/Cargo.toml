@@ -1,6 +1,6 @@
 [package]
 name = "f76qc2"
-version = "2.0.0-beta.4"
+version = "2.0.0-beta.5"
 description = "Fallout 76 Quick Configuration"
 authors = ["FelisDiligens"]
 license = "MIT"
