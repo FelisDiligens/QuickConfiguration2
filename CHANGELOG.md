@@ -1,3 +1,19 @@
+## What's new in v2.0.0-beta.5
+
+This update adds the option to select an existing mod to update when installing a mod (through file/folder selection, drag and drop, or mod manager download from NexusMods).
+It also improves the performance of the file tree picker, so installing mods with a ton of files should be smoother.
+
+On Windows, users should no longer see a console window popup when extracting archives (e.g. while installing mods).
+Also, Linux users using [AppManager](https://github.com/kem-a/AppManager) should now be able to install the AppImage without error messages.
+
+- Added: Option to update an existing mod in the installing mod dialog
+- Improved: Order files alphabetically in the file selector tree in the installing mod dialog
+- Improved: Performance in the file selector tree in the installing mod dialog
+- Improved: Readme / text file buttons have proper gaps and maximum height in the installing mod dialog
+- Fixed: Console window spawning on Windows when creating/extracting archives
+- Fixed: Broken .DirIcon symlink in AppImage on Linux (upstream fix: [tauri-apps/tauri#15110](https://github.com/tauri-apps/tauri/issues/15110))
+- Misc: Updated Cargo and npm dependencies
+
 ## What's new in v2.0.0-beta.4
 
 This update should fix issues with extracting RAR archives:
