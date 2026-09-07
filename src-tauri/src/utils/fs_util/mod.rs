@@ -9,6 +9,9 @@ use std::path::{Path, PathBuf, StripPrefixError};
 
 use cfg_if::cfg_if;
 
+#[cfg(target_os = "windows")]
+use windows::Win32::Foundation::{ERROR_NOT_SAME_DEVICE, WIN32_ERROR};
+
 use crate::utils::channel;
 
 pub fn get_relative_path<P1: AsRef<Path>, P2: AsRef<Path>>(
@@ -95,7 +98,26 @@ pub fn copy_or_link<P1: AsRef<Path>, P2: AsRef<Path>>(
                 }
             }
 
-            fs::hard_link(src_path, dst_path)?;
+            let result = fs::hard_link(src_path, dst_path);
+            // Check for errors:
+            #[cfg(target_os = "windows")]
+            {
+                // On Windows, let's try to extract the raw system error code and check
+                // if the error occurred because the paths are on different filesystems
+                // (and assuming our heuristic above didn't catch that).
+                if let Err(ref error) = result
+                    && let Some(os_error) = error.raw_os_error()
+                    && let Ok(win_error) = u32::try_from(os_error).map(WIN32_ERROR)
+                {
+                    // Compare https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499-
+                    if win_error == ERROR_NOT_SAME_DEVICE {
+                        // Fallback to copy if on different drives:
+                        fs::copy(src_path, dst_path)?;
+                        return Ok(());
+                    }
+                }
+            }
+            result?
         }
         CopyMethod::Symlink => {
             // TODO: On Windows, check if we have permission to create symlinks (`SeCreateSymbolicLinkPrivilege` or admin). If not, fallback to copying.
