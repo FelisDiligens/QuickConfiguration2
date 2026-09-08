@@ -13,6 +13,7 @@ use tauri::async_runtime::spawn_blocking;
 
 use super::errors::{CommandError, CommandResult};
 use crate::features::stores::ini::{IniFile, IniFiles};
+use crate::utils::fs_util;
 use crate::utils::ini::IniAccessors;
 use crate::utils::paths::get_resources_path;
 
@@ -219,16 +220,60 @@ pub fn _ini_save(
         ..Default::default()
     };
 
+    // Check if files are readonly, ignoring any read errors:
+    let main_readonly = fs_util::is_file_readonly(&main_path)
+        .tap_err(|err| log::warn!("Couldn't read readonly flag on {ini_prefix}.ini: {err}"))
+        .unwrap_or(false);
+    let prefs_readonly = fs_util::is_file_readonly(&prefs_path)
+        .tap_err(|err| log::warn!("Couldn't read readonly flag on {ini_prefix}Prefs.ini: {err}"))
+        .unwrap_or(false);
+    let custom_readonly = fs_util::is_file_readonly(&custom_path)
+        .tap_err(|err| log::warn!("Couldn't read readonly flag on {ini_prefix}Custom.ini: {err}"))
+        .unwrap_or(false);
+
+    // Unset read-only flag:
+    if main_readonly {
+        fs_util::set_file_readonly(&main_path, false).tap_err(|err| {
+            log::error!("Couldn't unset readonly flag on {ini_prefix}.ini: {err}")
+        })?;
+    }
+    if prefs_readonly {
+        fs_util::set_file_readonly(&prefs_path, false).tap_err(|err| {
+            log::error!("Couldn't unset readonly flag on {ini_prefix}Prefs.ini: {err}")
+        })?;
+    }
+    if custom_readonly {
+        fs_util::set_file_readonly(&custom_path, false).tap_err(|err| {
+            log::error!("Couldn't unset readonly flag on {ini_prefix}Custom.ini: {err}")
+        })?;
+    }
+
     // Write state to files:
     main_lock
-        .write_to_file_opt(main_path, options.clone())
+        .write_to_file_opt(&main_path, options.clone())
         .tap_err(|err| log::error!("Couldn't write to {ini_prefix}.ini: {err}"))?;
     prefs_lock
-        .write_to_file_opt(prefs_path, options.clone())
+        .write_to_file_opt(&prefs_path, options.clone())
         .tap_err(|err| log::error!("Couldn't write to {ini_prefix}Prefs.ini: {err}"))?;
     custom_lock
-        .write_to_file_opt(custom_path, options.clone())
+        .write_to_file_opt(&custom_path, options.clone())
         .tap_err(|err| log::error!("Couldn't write to {ini_prefix}Custom.ini: {err}"))?;
+
+    // Preserve read-only flag if it was set before saving:
+    if main_readonly {
+        fs_util::set_file_readonly(&main_path, true)
+            .tap_err(|err| log::error!("Couldn't set readonly flag on {ini_prefix}.ini: {err}"))?;
+    }
+    if prefs_readonly {
+        fs_util::set_file_readonly(&prefs_path, true).tap_err(|err| {
+            log::error!("Couldn't set readonly flag on {ini_prefix}Prefs.ini: {err}")
+        })?;
+    }
+    if custom_readonly {
+        fs_util::set_file_readonly(&custom_path, true).tap_err(|err| {
+            log::error!("Couldn't set readonly flag on {ini_prefix}Custom.ini: {err}")
+        })?;
+    }
 
     Ok(())
 }

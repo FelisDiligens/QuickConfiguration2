@@ -10,16 +10,7 @@ use std::path::{Path, PathBuf, StripPrefixError};
 use cfg_if::cfg_if;
 
 #[cfg(target_os = "windows")]
-use std::ops::{BitAnd, BitOr, Not};
-#[cfg(target_os = "windows")]
-use windows::{
-    Win32::Foundation::{ERROR_NOT_SAME_DEVICE, WIN32_ERROR},
-    Win32::Storage::FileSystem::{
-        FILE_ATTRIBUTE_READONLY, FILE_FLAGS_AND_ATTRIBUTES, GetFileAttributesW,
-        INVALID_FILE_ATTRIBUTES, SetFileAttributesW,
-    },
-    core::HSTRING,
-};
+use windows::Win32::Foundation::{ERROR_NOT_SAME_DEVICE, WIN32_ERROR};
 
 use crate::utils::channel;
 
@@ -70,46 +61,19 @@ fn are_on_same_drive(src: &Path, dst: &Path) -> Option<bool> {
     Some(src_drive == dst_drive)
 }
 
-/// Checks if readonly attribute is set on a file on Windows.
-#[cfg(target_os = "windows")]
-pub fn is_file_readonly<P: AsRef<Path>>(file_path: P) -> anyhow::Result<bool> {
-    unsafe {
-        let attrs = GetFileAttributesW(&HSTRING::from(file_path.as_ref()));
-        if attrs == INVALID_FILE_ATTRIBUTES {
-            anyhow::bail!(
-                "Couldn't get file attributes: {:?} has invalid file attributes.",
-                file_path.as_ref()
-            )
-        }
-        let attrs = FILE_FLAGS_AND_ATTRIBUTES(attrs);
-        Ok(attrs.bitand(FILE_ATTRIBUTE_READONLY).0 > 0)
-    }
+/// Checks if file is readonly.
+pub fn is_file_readonly<P: AsRef<Path>>(file_path: P) -> io::Result<bool> {
+    Ok(File::open(file_path.as_ref())?
+        .metadata()?
+        .permissions()
+        .readonly())
 }
 
-/// Sets/unsets readonly attribute on a file on Windows.
-#[cfg(target_os = "windows")]
-pub fn set_file_readonly<P: AsRef<Path>>(file_path: P, read_only: bool) -> anyhow::Result<()> {
-    unsafe {
-        let attrs = GetFileAttributesW(&HSTRING::from(file_path.as_ref()));
-        if attrs == INVALID_FILE_ATTRIBUTES {
-            anyhow::bail!(
-                "Couldn't set readonly attribute: {:?} has invalid file attributes.",
-                file_path.as_ref()
-            )
-        }
-        let attrs = FILE_FLAGS_AND_ATTRIBUTES(attrs);
-        if read_only {
-            SetFileAttributesW(
-                &HSTRING::from(file_path.as_ref()),
-                attrs.bitor(FILE_ATTRIBUTE_READONLY),
-            )?;
-        } else {
-            SetFileAttributesW(
-                &HSTRING::from(file_path.as_ref()),
-                attrs.bitand(FILE_ATTRIBUTE_READONLY.not()),
-            )?;
-        }
-    }
+/// Makes the file readonly or writable.
+pub fn set_file_readonly<P: AsRef<Path>>(file_path: P, read_only: bool) -> io::Result<()> {
+    let mut permissions = File::open(file_path.as_ref())?.metadata()?.permissions();
+    permissions.set_readonly(read_only);
+    fs::set_permissions(file_path.as_ref(), permissions)?;
     Ok(())
 }
 
