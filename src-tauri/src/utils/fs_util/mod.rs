@@ -612,5 +612,5 @@ pub fn sanitize_filename(filename: &str, replacement: char) -> String {
         result.push(ch);
     }
 
-    result
+    result.trim_end().to_string()
 }

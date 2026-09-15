@@ -1,6 +1,7 @@
 pub mod archive2;
 pub mod download;
 pub mod errors;
+pub mod fs;
 pub mod game;
 pub mod ini;
 pub mod mods;

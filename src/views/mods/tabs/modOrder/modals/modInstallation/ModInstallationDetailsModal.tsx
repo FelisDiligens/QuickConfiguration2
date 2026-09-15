@@ -131,9 +131,11 @@ export default function ModInstallationDetailsModal(props: Props) {
   const [enabledPaths, setEnabledPaths] = useState(new Set<string>());
   const [issues, setIssues] = useState<DiagnosticIssue[]>([]);
   const [error, setError] = useState<AnyError>(null);
+  const [validFolderName, setValidFolderName] = useState(false);
 
   const disableInstallButton =
-    updateModOption === "update" && updateModKey === "none";
+    (updateModOption === "update" && updateModKey === "none")
+    || !validFolderName;
 
   const getReadmes = (
     path: string,
@@ -244,6 +246,17 @@ export default function ModInstallationDetailsModal(props: Props) {
       setError(error);
     },
     watch: [mod.options.rootFolder, tmpPath],
+    enabled: props.show,
+  });
+
+  useAsync({
+    promiseFn: () => commands.isFilenameValid(mod.folderName),
+    onResolved: setValidFolderName,
+    onRejected: (error) => {
+      console.error(error);
+      setValidFolderName(false);
+    },
+    watch: [mod.folderName],
     enabled: props.show,
   });
 
@@ -523,6 +536,13 @@ export default function ModInstallationDetailsModal(props: Props) {
                   onChange={(folderName) =>
                     setMod((mod) => ({ ...mod, folderName }))
                   }
+                  onBlur={() => {
+                    if (!validFolderName)
+                      commands.sanitizeFilename(mod.folderName, "_")
+                        .then(folderName => setMod((mod) => ({ ...mod, folderName })))
+                        .catch(console.error)
+                  }}
+                  isInvalid={!validFolderName}
                   disabled={updateModKey !== "none"}
                 />
               </FlexCol>

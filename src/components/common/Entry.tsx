@@ -1,5 +1,5 @@
 import { css, SerializedStyles } from "@emotion/react";
-import { useId } from "react";
+import { FocusEvent, useId } from "react";
 import { Form } from "react-bootstrap";
 
 interface Props {
@@ -8,10 +8,10 @@ interface Props {
   value?: string;
   defaultValue?: string;
   onChange?: (value: string) => void;
+  onBlur?: (ev: FocusEvent<HTMLInputElement>) => void;
   isInvalid?: boolean;
   disabled?: boolean;
   placeholder?: string;
-
   className?: string;
   css?: SerializedStyles;
 }
@@ -27,6 +27,7 @@ export default function Entry(props: Props) {
       onChange={(ev) => {
         if (props.onChange) props.onChange(ev.currentTarget.value);
       }}
+      onBlur={props.onBlur}
       isInvalid={props.isInvalid}
       disabled={props.disabled}
       placeholder={props.placeholder || " "}

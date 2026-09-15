@@ -400,6 +400,12 @@ async downloadTranslations() : Promise<string[]> {
 },
 async downloadWithProgress(downloadUrl: string, downloadFolder: string) : Promise<string> {
     return await TAURI_INVOKE("download_with_progress", { downloadUrl, downloadFolder });
+},
+async isFilenameValid(filename: string) : Promise<boolean> {
+    return await TAURI_INVOKE("is_filename_valid", { filename });
+},
+async sanitizeFilename(filename: string, replacement: string) : Promise<string> {
+    return await TAURI_INVOKE("sanitize_filename", { filename, replacement });
 }
 }
 
