@@ -28,6 +28,7 @@ pub struct Settings {
     pub download_translations_on_start: bool,
     pub quit_on_game_launch: bool,
     pub navigation_collapsed: bool,
+    pub bypass_ini_readonly: bool,
     pub mod_manager: ModManagerSettings,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub migrated_from_v1: Option<Migration>,
@@ -102,6 +103,7 @@ impl Default for Settings {
             download_translations_on_start: true,
             quit_on_game_launch: true,
             navigation_collapsed: false,
+            bypass_ini_readonly: true,
             mod_manager: ModManagerSettings::default(),
             migrated_from_v1: None,
             prerelease_dismissed: None,

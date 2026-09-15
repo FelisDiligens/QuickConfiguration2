@@ -943,6 +943,13 @@
       "downloadTranslations": "Download new translations on start",
       "downloadTranslationsSubtitle": "Contacts github.com to check for new translations and download them"
     },
+    "ini": {
+      "title": "INI files",
+      "readonly": "Make ini files read-only",
+      "readonlySubtitle": "If this option is enabled, the game might not save your settings.",
+      "bypassReadonly": "Bypass read-only state when saving",
+      "bypassReadonlySubtitle": "If this option is disabled, the app may fail to write ini files if they're set to read-only."
+    },
     "updates": {
       "title": "Updates",
       "updateAvailable": "An update is available",

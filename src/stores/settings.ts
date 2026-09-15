@@ -20,6 +20,7 @@ interface Actions {
   setDownloadTranslationsOnStart: (value: boolean) => void;
   setQuitOnGameLaunch: (value: boolean) => void;
   setNavigationCollapsed: (value: boolean) => void;
+  setBypassIniReadonly: (value: boolean) => void;
   setMigrationDismissed: (value: boolean) => void;
   setPrereleaseDismissed: (value: boolean) => void;
 }
@@ -37,6 +38,7 @@ export const useSettingsStore = create<SettingsStore>()((set, get) => ({
   downloadTranslationsOnStart: true,
   quitOnGameLaunch: true,
   navigationCollapsed: false,
+  bypassIniReadonly: true,
   modManager: {
     resourceList: "",
     copyMethod: "hardlink",
@@ -75,6 +77,9 @@ export const useSettingsStore = create<SettingsStore>()((set, get) => ({
   },
   setNavigationCollapsed: (value: boolean) => {
     set({ navigationCollapsed: value });
+  },
+  setBypassIniReadonly: (value: boolean) => {
+    set({ bypassIniReadonly: value });
   },
   setMigrationDismissed: (value: boolean) => {
     const migratedFromV1 = get().migratedFromV1;

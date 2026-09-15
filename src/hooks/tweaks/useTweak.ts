@@ -3,6 +3,7 @@ import { AnyError, commandErrorToString } from "@/commands/errors";
 import { useAsync } from "@/hooks/async";
 import { windowCloseService } from "@/services/windowCloseService";
 import { useProfilesStore } from "@/stores/profiles";
+import { useSettingsStore } from "@/stores/settings";
 import { atom, useAtom, useSetAtom } from "jotai";
 import { useEffect } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -39,6 +40,9 @@ export default function useTweak<T>(
 
   const iniPath = useProfilesStore((store) => store.getIniPath());
   const iniPrefix = useProfilesStore((store) => store.getIniPrefix());
+  const bypassIniReadonly = useSettingsStore(
+    (store) => store.bypassIniReadonly,
+  );
 
   // On first mount or when the ini file path changes or when a reload is necessary,
   // load the value:
@@ -55,7 +59,7 @@ export default function useTweak<T>(
       setNeedsToSave(false);
       try {
         setError(undefined);
-        return await commands.iniSave(iniPath, iniPrefix);
+        return await commands.iniSave(iniPath, iniPrefix, bypassIniReadonly);
       } catch (error) {
         console.error(
           "Couldn't save ini files:",

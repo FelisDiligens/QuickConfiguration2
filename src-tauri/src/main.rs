@@ -42,6 +42,8 @@ fn main() {
             commands::ini::ini_save,
             commands::ini::ini_create_files,
             commands::ini::ini_get_error_context,
+            commands::ini::ini_are_read_only,
+            commands::ini::ini_set_read_only,
             commands::ini::ini_get_string,
             commands::ini::ini_set_string,
             commands::ini::ini_get_int,

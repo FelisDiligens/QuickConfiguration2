@@ -943,6 +943,13 @@
       "downloadTranslations": "Neue Übersetzungen beim Start herunterladen",
       "downloadTranslationsSubtitle": "Kontaktiert github.com, um nach neuen Übersetzungen zu schauen und diese herunterzuladen"
     },
+    "ini": {
+      "title": "INI-Dateien",
+      "readonly": "INI-Dateien auf \"nur lesbar\" setzen",
+      "readonlySubtitle": "Wenn diese Option aktiv ist, könnte das Spiel keine Einstellungen mehr speichern.",
+      "bypassReadonly": "\"Nur Lesen\"-Zustand beim Speichern umgehen",
+      "bypassReadonlySubtitle": "Wenn diese Option inaktiv ist, könnte die App die INI-Dateien nicht speichern, wenn diese nur lesbar gesetzt wurden."
+    },
     "updates": {
       "title": "Updates",
       "updateAvailable": "Ein Update ist verfügbar",

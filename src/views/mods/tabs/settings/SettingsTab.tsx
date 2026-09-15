@@ -35,6 +35,7 @@ export default function SettingsTab() {
     try {
       const resources = useResourceListStore.getState().resources;
       const oldIniKey = useSettingsStore.getState().modManager.resourceList;
+      const bypassIniReadonly = useSettingsStore.getState().bypassIniReadonly;
       const iniPath = useProfilesStore.getState().getIniPath();
       const iniPrefix = useProfilesStore.getState().getIniPrefix();
       if (!iniPath || !iniPrefix)
@@ -51,7 +52,7 @@ export default function SettingsTab() {
       resourceListStoreSync.cancelSave();
 
       console.log("Saving ini file after resource list switch");
-      await commands.iniSave(iniPath, iniPrefix);
+      await commands.iniSave(iniPath, iniPrefix, bypassIniReadonly);
     } catch (error) {
       console.error(
         "Error while switching resource list:",

@@ -41,6 +41,7 @@ export const resourceListStoreSync = syncStore(
     save: () => {
       const resources = get().resources;
       const iniKey = useSettingsStore.getState().modManager.resourceList;
+      const bypassIniReadonly = useSettingsStore.getState().bypassIniReadonly;
       const modsPath = useProfilesStore.getState().getModsPath();
       const iniPath = useProfilesStore.getState().getIniPath();
       const iniPrefix = useProfilesStore.getState().getIniPrefix();
@@ -58,7 +59,7 @@ export const resourceListStoreSync = syncStore(
           iniKey,
         );
         await Mods.resourceList.saveToTextFile(resources, modsPath);
-        await commands.iniSave(iniPath, iniPrefix);
+        await commands.iniSave(iniPath, iniPrefix, bypassIniReadonly);
       };
     },
     watch: (store) => store.resources,

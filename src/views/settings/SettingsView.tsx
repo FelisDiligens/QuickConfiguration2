@@ -1,5 +1,5 @@
 import { commands, Theme } from "@/commands/bindings";
-import { commandErrorToString } from "@/commands/errors";
+import { AnyError, commandErrorToString } from "@/commands/errors";
 import AccordionRow from "@/components/common/AccordionRow";
 import ButtonRow from "@/components/common/ButtonRow";
 import ComboRow from "@/components/common/ComboRow";
@@ -18,6 +18,7 @@ import { useUpdateCheckState } from "@/hooks/updater";
 import { useTranslationsStore } from "@/lib/i18n/store";
 import { translationUpdateService } from "@/services/translations";
 import { updaterService } from "@/services/updater";
+import { useProfilesStore } from "@/stores/profiles";
 import { useSettingsStore } from "@/stores/settings";
 import { useToastsStore } from "@/stores/toasts";
 import { css } from "@emotion/react";
@@ -34,6 +35,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as dialog from "@tauri-apps/plugin-dialog";
 import i18next from "i18next";
+import { useEffect, useState } from "react";
 import { ListGroup, Spinner } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -69,10 +71,47 @@ export default function SettingsView() {
   );
   const quitOnGameLaunch = useSettingsStore((s) => s.quitOnGameLaunch);
   const setQuitOnGameLaunch = useSettingsStore((s) => s.setQuitOnGameLaunch);
+  const bypassIniReadonly = useSettingsStore(
+    (store) => store.bypassIniReadonly,
+  );
+  const setBypassIniReadonly = useSettingsStore(
+    (store) => store.setBypassIniReadonly,
+  );
   const migratedFromV1 = useSettingsStore((s) => s.migratedFromV1);
   const setMigrationDismissed = useSettingsStore(
     (s) => s.setMigrationDismissed,
   );
+
+  /* INI read-only state */
+  const iniPath = useProfilesStore((store) => store.getIniPath());
+  const iniPrefix = useProfilesStore((store) => store.getIniPrefix());
+  const [iniAreReadOnly, _setIniAreReadOnly] = useState(false);
+  const iniSetReadOnly = async (readonly: boolean) => {
+    try {
+      const iniPath = useProfilesStore.getState().getIniPath();
+      const iniPrefix = useProfilesStore.getState().getIniPrefix();
+      if (!iniPath || !iniPrefix)
+        throw new Error(t("mods.errors.unsetIniPathOrIniPrefix"));
+
+      await commands.iniSetReadOnly(iniPath, iniPrefix, readonly);
+      _setIniAreReadOnly(readonly);
+    } catch (error) {
+      useToastsStore
+        .getState()
+        .addToast(
+          t("errors.anErrorOccurred"),
+          t("common.error") + ": " + commandErrorToString(error as AnyError),
+          "danger",
+        );
+    }
+  };
+  useEffect(() => {
+    if (iniPath && iniPrefix)
+      commands
+        .iniAreReadOnly(iniPath, iniPrefix)
+        .then(_setIniAreReadOnly)
+        .catch(console.error);
+  }, [iniPath, iniPrefix]);
 
   /* Translations store and actions */
   const translations = useTranslationsStore((s) => s.translations);
@@ -324,6 +363,21 @@ export default function SettingsView() {
             subtitle={t("settings.behavior.downloadTranslationsSubtitle")}
             checked={downloadTranslationsOnStart}
             onChange={setDownloadTranslationsOnStart}
+          />
+        </PreferencesGroup>
+
+        <PreferencesGroup title={t("settings.ini.title")}>
+          <SwitchRow
+            title={t("settings.ini.readonly")}
+            subtitle={t("settings.ini.readonlySubtitle")}
+            checked={iniAreReadOnly}
+            onChange={iniSetReadOnly}
+          />
+          <SwitchRow
+            title={t("settings.ini.bypassReadonly")}
+            subtitle={t("settings.ini.bypassReadonlySubtitle")}
+            checked={bypassIniReadonly}
+            onChange={setBypassIniReadonly}
           />
         </PreferencesGroup>
 

@@ -84,7 +84,7 @@ export function useModMigration(onSuccess?: () => void) {
       });
 
       await Mods.legacy.migrateMods(gamePath, modsPath);
-      await commands.iniSave(iniPath, iniPrefix);
+      await commands.iniSave(iniPath, iniPrefix, true);
 
       hideProgress();
       if (onSuccess) onSuccess();
@@ -144,7 +144,7 @@ export function useModMigration(onSuccess?: () => void) {
       });
 
       await Mods.legacy.removeMods(gamePath, modsPath);
-      await commands.iniSave(iniPath, iniPrefix);
+      await commands.iniSave(iniPath, iniPrefix, true);
 
       hideProgress();
       if (onSuccess) onSuccess();
