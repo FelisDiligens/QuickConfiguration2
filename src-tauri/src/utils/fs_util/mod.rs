@@ -40,16 +40,20 @@ pub enum CopyMethod {
 fn are_on_same_drive(src: &Path, dst: &Path) -> Option<bool> {
     use std::path::Component;
 
-    // Canonicalize to get absolute paths with drive letters
-    let src = src.canonicalize().ok()?;
-    let dst = dst.canonicalize().ok()?;
+    // Try to canonicalize to get absolute paths with drive letters:
+    let src = src.canonicalize().unwrap_or(src.to_path_buf());
+    let dst = dst.canonicalize().unwrap_or(dst.to_path_buf());
 
-    // Get the drive letter from both paths by checking the prefix component
+    // Get the drive letter from both paths by checking the prefix component:
     let get_drive = |path: &Path| -> Option<String> {
         path.components().find_map(|c| match c {
             Component::Prefix(prefix) => {
-                // Convert the prefix to a string for comparison
-                prefix.as_os_str().to_str().map(|s| s.to_uppercase())
+                // Convert the prefix to a string for comparison:
+                prefix
+                    .as_os_str()
+                    .to_str()
+                    .map(|s| s.strip_prefix(r"\\?\").unwrap_or(s)) // "Convert" verbatim disk (\\?\C:) to DOS disk (C:)
+                    .map(|s| s.to_uppercase()) // Ignore case
             }
             _ => None,
         })
@@ -109,6 +113,9 @@ pub fn copy_or_link<P1: AsRef<Path>, P2: AsRef<Path>>(
                 // If the drive letters cannot be determined, just assume that they are the same:
                 if !are_on_same_drive(src_path, dst_path).unwrap_or(true) {
                     // Fallback to copy if on different drives:
+                    log::trace!(
+                        "Requested to hardlink {src_path:?} to {dst_path:?} but drive letters did not match: Falling back to copying."
+                    );
                     fs::copy(src_path, dst_path)?;
                     return Ok(());
                 }
@@ -128,6 +135,9 @@ pub fn copy_or_link<P1: AsRef<Path>, P2: AsRef<Path>>(
                     // Compare https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499-
                     if win_error == ERROR_NOT_SAME_DEVICE {
                         // Fallback to copy if on different drives:
+                        log::trace!(
+                            "Attempted to hardlink {src_path:?} to {dst_path:?} but failed with OS error {os_error}: Falling back to copying."
+                        );
                         fs::copy(src_path, dst_path)?;
                         return Ok(());
                     }
