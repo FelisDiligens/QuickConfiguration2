@@ -1,3 +1,12 @@
+## What's new in v2.0.0-beta.6
+
+This update adds two new settings for the ini files and fixes a few I/O errors:
+- Added: Setting to make ini files read-only
+- Added: Setting to bypass read-only state when saving ini files (If the ini files are set read-only, this setting allows the app to save them anyways)
+- Improved: Prevent creating mods with invalid folder names
+- Fixed: OS error 5 ("ERROR_ACCESS_DENIED") when attempting to overwrite read-only ini files
+- Fixed: OS error 17 ("ERROR_NOT_SAME_DEVICE") when deploying mods from a different hard drive
+
 ## What's new in v2.0.0-beta.5
 
 This update adds the option to select an existing mod to update when installing a mod (through file/folder selection, drag and drop, or mod manager download from NexusMods).
