@@ -30,44 +30,47 @@ specta = { version = "=2.0.0-rc.20", features = ["serde_json"] }
 specta-typescript = "0.0.7"
 tauri-specta = { version = "=2.0.0-rc.20", features = ["derive", "typescript"] }
 
-anyhow = "1.0.102"
-chrono = { version = "0.4.43", features = ["serde"] }
-dirs = "5.0.1"
-duplicate = "1.0.0"
-futures-util = { version = "0.3.32", features = ["sink"] }
-image = "0.25.9"
+anyhow = "1.0.104"
+chrono = { version = "0.4.45", features = ["serde"] }
+dirs = "7.0.0"
+duplicate = "2.0.1"
+futures-util = { version = "0.3.34", features = ["sink"] }
+image = "0.25.10"
 indoc = "2"
-itertools = "0.14.0"
-log = "0.4.29"
+itertools = "0.15.0"
+log = "0.4.34"
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
-quick-xml = { version = "0.41.0", features = ["serialize"] }
-regex = "1.12.3"
-reqwest = { version = "0.12.28", features = ["stream"] }
-rust-ini = { version = "0.20.0", features = ["inline-comment", "case-insensitive"] }
+quick-xml = { version = "0.42.0", features = ["serialize"] }
+regex = "1.13.1"
+reqwest = { version = "0.13.5", features = ["stream"] }
+rust-ini = { version = "0.21.3", features = [
+    "inline-comment",
+    "case-insensitive",
+] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = ["preserve_order"] }
 tap = "1.0.1"
-thiserror = "2.0.18"
-tokio = { version = "1.49.0", features = ["macros"] }
-tokio-tungstenite = { version = "0.27.0", features = ["native-tls"] }
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["macros"] }
+tokio-tungstenite = { version = "0.30.0", features = ["native-tls"] }
 unescape = "0.1.0"
-uuid = { version = "1.21.0", features = ["v4"] }
-cfg-if = "1.0.4"
-duct = "1.1.1"
-which = "8.0.0"
+uuid = { version = "1.28.0", features = ["v4"] }
+cfg-if = "1.0.5"
+duct = "1.1.2"
+which = "8.0.6"
 tempfile = "3.27.0"
 function_name = "0.3.0"
 clone-macro = "1.0.0"
 strum = { version = "0.28.0", features = ["derive"] }
-camino = { version = "1.2.2", features = ["serde1"] }
+camino = { version = "1.2.6", features = ["serde1"] }
 url = "2.5.8"
 percent-encoding = "2.3.2"
 semver = "1.0.28"
-normalize-path = "0.2.1"
+normalize-path = "0.2.2"
 content_disposition = "0.4.0"
 
 [dev-dependencies]
-mockall = "0.14.0"
+mockall = "0.15.0"
 wiremock = "0.6.5"
 
 [target.'cfg(windows)'.dependencies]
