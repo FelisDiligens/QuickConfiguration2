@@ -677,11 +677,11 @@ gameScopedId: number;
 /**
  * The game for which the mod was uploaded, e.g. "fallout76"
  */
-gameDomain: string; name: string; summary: string; version: string; author: string; uploadedBy: string; pictureUrl: string; 
+gameDomain: string; name: string | null; summary: string | null; version: string; author: string; uploadedBy: string; pictureUrl: string | null; 
 /**
  * A thumbnail downloaded from `picture_url`
  */
-thumbnailFilename: string | null; endorsementCount: number; endorseStatus: NexusModsEndorseStatus; containsAdultContent: boolean; createdTime: string; updatedTime: string; lastAccessTime: string }
+thumbnailFilename: string | null; endorsementCount: number; endorseStatus: NexusModsEndorseStatus; containsAdultContent: boolean; available: boolean; createdTime: string; updatedTime: string; lastAccessTime: string }
 export type NexusModsModInfos = { mods: NexusModsModInfo[] }
 export type NexusModsProfile = { userId: number; apiKey: string; name: string; email: string; profileUrl: string; membership: NexusModsMembership }
 export type NexusModsRateLimit = { dailyLimit: number; dailyRemaining: number; dailyReset: string; hourlyLimit: number; hourlyRemaining: number; hourlyReset: string }

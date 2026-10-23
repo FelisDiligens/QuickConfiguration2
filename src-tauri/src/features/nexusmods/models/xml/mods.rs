@@ -67,17 +67,17 @@ impl From<json::ModInfo> for Mod {
             id: value.game_scoped_id,
             game: Some(value.game_domain),
             contains_adult_content: Some(value.contains_adult_content),
-            title: value.name,
+            title: value.name.unwrap_or_default(),
             latest_version: value.version,
             author: value.author,
             uploader: value.uploaded_by,
-            summary: value.summary,
+            summary: value.summary.unwrap_or_default(),
             endorsement_count: value.endorsement_count,
             created_timestamp: value.created_time.timestamp(),
             updated_timestamp: value.updated_time.timestamp(),
             thumbnail: if let Some(thumbnail_filename) = value.thumbnail_filename {
                 Some(Thumbnail {
-                    url: value.picture_url,
+                    url: value.picture_url.unwrap_or_default(),
                     file: thumbnail_filename,
                 })
             } else {

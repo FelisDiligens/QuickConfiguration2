@@ -148,7 +148,7 @@ export default function ModDownloadModals() {
 
   const installMod = (downloadedFilePath: string) => {
     modsEventBus.emitInstallModFromFileWithPath(downloadedFilePath, {
-      title: modDetailsRef.current?.name,
+      title: modDetailsRef.current?.name || undefined,
       version: modDetailsRef.current?.version,
       url: modLinkRef.current,
     });

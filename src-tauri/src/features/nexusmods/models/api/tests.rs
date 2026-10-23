@@ -5,7 +5,8 @@ use super::*;
 use indoc::indoc;
 
 #[test]
-fn test_mod_info_json_load() {
+fn test_mod_info_json_load_published() {
+    // Full JSON payload:
     let test_str = indoc! {r#"
         {
           "name": "Fallout 76 Quick Configuration - INI-Editor and Mod Manager",
@@ -52,7 +53,7 @@ fn test_mod_info_json_load() {
     assert_eq!(mod_info.domain_name, "fallout76");
     assert_eq!(mod_info.contains_adult_content, false);
     assert_eq!(
-        mod_info.name,
+        mod_info.name.unwrap(),
         "Fallout 76 Quick Configuration - INI-Editor and Mod Manager"
     );
     assert_eq!(mod_info.version, "1.12.8");
@@ -61,17 +62,74 @@ fn test_mod_info_json_load() {
     assert_eq!(mod_info.endorsement_count, 7442);
     assert_eq!(mod_info.created_timestamp, 1586526633);
     assert_eq!(mod_info.updated_timestamp, 1753040884);
+    assert_eq!(mod_info.status, "published");
+    assert_eq!(mod_info.available, true);
     assert_eq!(
         mod_info.endorsement.endorse_status,
         EndorseStatus::Undecided
     );
     assert_eq!(
-        mod_info.summary,
+        mod_info.summary.unwrap(),
         "This tool allows you to tweak *.ini settings and install mods."
     );
     assert_eq!(
-        mod_info.picture_url,
+        mod_info.picture_url.unwrap(),
         "https://staticdelivery.nexusmods.com/mods/2590/images/546/546-1654537179-893568444.png"
+    );
+}
+
+#[test]
+fn test_mod_info_json_load_hidden() {
+    let test_str = indoc! {r#"
+        {
+          "uid": 11123965297186,
+          "mod_id": 546,
+          "game_id": 2590,
+          "allow_rating": true,
+          "domain_name": "fallout76",
+          "category_id": 6,
+          "version": "1.12.8",
+          "endorsement_count": 7442,
+          "created_timestamp": 1586526633,
+          "created_time": "2020-04-10T13:50:33.000+00:00",
+          "updated_timestamp": 1753040884,
+          "updated_time": "2025-07-20T19:48:04.000+00:00",
+          "author": "FelisDiligens",
+          "uploaded_by": "FelisDiligens",
+          "uploaded_users_profile_url": "https://www.nexusmods.com/users/41275740",
+          "contains_adult_content": false,
+          "status": "hidden",
+          "available": false,
+          "user": {
+            "member_id": 41275740,
+            "member_group_id": 27,
+            "name": "FelisDiligens"
+          },
+          "endorsement": {
+            "endorse_status": "Undecided",
+            "timestamp": null,
+            "version": null
+          }
+        }
+    "#};
+    let result: Result<ModInfo, serde_json::Error> = serde_json::from_str(test_str);
+    assert!(result.is_ok(), "{}", result.unwrap_err());
+
+    let mod_info: ModInfo = result.unwrap();
+    assert_eq!(mod_info.mod_id, 546);
+    assert_eq!(mod_info.domain_name, "fallout76");
+    assert_eq!(mod_info.contains_adult_content, false);
+    assert_eq!(mod_info.status, "hidden");
+    assert_eq!(mod_info.available, false);
+    assert_eq!(mod_info.name, None);
+    assert_eq!(mod_info.author, "FelisDiligens");
+    assert_eq!(mod_info.uploaded_by, "FelisDiligens");
+    assert_eq!(mod_info.endorsement_count, 7442);
+    assert_eq!(mod_info.created_timestamp, 1586526633);
+    assert_eq!(mod_info.updated_timestamp, 1753040884);
+    assert_eq!(
+        mod_info.endorsement.endorse_status,
+        EndorseStatus::Undecided
     );
 }
 

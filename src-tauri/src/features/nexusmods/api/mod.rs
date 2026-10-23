@@ -96,6 +96,13 @@ impl NexusModsAPI {
     }
 
     async fn download_and_create_thumbnail(mod_info: &mut json::ModInfo) -> anyhow::Result<()> {
+        let Some(ref picture_url) = mod_info.picture_url else {
+            log::warn!(
+                "download_and_create_thumbnail called but mod_info.picture_url is None: skip"
+            );
+            return Ok(()); // Cannot download without URL
+        };
+
         // Create thumbnail folder:
         let Some(thumbnail_path) = get_legacy_nexusmods_thumbnails_path() else {
             anyhow::bail!("Couldn't determine thumbnail path");
@@ -104,11 +111,7 @@ impl NexusModsAPI {
 
         // Create thumbnail:
         let filename = format!("thumb_{}.jpg", mod_info.game_scoped_id);
-        thumbnails::create_thumbnail_from_url(
-            &mod_info.picture_url,
-            thumbnail_path.join(&filename),
-        )
-        .await?;
+        thumbnails::create_thumbnail_from_url(picture_url, thumbnail_path.join(&filename)).await?;
 
         // Update mod info:
         mod_info.thumbnail_filename = Some(filename);

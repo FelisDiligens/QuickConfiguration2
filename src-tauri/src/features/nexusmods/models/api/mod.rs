@@ -99,15 +99,15 @@ pub struct RateLimit {
 #[serde(rename_all = "snake_case")]
 pub struct ModInfo {
     /// The mod's name or title
-    pub name: String,
+    pub name: Option<String>,
     /// A short summary of the mod
-    pub summary: String,
+    pub summary: Option<String>,
     /// The full description as seen when navigating to the mod's page. Formatted with BBCode.
-    pub description: String,
+    pub description: Option<String>,
     /// URL to a PNG with domain staticdelivery.nexusmods.com.
-    pub picture_url: String,
-    pub mod_downloads: u32,
-    pub mod_unique_downloads: u32,
+    pub picture_url: Option<String>,
+    pub mod_downloads: Option<u32>,
+    pub mod_unique_downloads: Option<u32>,
     pub uid: u64,
     pub mod_id: u32,
     pub game_id: u32,
@@ -128,7 +128,7 @@ pub struct ModInfo {
     pub uploaded_by: String,
     pub uploaded_users_profile_url: String,
     pub contains_adult_content: bool,
-    /// "published"
+    /// "published" | "hidden"
     pub status: String,
     pub available: bool,
     pub user: ModInfoUser,

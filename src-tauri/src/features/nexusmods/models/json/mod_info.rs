@@ -23,20 +23,21 @@ pub struct ModInfo {
     /// The game for which the mod was uploaded, e.g. "fallout76"
     pub game_domain: String,
     // The mod's name or title
-    pub name: String,
+    pub name: Option<String>,
     // A short summary about the mod
-    pub summary: String,
+    pub summary: Option<String>,
     // The mod's latest version
     pub version: String,
     pub author: String,
     pub uploaded_by: String,
     // The mod's "preview" or thumbnail image
-    pub picture_url: String,
+    pub picture_url: Option<String>,
     /// A thumbnail downloaded from `picture_url`
     pub thumbnail_filename: Option<String>,
     pub endorsement_count: u32,
     pub endorse_status: EndorseStatus,
     pub contains_adult_content: bool,
+    pub available: bool,
     #[specta(type = String)] // will be formatted as RFC3339
     pub created_time: chrono::DateTime<chrono::Utc>,
     #[specta(type = String)] // will be formatted as RFC3339
@@ -68,6 +69,7 @@ impl From<api::ModInfo> for ModInfo {
             endorsement_count: value.endorsement_count,
             endorse_status: value.endorsement.endorse_status.into(),
             contains_adult_content: value.contains_adult_content,
+            available: value.available,
             created_time: value.created_time,
             updated_time: value.updated_time,
             last_access_time: chrono::Utc::now(),
@@ -96,16 +98,17 @@ impl TryFrom<xml::Mod> for ModInfo {
         Ok(Self {
             game_scoped_id: value.id,
             game_domain: value.game.unwrap_or("fallout76".to_string()),
-            name: value.title,
-            summary: value.summary,
+            name: Some(value.title),
+            summary: Some(value.summary),
             version: value.latest_version,
             author: value.author,
             uploaded_by: value.uploader,
-            picture_url: value.thumbnail.clone().map(|t| t.url).unwrap_or_default(),
+            picture_url: Some(value.thumbnail.clone().map(|t| t.url).unwrap_or_default()),
             thumbnail_filename: value.thumbnail.map(|t| t.file),
             endorsement_count: value.endorsement_count,
             endorse_status: value.endorse_state.into(),
             contains_adult_content: value.contains_adult_content.unwrap_or(false),
+            available: true,
             created_time: chrono::DateTime::<chrono::Utc>::from_timestamp(
                 value.created_timestamp,
                 0,
