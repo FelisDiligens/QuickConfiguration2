@@ -5,9 +5,8 @@
   "type": "module",
   "author": "FelisDiligens",
   "license": "MIT",
-  "packageManager": "pnpm@11.22.0",
+  "packageManager": "pnpm@12.15.0",
   "scripts": {
-    "preinstall": "npx --yes only-allow pnpm",
     "dev": "tauri dev",
     "build": "tauri build",
     "test": "pnpm run ui:vitest && pnpm run cargo:nextest",
@@ -114,5 +113,17 @@
     "vite": "^7.3.7",
     "vitest": "^4.1.12",
     "vitest-fetch-mock": "^0.4.5"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^24.22.1",
+      "onFail": "warn"
+    },
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.15.0",
+      "onFail": "warn"
+    }
   }
 }
