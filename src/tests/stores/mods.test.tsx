@@ -155,4 +155,67 @@ describe("<ModsStoreProvider> component and useModsStoreStatus/useModsStore hook
     // Check if function was called once:
     expect(commands.modsLoadMetadataOrDefault).toHaveBeenCalledTimes(1);
   });
+
+  it("should move mods up and down in the store", async () => {
+    const mods = ["Mod A", "Mod B", "Mod C"].map((title) => ({
+      key: title,
+      title,
+      folderName: title,
+      version: "1.0",
+      url: "",
+      notes: "",
+      enabled: false,
+      options: {
+        rootFolder: "",
+      },
+    }));
+    vi.mocked(commands.modsLoadMetadataOrDefault).mockResolvedValueOnce({
+      enabled: true,
+      mods,
+      state: [],
+    });
+
+    // Mount store:
+    const hook = renderHook(() => useModsStore((store) => store.mods));
+
+    // Load mods:
+    modsStoreSync.load().catch(console.error);
+
+    // Check if mods were loaded:
+    await waitFor(() => {
+      expect(hook.result.current).toHaveLength(3);
+    });
+
+    const keys = () => hook.result.current.map((mod) => mod.key);
+
+    // Move a mod up:
+    act(() => {
+      useModsStore.getState().moveModUp("Mod C");
+    });
+    expect(keys()).toEqual(["Mod A", "Mod C", "Mod B"]);
+
+    // Moving the first mod up is a no-op:
+    act(() => {
+      useModsStore.getState().moveModUp("Mod A");
+    });
+    expect(keys()).toEqual(["Mod A", "Mod C", "Mod B"]);
+
+    // Move a mod down:
+    act(() => {
+      useModsStore.getState().moveModDown("Mod A");
+    });
+    expect(keys()).toEqual(["Mod C", "Mod A", "Mod B"]);
+
+    // Moving the last mod down is a no-op:
+    act(() => {
+      useModsStore.getState().moveModDown("Mod B");
+    });
+    expect(keys()).toEqual(["Mod C", "Mod A", "Mod B"]);
+
+    // Moving an unknown mod is a no-op:
+    act(() => {
+      useModsStore.getState().moveModUp("Unknown");
+    });
+    expect(keys()).toEqual(["Mod C", "Mod A", "Mod B"]);
+  });
 });

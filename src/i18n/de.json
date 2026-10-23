@@ -568,6 +568,10 @@
             "deployPending": "Anwendung ausstehend",
             "removePending": "Entfernung ausstehend"
           }
+        },
+        "aria": {
+          "modMovedUp": "{{title}} nach oben verschoben",
+          "modMovedDown": "{{title}} nach unten verschoben"
         }
       },
       "detailsPane": {

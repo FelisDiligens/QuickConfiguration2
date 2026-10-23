@@ -19,7 +19,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Form, InputGroup, Table } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { getModInfo } from "./utils/getModInfo";
@@ -29,11 +29,13 @@ function ModTableRow(props: {
   state?: ModInstallationState;
   modinfo?: NexusModsModInfo;
   selected: boolean;
+  focused: boolean;
   showNexusModsTitle: boolean;
   onEnable: () => void;
   onDisable: () => void;
   onSelect: () => void;
   onDelete: () => void;
+  onFocusRow: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -79,7 +81,11 @@ function ModTableRow(props: {
         },
         "allow-drag",
       )}
+      data-mod-key={props.mod.key}
+      tabIndex={props.focused ? 0 : -1}
+      aria-selected={props.selected}
       draggable={true}
+      onFocus={props.onFocusRow}
     >
       <td className="center" css={css`padding: 0 !important;`}>
         <FontAwesomeIcon
@@ -185,6 +191,8 @@ export default function ModTable() {
   const enableMod = useModsStore((store) => store.enableMod);
   const disableMod = useModsStore((store) => store.disableMod);
   const disableAllMods = useModsStore((store) => store.disableAllMods);
+  const moveModUp = useModsStore((store) => store.moveModUp);
+  const moveModDown = useModsStore((store) => store.moveModDown);
   const selectedModKey = useModsStore((store) => store.selectedModKey);
   const selectModByKey = useModsStore((store) => store.selectModByKey);
 
@@ -214,6 +222,116 @@ export default function ModTable() {
     dragHandle: ".drag-handle",
     disabled: !!filter,
   });
+
+  const [focusedModKey, setFocusedModKey] = useState<string | undefined>();
+  const [pendingFocusModKey, setPendingFocusModKey] = useState<
+    string | undefined
+  >();
+  const [announcement, setAnnouncement] = useState("");
+
+  const focusModKey = (modKey: string) => {
+    setFocusedModKey(modKey);
+    const row = Array.from(
+      dndParentRef.current?.querySelectorAll<HTMLTableRowElement>(
+        "tr[data-mod-key]",
+      ) ?? [],
+    ).find((row) => row.dataset.modKey === modKey);
+    row?.focus();
+  };
+
+  useEffect(() => {
+    if (!pendingFocusModKey) return;
+    setPendingFocusModKey(undefined);
+    focusModKey(pendingFocusModKey);
+  }, [pendingFocusModKey, mods]);
+
+  const rovingModKey =
+    focusedModKey && filteredMods.some((mod) => mod.key === focusedModKey)
+      ? focusedModKey
+      : filteredMods.at(0)?.key;
+
+  const moveRow = (mod: ManagedMod, offset: number) => {
+    if (offset < 0) {
+      moveModUp(mod.key);
+      setAnnouncement(
+        t("mods.modOrderTab.table.aria.modMovedUp", { title: mod.title }),
+      );
+    } else {
+      moveModDown(mod.key);
+      setAnnouncement(
+        t("mods.modOrderTab.table.aria.modMovedDown", { title: mod.title }),
+      );
+    }
+    setPendingFocusModKey(mod.key);
+  };
+
+  const handleTabKeyDown = (
+    ev: React.KeyboardEvent<HTMLTableSectionElement>,
+  ) => {
+    if (!(ev.target instanceof HTMLElement)) return;
+    const row = ev.target.closest("tr[data-mod-key]");
+    if (!(row instanceof HTMLTableRowElement)) return;
+    const modKey = row.dataset.modKey;
+    if (!modKey) return;
+    const visibleIndex = filteredMods.findIndex((mod) => mod.key === modKey);
+    if (visibleIndex < 0) return;
+
+    if (ev.target instanceof HTMLButtonElement && !ev.shiftKey) {
+      const nextMod = filteredMods.at(visibleIndex + 1);
+      if (nextMod) {
+        ev.preventDefault();
+        focusModKey(nextMod.key);
+      }
+      return;
+    }
+
+    if (ev.target instanceof HTMLInputElement && ev.shiftKey) {
+      ev.preventDefault();
+      focusModKey(modKey);
+    }
+  };
+
+  const handleKeyDown = (ev: React.KeyboardEvent<HTMLTableSectionElement>) => {
+    if (ev.key === "Tab") handleTabKeyDown(ev);
+    if (!(ev.target instanceof HTMLTableRowElement)) return;
+    const modKey = ev.target.dataset.modKey;
+    if (!modKey) return;
+    const visibleIndex = filteredMods.findIndex((mod) => mod.key === modKey);
+    const mod = filteredMods.at(visibleIndex);
+    if (!mod) return;
+
+    if (ev.key === "ArrowUp" || ev.key === "ArrowDown") {
+      const offset = ev.key === "ArrowUp" ? -1 : 1;
+      if (ev.altKey && filter) return;
+      ev.preventDefault();
+      if (ev.altKey) {
+        moveRow(mod, offset);
+      } else {
+        const nextMod = filteredMods.at(visibleIndex + offset);
+        if (nextMod) focusModKey(nextMod.key);
+      }
+      return;
+    }
+
+    if (ev.key === "Home" || ev.key === "End") {
+      ev.preventDefault();
+      const targetMod =
+        ev.key === "Home" ? filteredMods.at(0) : filteredMods.at(-1);
+      if (targetMod) focusModKey(targetMod.key);
+      return;
+    }
+
+    if (ev.key === "Enter" || ev.key === " ") {
+      ev.preventDefault();
+      selectModByKey(modKey);
+      return;
+    }
+
+    if (ev.key === "Delete" || ev.key === "Backspace") {
+      ev.preventDefault();
+      modsEventBus.emitDeleteMod(modKey);
+    }
+  };
 
   return (
     <FlexCol grow css={css`overflow-x: auto;`}>
@@ -245,6 +363,9 @@ export default function ModTable() {
           )}
         </InputGroup>
       </FlexRow>
+      <span aria-live="polite" className="visually-hidden">
+        {announcement}
+      </span>
       <Table
         hover
         size="sm"
@@ -262,6 +383,23 @@ export default function ModTable() {
           }
           & tr:hover td, & tr.selected td {
             background-color: var(--bs-table-hover-bg);
+          }
+          & tr:focus-visible {
+            outline: none;
+          }
+          & tr:focus-visible td {
+            box-shadow: inset 0 2px 0 0 var(--bs-primary),
+              inset 0 -2px 0 0 var(--bs-primary);
+          }
+          & tr:focus-visible td:first-of-type {
+            box-shadow: inset 2px 0 0 0 var(--bs-primary),
+              inset 0 2px 0 0 var(--bs-primary),
+              inset 0 -2px 0 0 var(--bs-primary);
+          }
+          & tr:focus-visible td:last-of-type {
+            box-shadow: inset -2px 0 0 0 var(--bs-primary),
+              inset 0 2px 0 0 var(--bs-primary),
+              inset 0 -2px 0 0 var(--bs-primary);
           }
         `}
       >
@@ -310,7 +448,7 @@ export default function ModTable() {
             </th>
           </tr>
         </thead>
-        <tbody ref={dndParentRef}>
+        <tbody ref={dndParentRef} onKeyDown={handleKeyDown}>
           {filteredMods.map((mod) => (
             <ModTableRow
               key={mod.key}
@@ -318,11 +456,13 @@ export default function ModTable() {
               state={getModState(mod.key)}
               modinfo={getModInfo(mod, modinfos)}
               selected={selectedModKey === mod.key}
+              focused={mod.key === rovingModKey}
               showNexusModsTitle={showNexusModsTitle}
               onEnable={() => enableMod(mod.key)}
               onDisable={() => disableMod(mod.key)}
               onSelect={() => selectModByKey(mod.key)}
               onDelete={() => modsEventBus.emitDeleteMod(mod.key)}
+              onFocusRow={() => setFocusedModKey(mod.key)}
             />
           ))}
         </tbody>

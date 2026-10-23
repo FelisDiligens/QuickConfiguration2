@@ -568,6 +568,10 @@
             "deployPending": "Deploy pending",
             "removePending": "Remove pending"
           }
+        },
+        "aria": {
+          "modMovedUp": "Moved {{title}} up",
+          "modMovedDown": "Moved {{title}} down"
         }
       },
       "detailsPane": {
