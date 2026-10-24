@@ -54,6 +54,39 @@
       ]
     },
     "iniSaveFailed": "Couldn't save ini files",
+    "path": {
+      "goToProfiles": "Go to profiles and change the path under the advanced options.",
+      "ini": {
+        "notSet": "The *.ini parent path has not been set for the active profile.",
+        "invalid": "The *.ini parent path contains invalid characters: {{path}}",
+        "missing": "The *.ini folder does not exist: {{path}}",
+        "description": "The *.ini files contain all of your game settings. Without a valid path, they cannot be loaded or saved. That is why this page is unavailable.",
+        "instructions": [
+          "<p>How to fix this:</p>",
+          "<ul>",
+          "<li>Go to the <a>profiles page</a> and click the <b>Edit profile</b> button of the active profile.</li>",
+          "<li>Open the <b>Advanced options</b> section.</li>",
+          "<li>Enter a valid folder path into the <b>*.ini parent path</b> field, or press the <b>Reset</b> button next to it to automatically detect the correct path.</li>",
+          "<li>Press <b>Save</b> at the bottom of the window.</li>",
+          "</ul>"
+        ]
+      },
+      "mods": {
+        "notSet": "The mods path has not been set for the active profile.",
+        "invalid": "The mods path contains invalid characters: {{path}}",
+        "missing": "The mods folder does not exist: {{path}}",
+        "description": "The mods path tells the app where to store the files of installed mods. Without a valid path, no mods can be installed. That is why this page is unavailable.",
+        "instructions": [
+          "<p>How to fix this:</p>",
+          "<ul>",
+          "<li>Go to the <a>profiles page</a> and click the <b>Edit profile</b> button of the active profile.</li>",
+          "<li>Open the <b>Advanced options</b> section.</li>",
+          "<li>Enter a valid folder path into the <b>Mods path</b> field, or press the <b>Reset</b> button next to it to restore the default path.</li>",
+          "<li>Press <b>Save</b> at the bottom of the window.</li>",
+          "</ul>"
+        ]
+      }
+    },
     "routeNotFound": "The route <code>{{route}}</code> doesn't exist.",
     "gamePathNotSet": "The game path has not been set for the active profile.",
     "iniPathNotSet": "The path to the ini files has not been set for the active profile.",
@@ -517,12 +550,10 @@
   "mods": {
     "title": "Mods",
     "errors": {
-      "noModsPath": "No mods path entered in profile.",
       "unsetModsPath": "Mods path not set.",
       "unsetGamePath": "Game path not set.",
       "unsetModsPathOrGamePath": "Mods path or game path not set.",
-      "unsetIniPathOrIniPrefix": "Ini path or ini prefix not set.",
-      "goToProfilesToSetModsPath": "Go to profiles and set the game path (and mods path under advanced options)."
+      "unsetIniPathOrIniPrefix": "Ini path or ini prefix not set."
     },
     "modOrderTab": {
       "title": "Mod order",

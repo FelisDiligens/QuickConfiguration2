@@ -9,6 +9,12 @@ pub fn is_filename_valid(filename: String) -> bool {
 
 #[tauri::command]
 #[specta::specta]
+pub fn is_path_valid(path: String) -> bool {
+    fs_util::is_path_valid(&path)
+}
+
+#[tauri::command]
+#[specta::specta]
 pub fn sanitize_filename(filename: String, replacement: String) -> CommandResult<String> {
     if let Some(replacement) = replacement.chars().next() {
         Ok(fs_util::sanitize_filename(&filename, replacement))

@@ -54,6 +54,39 @@
       ]
     },
     "iniSaveFailed": "INI-Dateien konnten nicht gespeichert werden",
+    "path": {
+      "goToProfiles": "Gehe zu den Profilen und ändere den Pfad unter den erweiterten Optionen.",
+      "ini": {
+        "notSet": "Der *.ini Ordnerpfad wurde nicht für das aktive Profil gesetzt.",
+        "invalid": "Der *.ini Ordnerpfad enthält ungültige Zeichen: {{path}}",
+        "missing": "Der *.ini Ordner existiert nicht: {{path}}",
+        "description": "Die *.ini Dateien enthalten alle deine Spieleinstellungen. Ohne einen gültigen Pfad können sie weder geladen noch gespeichert werden. Deshalb ist diese Seite nicht verfügbar.",
+        "instructions": [
+          "<p>So kannst du das Problem beheben:</p>",
+          "<ul>",
+          "<li>Gehe zur <a>Profilseite</a> und klicke beim aktiven Profil auf <b>Profil bearbeiten</b>.</li>",
+          "<li>Öffne den Abschnitt <b>Erweiterte Optionen</b>.</li>",
+          "<li>Trage im Feld <b>*.ini Ordnerpfad</b> einen gültigen Ordnerpfad ein, oder drücke daneben den <b>Zurücksetzen</b>-Knopf, um den korrekten Pfad automatisch zu ermitteln.</li>",
+          "<li>Drücke unten im Fenster auf <b>Speichern</b>.</li>",
+          "</ul>"
+        ]
+      },
+      "mods": {
+        "notSet": "Der Modspfad wurde nicht für das aktive Profil gesetzt.",
+        "invalid": "Der Modspfad enthält ungültige Zeichen: {{path}}",
+        "missing": "Der Mods-Ordner existiert nicht: {{path}}",
+        "description": "Der Modspfad legt fest, wo die Dateien installierter Mods gespeichert werden. Ohne einen gültigen Pfad können keine Mods installiert werden. Deshalb ist diese Seite nicht verfügbar.",
+        "instructions": [
+          "<p>So kannst du das Problem beheben:</p>",
+          "<ul>",
+          "<li>Gehe zur <a>Profilseite</a> und klicke beim aktiven Profil auf <b>Profil bearbeiten</b>.</li>",
+          "<li>Öffne den Abschnitt <b>Erweiterte Optionen</b>.</li>",
+          "<li>Trage im Feld <b>Modspfad</b> einen gültigen Ordnerpfad ein, oder drücke daneben den <b>Zurücksetzen</b>-Knopf, um den Standardpfad wiederherzustellen.</li>",
+          "<li>Drücke unten im Fenster auf <b>Speichern</b>.</li>",
+          "</ul>"
+        ]
+      }
+    },
     "routeNotFound": "Die Route <code>{{route}}</code> existiert nicht.",
     "gamePathNotSet": "Der Spielpfad wurde nicht für das aktive Profil gesetzt.",
     "iniPathNotSet": "Der Pfad zu den ini-Dateien wurde nicht für das aktive Profil gesetzt.",
@@ -517,12 +550,10 @@
   "mods": {
     "title": "Mods",
     "errors": {
-      "noModsPath": "Modspfad ist nicht im Profil angegeben.",
       "unsetModsPath": "Modspfad nicht gesetzt.",
       "unsetGamePath": "Spielpfad nicht gesetzt.",
       "unsetModsPathOrGamePath": "Modspfad oder Spielpfad nicht gesetzt.",
-      "unsetIniPathOrIniPrefix": "Inipfad oder Inipräfix nicht gesetzt.",
-      "goToProfilesToSetModsPath": "Gehe zu den Profilen und setze den Spielpfad (und den Modspfad unter den erweiterten Optionen)."
+      "unsetIniPathOrIniPrefix": "Inipfad oder Inipräfix nicht gesetzt."
     },
     "modOrderTab": {
       "title": "Modreihenfolge",

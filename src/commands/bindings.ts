@@ -404,6 +404,9 @@ async downloadWithProgress(downloadUrl: string, downloadFolder: string) : Promis
 async isFilenameValid(filename: string) : Promise<boolean> {
     return await TAURI_INVOKE("is_filename_valid", { filename });
 },
+async isPathValid(path: string) : Promise<boolean> {
+    return await TAURI_INVOKE("is_path_valid", { path });
+},
 async sanitizeFilename(filename: string, replacement: string) : Promise<string> {
     return await TAURI_INVOKE("sanitize_filename", { filename, replacement });
 }

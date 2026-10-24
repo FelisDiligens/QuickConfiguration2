@@ -1,37 +1,15 @@
+import usePathCheck from "@/hooks/usePathCheck";
 import { modsStoreSync } from "@/stores/mods";
 import { useProfilesStore } from "@/stores/profiles";
 import { useSyncLoadState } from "@/utils/zustand";
-import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-import ButtonRow from "../common/ButtonRow";
+import { Trans, useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { PageErrorAlert } from "../common/ErrorAlert";
 import { PageLoadingAlert } from "../common/LoadingAlert";
-import PageAlert from "../common/PageAlert";
 import PageContainer from "../common/PageContainer";
+import PagePathError from "../common/PagePathError";
 import PageTitle from "../common/PageTitle";
-import PreferencesGroup from "../common/PreferencesGroup";
-
-function NoModsPathError(props: { title: string }) {
-  const navigate = useNavigate();
-  const { t } = useTranslation();
-  return (
-    <PageContainer>
-      <PageTitle>{props.title}</PageTitle>
-      <PageAlert>{t("mods.errors.noModsPath")}</PageAlert>
-      <PreferencesGroup subtitle={t("mods.errors.goToProfilesToSetModsPath")}>
-        <ButtonRow
-          onClick={() => navigate("/profiles")}
-          iconRight={<FontAwesomeIcon icon={faChevronRight} />}
-        >
-          {t("settings.profiles.goToProfiles")}
-        </ButtonRow>
-      </PreferencesGroup>
-    </PageContainer>
-  );
-}
 
 interface Props {
   title: string;
@@ -41,14 +19,47 @@ interface Props {
 export function ModsBoundary(props: Props) {
   const { t } = useTranslation();
   const modsPath = useProfilesStore((store) => store.getModsPath());
+  const pathState = usePathCheck(modsPath);
   const { isPending, hasLoaded, error } = useSyncLoadState(modsStoreSync);
 
   useEffect(() => {
-    if (!hasLoaded && modsPath) modsStoreSync.load().catch(console.error);
-  }, []);
+    if (!hasLoaded && modsPath && pathState === "ok")
+      modsStoreSync.load().catch(console.error);
+  }, [pathState]);
 
-  if (!modsPath) {
-    return <NoModsPathError title={props.title} />;
+  if (
+    pathState === "not-set" ||
+    pathState === "invalid" ||
+    pathState === "missing"
+  ) {
+    return (
+      <PagePathError
+        title={props.title}
+        state={pathState}
+        path={modsPath}
+        i18nKeyPrefix="errors.path.mods"
+      >
+        <p>{t("errors.path.mods.description")}</p>
+        <Trans
+          t={t}
+          i18nKey="errors.path.mods.instructions"
+          components={{
+            ul: <ul />,
+            li: <li />,
+            b: <b />,
+            a: <Link to="/profiles" />,
+          }}
+          tOptions={{ joinArrays: "" }}
+        />
+      </PagePathError>
+    );
+  } else if (pathState === "checking") {
+    return (
+      <PageContainer>
+        <PageTitle>{props.title}</PageTitle>
+        <PageLoadingAlert>{t("common.loading")}</PageLoadingAlert>
+      </PageContainer>
+    );
   } else if (error) {
     return (
       <PageContainer>

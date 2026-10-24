@@ -265,3 +265,81 @@ pub mod copy_dir_all_with_progress_tests {
         }
     }
 }
+
+pub mod is_path_valid_tests {
+    use crate::utils::fs_util::is_path_valid;
+
+    #[test]
+    fn test_empty_path() {
+        assert!(!is_path_valid(""), "Empty path should be invalid");
+    }
+
+    #[test]
+    fn test_valid_paths() {
+        assert!(is_path_valid("folder"));
+        assert!(is_path_valid("folder/sub_folder/file.txt"));
+        assert!(is_path_valid("."));
+        assert!(is_path_valid(".."));
+        assert!(is_path_valid("folder/../other"));
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn test_valid_windows_paths() {
+        assert!(is_path_valid(r"C:\Program Files\Fallout 76"));
+        assert!(is_path_valid(r"C:\Games\My Mods\_foo (76)\Data"));
+        assert!(is_path_valid(r"\\server\share\folder"));
+        assert!(is_path_valid(r"\\?\C:\Users\test\Mods"));
+        assert!(is_path_valid(r"C:"));
+    }
+
+    #[cfg(target_os = "windows")]
+    #[test]
+    fn test_invalid_windows_paths() {
+        assert!(
+            !is_path_valid(r"C:\Games\Fallout?76"),
+            "? character should make path invalid"
+        );
+        assert!(
+            !is_path_valid(r"C:\Games\Fallout*76"),
+            "* character should make path invalid"
+        );
+        assert!(
+            !is_path_valid(r"C:\Games\Fallout<76>"),
+            "< and > characters should make path invalid"
+        );
+        assert!(
+            !is_path_valid(r"C:\Games\Fallout|76"),
+            "| character should make path invalid"
+        );
+        assert!(
+            !is_path_valid(r"C:\Games\Fallout."),
+            "Trailing dot should make path invalid"
+        );
+        assert!(
+            !is_path_valid(r"C:\Games\CON"),
+            "Reserved name as component should make path invalid"
+        );
+    }
+
+    #[cfg(any(target_os = "linux", target_os = "macos"))]
+    #[test]
+    fn test_valid_unix_paths() {
+        assert!(is_path_valid(
+            "/home/user/.steam/steamapps/common/Fallout 76"
+        ));
+        assert!(is_path_valid("/mnt/games/My_Mods"));
+    }
+
+    #[test]
+    fn test_control_characters() {
+        assert!(
+            !is_path_valid("folder/\x00name"),
+            "Null character should make path invalid"
+        );
+        assert!(
+            !is_path_valid("folder/\x1Fname"),
+            "Control character 31 should make path invalid"
+        );
+    }
+}

@@ -574,6 +574,35 @@ fn is_filename_valid_unix(filename: &str) -> bool {
     true
 }
 
+/// Checks if a path is valid by validating all of its components as filenames.
+/// Prefixes (e.g. `C:`), root directories, `.` and `..` components are allowed.
+/// Returns `true` if the path is valid, `false` otherwise.
+pub fn is_path_valid(path: &str) -> bool {
+    use std::path::Component;
+
+    if path.is_empty() {
+        return false;
+    }
+
+    for component in Path::new(path).components() {
+        let name = match component {
+            Component::Prefix(_)
+            | Component::RootDir
+            | Component::CurDir
+            | Component::ParentDir => continue,
+            Component::Normal(name) => name,
+        };
+        let Some(name) = name.to_str() else {
+            return false;
+        };
+        if !is_filename_valid(name) {
+            return false;
+        }
+    }
+
+    true
+}
+
 /// Replaces invalid filename characters with a replacement character.
 /// Only replaces invalid characters; does not handle reserved names or structural issues.
 pub fn sanitize_filename(filename: &str, replacement: char) -> String {
