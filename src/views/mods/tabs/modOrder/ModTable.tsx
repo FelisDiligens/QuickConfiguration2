@@ -65,12 +65,21 @@ function ModTableRow(props: {
   if (!props.mod.enabled && !props.state)
     status = t("mods.modOrderTab.table.rows.status.disabled");
   const rootFolder = props.mod.options.rootFolder || ".";
-  const endorsed =
-    props.modinfo?.endorseStatus === "Endorsed"
-      ? t("mods.modOrderTab.table.rows.endorsedYes")
-      : props.modinfo?.endorseStatus
-        ? t("mods.modOrderTab.table.rows.endorsedNo")
-        : "-/-";
+  let endorsement;
+  switch (props.modinfo?.endorseStatus) {
+    case "Endorsed":
+      endorsement = t("mods.modOrderTab.table.rows.endorsed");
+      break;
+    case "Abstained":
+      endorsement = t("mods.modOrderTab.table.rows.abstained");
+      break;
+    case "Undecided":
+      endorsement = t("mods.modOrderTab.table.rows.undecided");
+      break;
+    default:
+      endorsement = "-/-";
+      break;
+  }
 
   return (
     <tr
@@ -171,7 +180,29 @@ function ModTableRow(props: {
       <td className="center">
         <code>{rootFolder}</code>
       </td>
-      <td className="center">{endorsed}</td>
+      <td
+        className="center"
+        css={{
+          /*
+           * - Endorsed: green
+           * - Abstained: red
+           * - Undecided: inherit
+           * - Undefined: gray
+           */
+          color:
+            props.modinfo?.endorseStatus === "Endorsed"
+              ? "var(--bs-success) !important"
+              : props.modinfo?.endorseStatus === "Abstained"
+                ? "var(--bs-danger) !important"
+                : props.modinfo?.endorseStatus === "Undecided"
+                  ? "inherit"
+                  : "gray !important",
+          fontStyle:
+            !needsDeployment && !props.mod.enabled ? "italic" : undefined,
+        }}
+      >
+        {endorsement}
+      </td>
       <td className="center">
         <Button variant="outline-danger" size="sm" onClick={props.onDelete}>
           <FontAwesomeIcon icon={faTrash} />
@@ -441,7 +472,7 @@ export default function ModTable() {
               {t("mods.modOrderTab.table.header.rootFolder")}
             </th>
             <th className="center">
-              {t("mods.modOrderTab.table.header.endorsed")}
+              {t("mods.modOrderTab.table.header.endorsement")}
             </th>
             <th className="center">
               {t("mods.modOrderTab.table.header.actions")}

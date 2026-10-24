@@ -551,15 +551,16 @@
           "version": "Version",
           "status": "Status",
           "rootFolder": "Installiere nach",
-          "endorsed": "Empfohlen",
+          "endorsement": "Empfehlung",
           "actions": "Aktionen"
         },
         "rows": {
           "byAuthor": "von {{author}}",
           "enabled": "aktiviert",
           "disabled": "deaktiviert",
-          "endorsedYes": "Ja",
-          "endorsedNo": "Nein",
+          "endorsed": "Empfohlen",
+          "abstained": "Enthalten",
+          "undecided": "Unentschieden",
           "deleteButton": "Löschen",
           "status": {
             "enabled": "aktiviert",

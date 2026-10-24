@@ -551,15 +551,16 @@
           "version": "Version",
           "status": "Status",
           "rootFolder": "Install into",
-          "endorsed": "Endorsed",
+          "endorsement": "Endorsement",
           "actions": "Actions"
         },
         "rows": {
           "byAuthor": "by {{author}}",
           "enabled": "Enabled",
           "disabled": "Disabled",
-          "endorsedYes": "Yes",
-          "endorsedNo": "No",
+          "endorsed": "Endorsed",
+          "abstained": "Abstained",
+          "undecided": "Undecided",
           "deleteButton": "Delete",
           "status": {
             "enabled": "Enabled",
