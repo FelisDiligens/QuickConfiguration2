@@ -134,8 +134,8 @@ export default function ModInstallationDetailsModal(props: Props) {
   const [validFolderName, setValidFolderName] = useState(false);
 
   const disableInstallButton =
-    (updateModOption === "update" && updateModKey === "none")
-    || !validFolderName;
+    (updateModOption === "update" && updateModKey === "none") ||
+    !validFolderName;
 
   const getReadmes = (
     path: string,
@@ -538,9 +538,12 @@ export default function ModInstallationDetailsModal(props: Props) {
                   }
                   onBlur={() => {
                     if (!validFolderName)
-                      commands.sanitizeFilename(mod.folderName, "_")
-                        .then(folderName => setMod((mod) => ({ ...mod, folderName })))
-                        .catch(console.error)
+                      commands
+                        .sanitizeFilename(mod.folderName, "_")
+                        .then((folderName) =>
+                          setMod((mod) => ({ ...mod, folderName })),
+                        )
+                        .catch(console.error);
                   }}
                   isInvalid={!validFolderName}
                   disabled={updateModKey !== "none"}

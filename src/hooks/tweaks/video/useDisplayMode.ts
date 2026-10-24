@@ -2,10 +2,7 @@ import ini from "@/commands/ini";
 import useTweak from "@/hooks/tweaks/useTweak";
 
 export type DisplayMode =
-  | "fullscreen"
-  | "windowed"
-  | "borderlessWindowed"
-  | "borderlessFullscreen";
+  "fullscreen" | "windowed" | "borderlessWindowed" | "borderlessFullscreen";
 
 export default function useDisplayMode() {
   return useTweak<DisplayMode>(

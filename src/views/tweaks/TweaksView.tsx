@@ -20,12 +20,7 @@ import GeneralTab from "./tabs/GeneralTab";
 import VideoTab from "./tabs/VideoTab";
 
 type Tabs =
-  | "general"
-  | "video"
-  | "audio"
-  | "controls"
-  | "camera"
-  | "accessibility";
+  "general" | "video" | "audio" | "controls" | "camera" | "accessibility";
 export const activeTabAtom = atom<Tabs>("general");
 
 function TweaksPageContainer({ children }: { children: React.ReactNode }) {
