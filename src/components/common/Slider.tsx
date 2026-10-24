@@ -7,6 +7,7 @@ import { getTrackBackground, Range } from "react-range";
 import { AppTheme } from "../MyThemeProvider";
 
 interface Props {
+  label?: string;
   value: number;
   max: number;
   min: number;
@@ -55,6 +56,7 @@ export default function Slider({ step, min, max, className, ...props }: Props) {
   );
   return (
     <Range
+      label={props.label}
       values={values}
       step={step}
       min={min}

@@ -219,7 +219,10 @@ export default function Navigation() {
           padding-right: ${collapsed ? "0px" : "4px"};
         `}
       >
-        <NavActionButton onClick={launchGame}>
+        <NavActionButton
+          title={t("navigation.playButton")}
+          onClick={launchGame}
+        >
           <FontAwesomeIcon icon={faPlay} color="LimeGreen" />
           <span>{t("navigation.playButton")}</span>
         </NavActionButton>
@@ -233,7 +236,7 @@ export default function Navigation() {
             flex-grow: 1;
           `}
         >
-          <NavActionDropdownToggle>
+          <NavActionDropdownToggle title={t("navigation.browseButton")}>
             <FontAwesomeIcon icon={faFolder} color="#ffa500" />
             <span>{t("navigation.browseButton")}</span>
           </NavActionDropdownToggle>

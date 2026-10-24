@@ -41,7 +41,7 @@ export default function Layout() {
         overflow-x: hidden;
       `}
     >
-      <div
+      <nav
         css={css`
           display: flex;
           flex: 0 0 auto;
@@ -55,8 +55,8 @@ export default function Layout() {
         `}
       >
         <Navigation />
-      </div>
-      <div
+      </nav>
+      <main
         css={css`
           display: flex;
           flex: 1 0 0;
@@ -69,7 +69,7 @@ export default function Layout() {
         `}
       >
         <Outlet />
-      </div>
+      </main>
       <Globals />
     </div>
   );

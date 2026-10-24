@@ -10,6 +10,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, ListGroup } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 
 const iconStyle = css`
   min-width: 24px;
@@ -30,6 +31,7 @@ interface Props {
 }
 
 export default function ProfileListRow(props: Props) {
+  const { t } = useTranslation();
   const handleKeyDown = (ev: React.KeyboardEvent) => {
     if (ev.key === "Enter" || ev.key === " ") {
       ev.preventDefault();
@@ -55,6 +57,7 @@ export default function ProfileListRow(props: Props) {
         tabIndex={0}
         onClick={props.onSelect}
         onKeyDown={handleKeyDown}
+        aria-pressed={props.active}
         css={css`
           display: flex;
           flex-grow: 1;
@@ -90,6 +93,7 @@ export default function ProfileListRow(props: Props) {
         {props.profileName}
       </div>
       <Button
+        title={t("profiles.moveUpButton")}
         variant="link"
         css={(theme: AppTheme) => css`
           ${textColor(props.active)(theme)}
@@ -103,6 +107,7 @@ export default function ProfileListRow(props: Props) {
         <FontAwesomeIcon icon={faArrowUp} />
       </Button>
       <Button
+        title={t("profiles.moveDownButton")}
         variant="link"
         css={(theme: AppTheme) => css`
           ${textColor(props.active)(theme)}

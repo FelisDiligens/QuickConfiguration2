@@ -83,7 +83,8 @@ const navButton =
         }
 
         & > span {
-          display: none;
+          text-indent: 9999;
+          overflow: hidden;
         }
 
         & > img,

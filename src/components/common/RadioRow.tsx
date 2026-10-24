@@ -41,7 +41,7 @@ export default function RadioRow(props: Props) {
           </FlexCol>
           {props.imageSrc && (
             <FlexCol noGrow css={css`padding-left: 5px;`}>
-              <img src={props.imageSrc} />
+              <img src={props.imageSrc} alt={props.title} />
             </FlexCol>
           )}
         </>

@@ -21,7 +21,11 @@
     "reload": "Neu laden",
     "success": "Erfolg",
     "showMore": "Mehr anzeigen",
-    "showLess": "Weniger anzeigen"
+    "showLess": "Weniger anzeigen",
+    "mod_one": "Mod",
+    "mod_other": "Mods",
+    "version": "Version",
+    "aVersion": "Version {{version}}"
   },
   "errors": {
     "anErrorOccurred": "Ein Fehler ist aufgetreten",
@@ -93,7 +97,9 @@
     "settingsPage": "Einstellungen",
     "nexusmodsPage": "NexusMods",
     "selectedProfile": "Ausgewähltes Profil:",
-    "noProfile": "Kein Profil"
+    "noProfile": "Kein Profil",
+    "expandNavigation": "Navigationsleiste aufklappen",
+    "collapseNavigation": "Navigationsleiste zuklappen"
   },
   "home": {
     "title": "Willkommen zur Schnellkonfiguration",
@@ -571,12 +577,16 @@
           }
         },
         "aria": {
-          "modMovedUp": "{{title}} nach oben verschoben",
-          "modMovedDown": "{{title}} nach unten verschoben"
+          "modMovedUp": "{{title}} nach oben verschoben auf Position {{position}}",
+          "modMovedDown": "{{title}} nach unten verschoben auf Position {{position}}"
         }
       },
       "detailsPane": {
         "enableThisMod": "Diese Mod aktivieren",
+        "expandSidePanel": "Seitenleiste aufklappen",
+        "collapseSidePanel": "Seitenleiste zuklappen",
+        "endorse": "Diese Mod empfehlen",
+        "abstain": "Darauf verzichten diese Mod zu empfehlen",
         "endorsedText": "Du hast diese Mod empfohlen.",
         "abstainedText": "Du hast darauf verzichtet diese Mod zu empfehlen.",
         "undecidedText": "Du hast diese Mod noch nicht empfohlen.",
@@ -976,6 +986,8 @@
   },
   "profiles": {
     "title": "Profile",
+    "moveUpButton": "Nach oben verschieben",
+    "moveDownButton": "Nach unten verschieben",
     "addButton": "Profil hinzufügen",
     "editButton": "Profil bearbeiten",
     "deleteButton": "Profil löschen",

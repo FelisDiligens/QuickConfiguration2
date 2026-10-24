@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { atom, useAtom } from "jotai";
 import { useEffect } from "react";
 import { Button } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 import Archive2Modals from "./modals/archive2/Archive2Modals";
 import CommonModals from "./modals/common/CommonModals";
 import ModActionModals from "./modals/modActions/ModActionModals";
@@ -24,6 +25,8 @@ import ToolRow from "./ToolRow";
 const showDetailsAtom = atom(true);
 
 export default function ModOrderTab() {
+  const { t } = useTranslation();
+
   const mods = useModsStore((store) => store.mods);
   const selectedModIndex = useModsStore((store) => store.getSelectedModIndex());
   const [showDetails, setShowDetails] = useAtom(showDetailsAtom);
@@ -55,12 +58,18 @@ export default function ModOrderTab() {
         {mods[selectedModIndex] && (
           <Button
             onClick={() => setShowDetails((value) => !value)}
+            title={
+              showDetails
+                ? t("mods.modOrderTab.detailsPane.collapseSidePanel")
+                : t("mods.modOrderTab.detailsPane.expandSidePanel")
+            }
+            aria-pressed={showDetails}
             variant="secondary"
             css={css`
-            border-radius: 0;
-            width: 24px;
-            padding: 0;
-          `}
+              border-radius: 0;
+              width: 24px;
+              padding: 0;
+            `}
           >
             {showDetails ? (
               <FontAwesomeIcon icon={faCaretRight} />

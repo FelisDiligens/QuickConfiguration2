@@ -80,6 +80,19 @@ function ModTableRow(props: {
       endorsement = "-/-";
       break;
   }
+  const description = [
+    t("common.mod", { count: 1 }),
+    modName
+      ? modName + t("common.aVersion", { version: props.mod.version })
+      : undefined,
+    status,
+    t("mods.modOrderTab.table.header.rootFolder") + " " + rootFolder,
+    props.modinfo?.endorseStatus
+      ? t("mods.modOrderTab.table.header.endorsement") + ": " + endorsement
+      : undefined,
+  ]
+    .filter((x) => !!x)
+    .join(", ");
 
   return (
     <tr
@@ -93,6 +106,7 @@ function ModTableRow(props: {
       data-mod-key={props.mod.key}
       tabIndex={props.focused ? 0 : -1}
       aria-selected={props.selected}
+      aria-label={description}
       draggable={true}
       onFocus={props.onFocusRow}
     >
@@ -283,14 +297,20 @@ export default function ModTable() {
 
   const moveRow = (mod: ManagedMod, offset: number) => {
     if (offset < 0) {
-      moveModUp(mod.key);
+      const newIndex = moveModUp(mod.key);
       setAnnouncement(
-        t("mods.modOrderTab.table.aria.modMovedUp", { title: mod.title }),
+        t("mods.modOrderTab.table.aria.modMovedUp", {
+          title: mod.title,
+          position: newIndex + 1,
+        }),
       );
     } else {
-      moveModDown(mod.key);
+      const newIndex = moveModDown(mod.key);
       setAnnouncement(
-        t("mods.modOrderTab.table.aria.modMovedDown", { title: mod.title }),
+        t("mods.modOrderTab.table.aria.modMovedDown", {
+          title: mod.title,
+          position: newIndex + 1,
+        }),
       );
     }
     setPendingFocusModKey(mod.key);

@@ -26,6 +26,7 @@ export default function SliderRow(props: Props) {
         <>
           <FlexCol shrink fullWidth>
             <Slider
+              label={props.title}
               value={_.isFinite(props.value) ? props.value : 0}
               max={props.max}
               min={props.min}

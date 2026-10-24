@@ -21,7 +21,11 @@
     "reload": "Reload",
     "success": "Success",
     "showMore": "Show more",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "mod_one": "Mod",
+    "mod_other": "Mods",
+    "version": "Version",
+    "aVersion": "Version {{version}}"
   },
   "errors": {
     "anErrorOccurred": "An error occurred",
@@ -93,7 +97,9 @@
     "settingsPage": "Settings",
     "nexusmodsPage": "NexusMods",
     "selectedProfile": "Selected profile:",
-    "noProfile": "No profile"
+    "noProfile": "No profile",
+    "expandNavigation": "Expand navigation panel",
+    "collapseNavigation": "Collapse navigation panel"
   },
   "home": {
     "title": "Welcome to Quick Configuration",
@@ -571,12 +577,16 @@
           }
         },
         "aria": {
-          "modMovedUp": "Moved {{title}} up",
-          "modMovedDown": "Moved {{title}} down"
+          "modMovedUp": "Moved {{title}} up to position {{position}}",
+          "modMovedDown": "Moved {{title}} down to position {{position}}"
         }
       },
       "detailsPane": {
         "enableThisMod": "Enable this mod",
+        "expandSidePanel": "Expand side panel",
+        "collapseSidePanel": "Collapse side panel",
+        "endorse": "Endorse this mod",
+        "abstain": "Abstain from endorsing this mod",
         "endorsedText": "You have endorsed this mod.",
         "abstainedText": "You have abstained from endorsing this mod.",
         "undecidedText": "You haven't endorsed this mod yet.",
@@ -976,6 +986,8 @@
   },
   "profiles": {
     "title": "Profiles",
+    "moveUpButton": "Move up",
+    "moveDownButton": "Move down",
     "addButton": "Add profile",
     "editButton": "Edit profile",
     "deleteButton": "Delete profile",

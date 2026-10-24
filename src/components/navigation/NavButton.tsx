@@ -37,6 +37,7 @@ export default function NavButton(props: Props) {
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      aria-pressed={active}
     >
       {props.children}
     </div>

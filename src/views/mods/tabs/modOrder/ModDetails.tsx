@@ -142,20 +142,22 @@ function StickyHeader(props: {
           margin-top: 4px;
         `}
       >
-        <span
+        <h1
           css={css`
             font-size: 1.25em;
             width: 270px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            margin: 0;
           `}
         >
           {props.showNexusModsTitle && props.modinfo?.name
             ? props.modinfo.name
             : props.mod.title}
-        </span>
+        </h1>
         <Form.Check
+          id="details_pane_enable_this_mod"
           checked={props.mod.enabled}
           onChange={(ev) => {
             if (ev.target.checked) {
@@ -182,6 +184,7 @@ function StickyHeader(props: {
             variant="outline-success"
             onClick={() => modsEventBus.emitNexusModsEndorseMod(props.mod.key)}
             disabled={props.modinfo?.endorseStatus === "Endorsed"}
+            title={t("mods.modOrderTab.detailsPane.endorse")}
           >
             <FontAwesomeIcon icon={faThumbsUp} />
           </Button>
@@ -189,6 +192,7 @@ function StickyHeader(props: {
             variant="outline-danger"
             onClick={() => modsEventBus.emitNexusModsAbstainMod(props.mod.key)}
             disabled={props.modinfo?.endorseStatus === "Abstained"}
+            title={t("mods.modOrderTab.detailsPane.abstain")}
           >
             <FontAwesomeIcon icon={faThumbsDown} />
           </Button>
@@ -408,6 +412,7 @@ function Options(props: {
                     }));
                     e.preventDefault();
                   }}
+                  role="button"
                 >
                   {t("mods.modOrderTab.detailsPane.setLatestVersion")}
                 </a>
@@ -453,6 +458,7 @@ export default function ModDetails() {
 
   return (
     <FlexCol
+      as="aside"
       noShrink
       css={css`
         width: 400px;

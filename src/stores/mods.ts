@@ -31,8 +31,8 @@ interface Actions {
   setMod: (key: string, mod: React.SetStateAction<ManagedMod>) => void;
   setModEnabled: (key: string, enabled: boolean) => void;
   deleteMod: (key: string) => void;
-  moveModUp: (key: string) => void;
-  moveModDown: (key: string) => void;
+  moveModUp: (key: string) => number;
+  moveModDown: (key: string) => number;
   enableMod: (key: string) => void;
   disableMod: (key: string) => void;
   disableAllMods: () => void;
@@ -106,7 +106,7 @@ export const useModsStore = create<ModsStore>()((set, get) => ({
   },
   moveModUp: (key) => {
     const index = get().mods.findIndex((mod) => mod.key == key);
-    if (index <= 0) return;
+    if (index <= 0) return index;
     set({
       mods: produce(get().mods, (mods) => {
         const temp = mods[index];
@@ -115,10 +115,11 @@ export const useModsStore = create<ModsStore>()((set, get) => ({
         mods[index - 1] = temp;
       }),
     });
+    return index - 1;
   },
   moveModDown: (key) => {
     const index = get().mods.findIndex((mod) => mod.key == key);
-    if (index == -1 || index == get().mods.length - 1) return;
+    if (index == -1 || index == get().mods.length - 1) return index;
     set({
       mods: produce(get().mods, (mods) => {
         const temp = mods[index];
@@ -127,6 +128,7 @@ export const useModsStore = create<ModsStore>()((set, get) => ({
         mods[index + 1] = temp;
       }),
     });
+    return index + 1;
   },
   enableMod: (key) => get().setModEnabled(key, true),
   disableMod: (key) => get().setModEnabled(key, false),
