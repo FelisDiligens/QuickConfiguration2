@@ -401,6 +401,9 @@ async downloadTranslations() : Promise<string[]> {
 async downloadWithProgress(downloadUrl: string, downloadFolder: string) : Promise<string> {
     return await TAURI_INVOKE("download_with_progress", { downloadUrl, downloadFolder });
 },
+async removeFile(path: string) : Promise<null> {
+    return await TAURI_INVOKE("remove_file", { path });
+},
 async isFilenameValid(filename: string) : Promise<boolean> {
     return await TAURI_INVOKE("is_filename_valid", { filename });
 },

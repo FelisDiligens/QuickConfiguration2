@@ -1,5 +1,17 @@
+use std::fs;
+
+use tap::TapFallible;
+
 use crate::commands::errors::{CommandError, CommandResult};
 use crate::utils::fs_util;
+
+#[tauri::command]
+#[specta::specta]
+pub fn remove_file(path: String) -> CommandResult<()> {
+    fs::remove_file(&path)
+        .tap_err(|err| log::error!("Couldn't remove file `{path}`: {err}"))
+        .map_err(CommandError::from)
+}
 
 #[tauri::command]
 #[specta::specta]

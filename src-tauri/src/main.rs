@@ -117,6 +117,7 @@ fn main() {
             commands::translations::check_for_translation_updates,
             commands::translations::download_translations,
             commands::download::download_with_progress,
+            commands::fs::remove_file,
             commands::fs::is_filename_valid,
             commands::fs::is_path_valid,
             commands::fs::sanitize_filename,

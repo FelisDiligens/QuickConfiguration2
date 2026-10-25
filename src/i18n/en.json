@@ -936,7 +936,18 @@
   },
   "gallery": {
     "title": "Gallery",
-    "noImagesFound": "No images found"
+    "noImagesFound": "No images found",
+    "toolbar": {
+      "deleteScreenshot": "Delete screenshot",
+      "openScreenshot": "Open screenshot",
+      "openContainingFolder": "Open folder containing the screenshot",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    },
+    "deleteScreenshot": {
+      "title": "Delete screenshot?",
+      "text": "Are you sure you want to delete {{path}}? This cannot be undone."
+    }
   },
   "nexusmods": {
     "title": "NexusMods Integration",

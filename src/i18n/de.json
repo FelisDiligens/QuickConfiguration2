@@ -936,7 +936,18 @@
   },
   "gallery": {
     "title": "Galerie",
-    "noImagesFound": "Keine Bilder gefunden"
+    "noImagesFound": "Keine Bilder gefunden",
+    "toolbar": {
+      "deleteScreenshot": "Screenshot löschen",
+      "openScreenshot": "Screenshot öffnen",
+      "openContainingFolder": "Ordner mit dem Screenshot öffnen",
+      "zoomIn": "Hineinzoomen",
+      "zoomOut": "Herauszoomen"
+    },
+    "deleteScreenshot": {
+      "title": "Screenshot löschen?",
+      "text": "Bist du sicher, dass du {{path}} löschen möchtest? Dies kann nicht rückgängig gemacht werden."
+    }
   },
   "nexusmods": {
     "title": "NexusMods-Integration",
