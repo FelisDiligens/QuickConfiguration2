@@ -11,7 +11,7 @@ fi
 VERSION="$1"
 
 # Update package.json
-sed -i -E 's/"version": "[^"]*"/"version": "'"${VERSION}"'"/' package.json
+sed -i -E '0,/"version":/ s/"version": "[^"]*"/"version": "'"${VERSION}"'"/' package.json
 
 # Update Cargo.toml - match version under [package] only
 sed -i -E '/^\[package\]$/,/^\[/ s/^version = "[^"]*"/version = "'"${VERSION}"'"/' src-tauri/Cargo.toml
