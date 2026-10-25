@@ -11,7 +11,7 @@ if [[ ${1:-} == "-y" ]]; then
 fi
 
 # Get version from package.json
-VERSION="$(grep '"version":' package.json | cut -d'"' -f4)"
+VERSION="$(grep -m 1 '"version":' package.json | cut -d'"' -f4)"
 
 if [[ -z "$VERSION" ]]; then
     echo "Error: Couldn't get version from package.json"
