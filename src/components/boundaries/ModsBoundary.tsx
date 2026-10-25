@@ -35,7 +35,7 @@ export function ModsBoundary(props: Props) {
       <PagePathError
         title={props.title}
         state={gamePathState}
-        path={modsPath}
+        path={gamePath}
         i18nKeyPrefix="errors.path.game"
       >
         <p>{t("errors.path.game.description")}</p>
