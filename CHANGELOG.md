@@ -1,6 +1,19 @@
+## What's new in v2.0.0-beta.7
+
+This update adds new toolbar buttons to the gallery, makes the mod table keyboard-navigable, and fixes a few bugs:
+
+- Added: Toolbar buttons in the gallery (Open screenshot, open screenshot folder, delete screenshot, zoom in, zoom out)
+- Improved: Mod table is now keyboard-navigable (Arrow up/down to focus mod, Alt+Arrow up/down to reorder mod, Enter/Space to select mod and open side bar, Delete/Backspace to delete a focused mod)
+- Improved: Show endorsement state (Endorsed/Abstained/Undecided) instead of Yes/No in the mod table
+- Improved: Added some labels, landmarks and button pressed states for screen readers
+- Fixed: Loading mod information of a hidden mod from NexusMods API ([Issue #6 - BUG: missing field name at line 1 column 625](https://github.com/FelisDiligens/QuickConfiguration2/issues/6))
+- Fixed: Block tweaks, pipboy, and mods view from loading if the profile is not setup correctly. Instead it shows a more helpful error message. Might prevent OS error 123 ("ERROR_INVALID_NAME").
+- Updated dependencies
+
 ## What's new in v2.0.0-beta.6
 
 This update adds two new settings for the ini files and fixes a few I/O errors:
+
 - Added: Setting to make ini files read-only
 - Added: Setting to bypass read-only state when saving ini files (If the ini files are set read-only, this setting allows the app to save them anyways)
 - Improved: Prevent creating mods with invalid folder names
