@@ -1,5 +1,5 @@
-import usePathCheck from "@/hooks/usePathCheck";
 import useIni from "@/hooks/tweaks/useIni";
+import usePathCheck from "@/hooks/usePathCheck";
 import { useProfilesStore } from "@/stores/profiles";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -20,11 +20,7 @@ export function IniBoundary(props: Props) {
   const pathState = usePathCheck(iniPath);
   const [isLoading, error, errorContext, reload] = useIni();
 
-  if (
-    pathState === "not-set" ||
-    pathState === "invalid" ||
-    pathState === "missing"
-  ) {
+  if (pathState !== "ok" && pathState !== "checking") {
     return (
       <PagePathError
         title={props.title}
@@ -53,6 +49,13 @@ export function IniBoundary(props: Props) {
         <PageLoadingAlert>{t("common.loading")}</PageLoadingAlert>
       </PageContainer>
     );
+  } else if (isLoading) {
+    return (
+      <PageContainer>
+        <PageTitle>{props.title}</PageTitle>
+        <PageLoadingAlert>{t("common.loading-ini")}</PageLoadingAlert>
+      </PageContainer>
+    );
   } else if (error) {
     return (
       <PageIniErrorDetails
@@ -61,13 +64,6 @@ export function IniBoundary(props: Props) {
         context={errorContext}
         reloadIni={reload}
       />
-    );
-  } else if (isLoading) {
-    return (
-      <PageContainer>
-        <PageTitle>{props.title}</PageTitle>
-        <PageLoadingAlert>{t("common.loading-ini")}</PageLoadingAlert>
-      </PageContainer>
     );
   }
   return <>{props.children}</>;

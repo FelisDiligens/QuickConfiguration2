@@ -1,3 +1,4 @@
+import useGamePathCheck from "@/hooks/useGamePathCheck";
 import usePathCheck from "@/hooks/usePathCheck";
 import { modsStoreSync } from "@/stores/mods";
 import { useProfilesStore } from "@/stores/profiles";
@@ -18,24 +19,44 @@ interface Props {
 
 export function ModsBoundary(props: Props) {
   const { t } = useTranslation();
+  const gamePath = useProfilesStore((store) => store.getGamePath());
   const modsPath = useProfilesStore((store) => store.getModsPath());
-  const pathState = usePathCheck(modsPath);
+  const gamePathState = useGamePathCheck(gamePath);
+  const modsPathState = usePathCheck(modsPath);
   const { isPending, hasLoaded, error } = useSyncLoadState(modsStoreSync);
 
   useEffect(() => {
-    if (!hasLoaded && modsPath && pathState === "ok")
+    if (!hasLoaded && modsPath && modsPathState === "ok")
       modsStoreSync.load().catch(console.error);
-  }, [pathState]);
+  }, [modsPathState]);
 
-  if (
-    pathState === "not-set" ||
-    pathState === "invalid" ||
-    pathState === "missing"
-  ) {
+  if (gamePathState !== "ok" && gamePathState !== "checking") {
     return (
       <PagePathError
         title={props.title}
-        state={pathState}
+        state={gamePathState}
+        path={modsPath}
+        i18nKeyPrefix="errors.path.game"
+      >
+        <p>{t("errors.path.game.description")}</p>
+        <Trans
+          t={t}
+          i18nKey="errors.path.game.instructions"
+          components={{
+            ul: <ul />,
+            li: <li />,
+            b: <b />,
+            a: <Link to="/profiles" />,
+          }}
+          tOptions={{ joinArrays: "" }}
+        />
+      </PagePathError>
+    );
+  } else if (modsPathState !== "ok" && modsPathState !== "checking") {
+    return (
+      <PagePathError
+        title={props.title}
+        state={modsPathState}
         path={modsPath}
         i18nKeyPrefix="errors.path.mods"
       >
@@ -53,7 +74,7 @@ export function ModsBoundary(props: Props) {
         />
       </PagePathError>
     );
-  } else if (pathState === "checking") {
+  } else if (isPending || !hasLoaded || modsPathState === "checking") {
     return (
       <PageContainer>
         <PageTitle>{props.title}</PageTitle>
@@ -65,13 +86,6 @@ export function ModsBoundary(props: Props) {
       <PageContainer>
         <PageTitle>{props.title}</PageTitle>
         <PageErrorAlert reason={error} />
-      </PageContainer>
-    );
-  } else if (isPending || !hasLoaded) {
-    return (
-      <PageContainer>
-        <PageTitle>{props.title}</PageTitle>
-        <PageLoadingAlert>{t("common.loading")}</PageLoadingAlert>
       </PageContainer>
     );
   }

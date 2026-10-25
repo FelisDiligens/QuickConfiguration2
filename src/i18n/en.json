@@ -85,6 +85,21 @@
           "<li>Press <b>Save</b> at the bottom of the window.</li>",
           "</ul>"
         ]
+      },
+      "game": {
+        "notSet": "The game installation path has not been set for the active profile.",
+        "invalid": "The game installation path contains invalid characters: {{path}}",
+        "missing": "The game installation folder does not exist: {{path}}",
+        "notGame": "The given game installation path doesn't point to a valid Fallout 76 installation folder: {{path}}",
+        "description": "The game installation path tells the app where to install mod files to. Without a valid path, no mods can be installed. That is why this page is unavailable.",
+        "instructions": [
+          "<p>How to fix this:</p>",
+          "<ul>",
+          "<li>Go to the <a>profiles page</a> and click the <b>Edit profile</b> button of the active profile.</li>",
+          "<li>Enter a valid folder path into the <b>Game path</b> field, or press the <b>Auto-detect</b> button next to it to automatically detect the correct path.</li>",
+          "<li>Press <b>Save</b> at the bottom of the window.</li>",
+          "</ul>"
+        ]
       }
     },
     "routeNotFound": "The route <code>{{route}}</code> doesn't exist.",

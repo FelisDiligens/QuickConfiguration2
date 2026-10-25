@@ -85,6 +85,21 @@
           "<li>Drücke unten im Fenster auf <b>Speichern</b>.</li>",
           "</ul>"
         ]
+      },
+      "game": {
+        "notSet": "Der Spielinstallationspfad wurde nicht für das aktive Profil gesetzt.",
+        "invalid": "Der Spielinstallationspfad enthält ungültige Zeichen: {{path}}",
+        "missing": "Der Spielinstallationsordner existiert nicht: {{path}}",
+        "notGame": "Der angegebene Spielinstallationsordner zeigt nicht auf einen richtigen Fallout 76 Installationsordner: {{path}}",
+        "description": "Der Spielinstallationsordner legt fest, wohin die Moddateien installiert werden. Ohne einen gültigen Pfad können keine Mods installiert werden. Deshalb ist diese Seite nicht verfügbar.",
+        "instructions": [
+          "<p>So kannst du das Problem beheben:</p>",
+          "<ul>",
+          "<li>Gehe zur <a>Profilseite</a> und klicke beim aktiven Profil auf <b>Profil bearbeiten</b>.</li>",
+          "<li>Trage im Feld <b>Spielpfad</b> einen gültigen Ordnerpfad ein, oder drücke daneben den <b>Automatisch erkennen</b>-Knopf, um den korrekten Pfad automatisch zu ermitteln.</li>",
+          "<li>Drücke unten im Fenster auf <b>Speichern</b>.</li>",
+          "</ul>"
+        ]
       }
     },
     "routeNotFound": "Die Route <code>{{route}}</code> existiert nicht.",
