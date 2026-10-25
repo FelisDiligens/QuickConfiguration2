@@ -1492,7 +1492,7 @@ dependencies = [
 
 [[package]]
 name = "f76qc2"
-version = "2.0.0-beta.6"
+version = "2.0.0-beta.7"
 dependencies = [
  "anyhow",
  "camino",
