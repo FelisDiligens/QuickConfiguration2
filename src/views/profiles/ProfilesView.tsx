@@ -4,6 +4,7 @@ import PageContainer from "@/components/common/PageContainer";
 import PageContent from "@/components/common/PageContent";
 import PageTitle from "@/components/common/PageTitle";
 import { ConfirmModal } from "@/components/modals/ConfirmModal";
+import type { DragendEvent } from "@formkit/drag-and-drop";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
 import * as profilesService from "@/services/profiles";
 import { useProfilesStore } from "@/stores/profiles";
@@ -13,7 +14,7 @@ import {
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { RefObject, useRef, useState } from "react";
+import { RefObject, useCallback, useRef, useState } from "react";
 import { Button, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import EditProfileModal from "./EditProfileModal";
@@ -64,12 +65,16 @@ function useProfiles(dndParentRef: RefObject<HTMLElement | null>) {
     return profile;
   };
 
+  // Stable callback identity, so that the options object stays equal between
+  // renders and the drag and drop instance is not re-created on every render:
+  const handleDragend = useCallback<DragendEvent>((event) => {
+    // https://github.com/formkit/drag-and-drop/issues/132
+    // For some reason, the z-index does not reset which interferes with the dialog:
+    event.draggedNode.el.style.zIndex = "auto";
+  }, []);
+
   useDragAndDrop(profiles, setProfiles, dndParentRef, {
-    onDragend: (event) => {
-      // https://github.com/formkit/drag-and-drop/issues/132
-      // For some reason, the z-index does not reset which interferes with the dialog:
-      event.draggedNode.el.style.zIndex = "auto";
-    },
+    onDragend: handleDragend,
   });
 
   return {

@@ -34,3 +34,24 @@ export function getModInfo(
   if (modinfo == null) return undefined;
   return modinfo;
 }
+
+/**
+ * Builds a lookup map from game-scoped mod ID to mod info, so that looking up
+ * the info of many mods doesn't require a linear search per mod.
+ */
+export function createModinfoMap(
+  modinfos: NexusModsModInfo[] | null | undefined,
+): Map<number, NexusModsModInfo> {
+  return new Map(
+    (modinfos ?? []).map((modinfo) => [modinfo.gameScopedId, modinfo]),
+  );
+}
+
+export function getModInfoFromMap(
+  mod: ManagedMod,
+  modinfoMap: Map<number, NexusModsModInfo>,
+): NexusModsModInfo | undefined {
+  const modId = getModIdFromUrl(mod.url);
+  if (modId == null) return undefined;
+  return modinfoMap.get(modId);
+}

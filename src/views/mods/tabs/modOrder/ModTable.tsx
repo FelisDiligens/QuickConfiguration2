@@ -19,23 +19,23 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button, Form, InputGroup, Table } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { getModInfo } from "./utils/getModInfo";
+import { createModinfoMap, getModInfoFromMap } from "./utils/getModInfo";
 
-function ModTableRow(props: {
+const ModTableRow = memo(function ModTableRow(props: {
   mod: ManagedMod;
   state?: ModInstallationState;
   modinfo?: NexusModsModInfo;
   selected: boolean;
   focused: boolean;
   showNexusModsTitle: boolean;
-  onEnable: () => void;
-  onDisable: () => void;
-  onSelect: () => void;
-  onDelete: () => void;
-  onFocusRow: () => void;
+  onEnable: (modKey: string) => void;
+  onDisable: (modKey: string) => void;
+  onSelect: (modKey: string) => void;
+  onDelete: (modKey: string) => void;
+  onFocusRow: (modKey: string) => void;
 }) {
   const { t } = useTranslation();
 
@@ -108,7 +108,7 @@ function ModTableRow(props: {
       aria-selected={props.selected}
       aria-label={description}
       draggable={true}
-      onFocus={props.onFocusRow}
+      onFocus={() => props.onFocusRow(props.mod.key)}
     >
       <td className="center" css={css`padding: 0 !important;`}>
         <FontAwesomeIcon
@@ -128,16 +128,16 @@ function ModTableRow(props: {
           checked={props.mod.enabled}
           onChange={(ev) => {
             if (ev.target.checked) {
-              props.onEnable();
+              props.onEnable(props.mod.key);
             } else {
-              props.onDisable();
+              props.onDisable(props.mod.key);
             }
           }}
         />
       </td>
       <td
         className="expand"
-        onClick={props.onSelect}
+        onClick={() => props.onSelect(props.mod.key)}
         css={css`
           &:hover {
             text-decoration: underline;
@@ -218,20 +218,24 @@ function ModTableRow(props: {
         {endorsement}
       </td>
       <td className="center">
-        <Button variant="outline-danger" size="sm" onClick={props.onDelete}>
+        <Button
+          variant="outline-danger"
+          size="sm"
+          onClick={() => props.onDelete(props.mod.key)}
+        >
           <FontAwesomeIcon icon={faTrash} />
           &nbsp;{t("mods.modOrderTab.table.rows.deleteButton")}
         </Button>
       </td>
     </tr>
   );
-}
+});
 
 export default function ModTable() {
   const { t } = useTranslation();
 
   const mods = useModsStore((store) => store.mods);
-  const getModState = useModsStore((store) => store.getModState);
+  const modStates = useModsStore((store) => store.state);
   const setMods = useModsStore((store) => store.setMods);
   const enableMod = useModsStore((store) => store.enableMod);
   const disableMod = useModsStore((store) => store.disableMod);
@@ -251,6 +255,11 @@ export default function ModTable() {
   );
 
   const { modinfos } = useModinfos();
+  const modinfoById = useMemo(() => createModinfoMap(modinfos), [modinfos]);
+  const modStateByKey = useMemo(
+    () => new Map(modStates.map((state) => [state.key, state])),
+    [modStates],
+  );
 
   const [filter, setFilter] = useState("");
   const filteredMods = useMemo(
@@ -281,7 +290,7 @@ export default function ModTable() {
         "tr[data-mod-key]",
       ) ?? [],
     ).find((row) => row.dataset.modKey === modKey);
-    row?.focus();
+    row?.focus({ preventScroll: true });
   };
 
   useEffect(() => {
@@ -294,6 +303,27 @@ export default function ModTable() {
     focusedModKey && filteredMods.some((mod) => mod.key === focusedModKey)
       ? focusedModKey
       : filteredMods.at(0)?.key;
+
+  const handleEnableMod = useCallback(
+    (modKey: string) => enableMod(modKey),
+    [enableMod],
+  );
+  const handleDisableMod = useCallback(
+    (modKey: string) => disableMod(modKey),
+    [disableMod],
+  );
+  const handleSelectMod = useCallback(
+    (modKey: string) => selectModByKey(modKey),
+    [selectModByKey],
+  );
+  const handleDeleteMod = useCallback(
+    (modKey: string) => modsEventBus.emitDeleteMod(modKey),
+    [],
+  );
+  const handleFocusRow = useCallback(
+    (modKey: string) => setFocusedModKey(modKey),
+    [],
+  );
 
   const moveRow = (mod: ManagedMod, offset: number) => {
     if (offset < 0) {
@@ -504,16 +534,16 @@ export default function ModTable() {
             <ModTableRow
               key={mod.key}
               mod={mod}
-              state={getModState(mod.key)}
-              modinfo={getModInfo(mod, modinfos)}
+              state={modStateByKey.get(mod.key)}
+              modinfo={getModInfoFromMap(mod, modinfoById)}
               selected={selectedModKey === mod.key}
               focused={mod.key === rovingModKey}
               showNexusModsTitle={showNexusModsTitle}
-              onEnable={() => enableMod(mod.key)}
-              onDisable={() => disableMod(mod.key)}
-              onSelect={() => selectModByKey(mod.key)}
-              onDelete={() => modsEventBus.emitDeleteMod(mod.key)}
-              onFocusRow={() => setFocusedModKey(mod.key)}
+              onEnable={handleEnableMod}
+              onDisable={handleDisableMod}
+              onSelect={handleSelectMod}
+              onDelete={handleDeleteMod}
+              onFocusRow={handleFocusRow}
             />
           ))}
         </tbody>
