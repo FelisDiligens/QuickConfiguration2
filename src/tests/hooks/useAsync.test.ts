@@ -2,6 +2,10 @@ import { useAsync } from "@/hooks/async";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { vi } from "vitest";
 
+afterEach(() => {
+  vi.useRealTimers();
+});
+
 interface User {
   id: number;
   name: string;
@@ -210,7 +214,10 @@ describe("useAsync", () => {
     // No change in dependency, should not re-run
     const oldData = result.current.data;
     rerender({ userId: 2 });
-    await new Promise((resolve) => setTimeout(resolve, 100)); // Give time for potential re-run
+    vi.useFakeTimers();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(150); // Give time for potential re-run
+    });
     expect(result.current.data).toEqual(oldData); // Data should be the same
   });
 
@@ -289,7 +296,10 @@ describe("useAsync", () => {
     expect(mockPromiseFn).not.toHaveBeenCalled();
 
     // Wait a bit to ensure promiseFn is not called later
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    vi.useFakeTimers();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(150);
+    });
     expect(mockPromiseFn).not.toHaveBeenCalled();
   });
 
