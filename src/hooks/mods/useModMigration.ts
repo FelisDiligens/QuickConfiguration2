@@ -27,13 +27,28 @@ export function useModMigration(onSuccess?: () => void) {
     setError(error);
   };
 
+  const getValidatedPaths = async () => {
+    const modsPath = useProfilesStore.getState().getModsPath();
+    const gamePath = useProfilesStore.getState().getGamePath();
+    if (!modsPath || !gamePath)
+      throw new Error(t("mods.errors.unsetModsPathOrGamePath"));
+    if (!(await commands.isPathValid(gamePath)))
+      throw new Error(t("errors.path.game.invalid", { path: gamePath }));
+    if (!(await commands.isDirectory(gamePath)))
+      throw new Error(t("errors.path.game.missing", { path: gamePath }));
+    if (!(await commands.validateGamePath(gamePath)))
+      throw new Error(t("errors.path.game.notGame", { path: gamePath }));
+    if (!(await commands.isPathValid(modsPath)))
+      throw new Error(t("errors.path.mods.invalid", { path: modsPath }));
+    if (!(await commands.isDirectory(modsPath)))
+      throw new Error(t("errors.path.mods.missing", { path: modsPath }));
+    return { modsPath, gamePath };
+  };
+
   const migrateMods = async () => {
     let unlisten: UnlistenFn | undefined = undefined;
     try {
-      const modsPath = useProfilesStore.getState().getModsPath();
-      const gamePath = useProfilesStore.getState().getGamePath();
-      if (!modsPath || !gamePath)
-        throw new Error(t("mods.errors.unsetModsPathOrGamePath"));
+      const { modsPath, gamePath } = await getValidatedPaths();
 
       const iniPath = useProfilesStore.getState().getIniPath();
       const iniPrefix = useProfilesStore.getState().getIniPrefix();
@@ -98,10 +113,7 @@ export function useModMigration(onSuccess?: () => void) {
   const deleteMods = async () => {
     let unlisten: UnlistenFn | undefined = undefined;
     try {
-      const modsPath = useProfilesStore.getState().getModsPath();
-      const gamePath = useProfilesStore.getState().getGamePath();
-      if (!modsPath || !gamePath)
-        throw new Error(t("mods.errors.unsetModsPathOrGamePath"));
+      const { modsPath, gamePath } = await getValidatedPaths();
 
       const iniPath = useProfilesStore.getState().getIniPath();
       const iniPrefix = useProfilesStore.getState().getIniPrefix();
