@@ -43,6 +43,16 @@ export default defineConfig({
       provider: "v8",
       reporter: ["html"],
       exclude: ["src-tauri/**", ...coverageConfigDefaults.exclude],
+      include: [
+        "src/api/**/*.{ts,tsx}",
+        "src/components/**/*.{ts,tsx}",
+        "src/hooks/**/*.{ts,tsx}",
+        "src/lib/**/*.{ts,tsx}",
+        "src/services/**/*.{ts,tsx}",
+        "src/stores/**/*.{ts,tsx}",
+        "src/utils/**/*.{ts,tsx}",
+        "src/views/**/*.{ts,tsx}",
+      ],
     },
   },
   resolve: {
