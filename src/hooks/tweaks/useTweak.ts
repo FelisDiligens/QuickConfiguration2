@@ -4,9 +4,9 @@ import { useAsync } from "@/hooks/async";
 import { windowCloseService } from "@/services/windowCloseService";
 import { useProfilesStore } from "@/stores/profiles";
 import { useSettingsStore } from "@/stores/settings";
-import { atom, useAtom, useSetAtom } from "jotai";
-import { useEffect } from "react";
-import { useDebouncedCallback } from "use-debounce";
+import { atom, getDefaultStore, useSetAtom } from "jotai";
+import _ from "lodash";
+import { useEffect, useRef } from "react";
 
 // This value tells us whether we need to save the ini file.
 // It lets us avoid saving the ini file multiple times when changing multiple values.
@@ -19,6 +19,42 @@ const needsToReloadAtom = atom(0);
 
 // Saves the error when saving ini files.
 export const errorAtom = atom<AnyError>(undefined);
+
+const SAVE_DEBOUNCE_MS = 5000;
+
+async function executeSave(): Promise<void> {
+  const store = getDefaultStore();
+  if (!store.get(needsToSaveAtom)) return;
+  const iniPath = useProfilesStore.getState().getIniPath();
+  const iniPrefix = useProfilesStore.getState().getIniPrefix();
+  if (!iniPath || !iniPrefix) return;
+  store.set(needsToSaveAtom, false);
+  store.set(errorAtom, undefined);
+  const bypassIniReadonly = useSettingsStore.getState().bypassIniReadonly;
+  try {
+    await commands.iniSave(iniPath, iniPrefix, bypassIniReadonly);
+  } catch (error) {
+    console.error(
+      "Couldn't save ini files:",
+      commandErrorToString(error as AnyError),
+    );
+    store.set(errorAtom, error as AnyError);
+    throw error;
+  }
+}
+
+// The debounced ini save is shared by all useTweak instances, so that changing
+// many tweaks at once results in a single timer and a single iniSave call.
+const debouncedSave = _.debounce((): Promise<void> | undefined => {
+  const result = executeSave();
+  void result.catch(() => undefined);
+  return result;
+}, SAVE_DEBOUNCE_MS);
+
+// Save the ini file before the window closes (subscribed once for all tweaks):
+windowCloseService.subscribe(async () => {
+  await debouncedSave.flush();
+});
 
 /**
  * Represents an *.ini tweak. May change more than one value in more than one file.
@@ -34,72 +70,55 @@ export default function useTweak<T>(
   defaultValue: T,
   reloadNecessary = false,
 ): [T, (value: T) => void, T] {
-  const [needsToSave, setNeedsToSave] = useAtom(needsToSaveAtom);
-  const [needsToReload, setNeedsToReload] = useAtom(needsToReloadAtom);
-  const setError = useSetAtom(errorAtom);
+  const setNeedsToSave = useSetAtom(needsToSaveAtom);
+  const setNeedsToReload = useSetAtom(needsToReloadAtom);
 
   const iniPath = useProfilesStore((store) => store.getIniPath());
   const iniPrefix = useProfilesStore((store) => store.getIniPrefix());
-  const bypassIniReadonly = useSettingsStore(
-    (store) => store.bypassIniReadonly,
-  );
 
-  // On first mount or when the ini file path changes or when a reload is necessary,
-  // load the value:
-  const { data: value, setData: setValue } = useAsync({
+  // On first mount or when the ini file path changes, load the value:
+  const {
+    data: value,
+    setData: setValue,
+    reload,
+  } = useAsync({
     promiseFn: getter,
-    watch: [iniPath, iniPrefix, needsToReload, defaultValue],
+    watch: [iniPath, iniPrefix, defaultValue],
     initialValue: defaultValue,
     onRejected: console.error,
   });
 
-  // Debounce saving the ini file by 5s for better performance:
-  const debouncedSave = useDebouncedCallback(async () => {
-    if (needsToSave && iniPath && iniPrefix) {
-      setNeedsToSave(false);
-      try {
-        setError(undefined);
-        return await commands.iniSave(iniPath, iniPrefix, bypassIniReadonly);
-      } catch (error) {
-        console.error(
-          "Couldn't save ini files:",
-          commandErrorToString(error as AnyError),
-        );
-        setError(error as AnyError);
-        throw error;
-      }
-    }
-  }, 5000);
+  // Reload the value when another tweak with reloadNecessary: true changed a shared value.
+  // Subscribing directly (instead of watching the atom in useAsync) avoids a re-render
+  // of every mounted tweak when the counter changes; only changed values re-render.
+  const reloadRef = useRef(reload);
+  reloadRef.current = reload;
+  useEffect(() => {
+    return getDefaultStore().sub(needsToReloadAtom, () => reloadRef.current());
+  }, []);
 
   const wrappedSetter = async (value: T) => {
     setValue(value);
     await setter(value);
     setNeedsToSave(true);
     if (reloadNecessary) setNeedsToReload((count) => count + 1);
-    await debouncedSave();
+    void debouncedSave();
   };
 
-  // When the ini file path changes, cancel the debounced save:
+  // When the ini file path changes, cancel the pending save:
   useEffect(() => {
     debouncedSave.cancel();
-    setNeedsToSave(false);
-  }, [iniPath, iniPrefix]);
+    if (getDefaultStore().get(needsToSaveAtom)) setNeedsToSave(false);
+  }, [iniPath, iniPrefix, setNeedsToSave]);
 
   // Save the ini file before the component unmounts:
   useEffect(() => {
     return () => {
       debouncedSave.flush()?.catch((reason) => {
         console.error(`Couldn't save ini file on unmount: ${reason}`);
-        setError(reason as AnyError);
+        getDefaultStore().set(errorAtom, reason as AnyError);
       });
     };
-  }, []);
-
-  // Save the ini file before the window closes:
-  useEffect(() => {
-    return windowCloseService.subscribe(async () => {
-      await debouncedSave.flush();
-    });
   }, []);
 
   return [value != null ? value : defaultValue, wrappedSetter, defaultValue];

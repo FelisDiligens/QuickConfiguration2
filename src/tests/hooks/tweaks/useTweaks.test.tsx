@@ -49,8 +49,8 @@ vi.mock(import("@tauri-apps/api/webviewWindow"), async (importOriginal) => {
   };
 });
 
-// Captures the listeners that hooks subscribe via windowCloseService,
-// so tests can simulate the window being closed.
+// Captures the listener that useTweak subscribes via windowCloseService at
+// module level, so tests can simulate the window being closed.
 const windowCloseState = vi.hoisted(() => ({
   listeners: [] as (() => Promise<void> | Promise<null>)[],
 }));
@@ -110,7 +110,6 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.useRealTimers();
-  windowCloseState.listeners.length = 0;
   getDefaultStore().set(errorAtom, undefined);
   vi.clearAllMocks();
 });
