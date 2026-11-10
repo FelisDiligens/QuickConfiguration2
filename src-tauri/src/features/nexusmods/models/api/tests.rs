@@ -198,7 +198,7 @@ fn test_download_links_json_load() {
 }
 
 #[test]
-fn test_mod_files_json_load() {
+fn test_mod_files_json_load_1() {
     let test_str = indoc! {r#"
         {
           "file_updates": [
@@ -266,7 +266,7 @@ fn test_mod_files_json_load() {
     assert_eq!(mod_file.name, "Quick Configuration v1.12.9");
     assert_eq!(mod_file.version, "v1.12.9");
     assert_eq!(mod_file.category_id, 1);
-    assert_eq!(mod_file.category_name, "MAIN");
+    assert_eq!(mod_file.category_name.as_ref().unwrap(), "MAIN");
     assert_eq!(mod_file.is_primary, false);
     assert_eq!(mod_file.size, 21477);
     assert_eq!(
@@ -285,12 +285,51 @@ fn test_mod_files_json_load() {
             .contains("Portable, *.zip\n<br />\n<br />(Setup available on GitHub mirror)")
     );
     assert_eq!(mod_file.size_kb, 21477);
-    assert_eq!(mod_file.size_in_bytes, 21992914);
+    assert_eq!(mod_file.size_in_bytes.unwrap(), 21992914);
     assert_eq!(mod_file.changelog_html, None);
     assert_eq!(
         mod_file.content_preview_link,
         Some("https://file-metadata.nexusmods.com/file/nexus-files-s3-meta/2590/546/Quick Configuration v1.12.9-546-v1-12-9-1753040884.zip.json".to_string())
     );
+}
+
+#[test]
+fn test_mod_files_json_load_2() {
+    // Test for missing fields or fields set to `null`:
+    let test_str = indoc! {r#"
+        {
+          "files": [
+            {
+              "id": [4335, 2590],
+              "uid": 11123965300975,
+              "file_id": 4335,
+              "name": "Quick Configuration v1.8.2 - Installer (recommended)",
+              "version": "1.8.2",
+              "category_id": 6,
+              "category_name": null,
+              "is_primary": false,
+              "size": 3691,
+              "file_name": "Quick Configuration v1.8.2 - Installer (recommended)-546-1-8-2-1599177201.exe",
+              "detected_file_extension": null,
+              "uploaded_timestamp": 1599177201,
+              "uploaded_time": "2020-09-03T23:53:21.000+00:00",
+              "mod_version": "1.8.2",
+              "external_virus_scan_url": "https://www.virustotal.com/gui/file/027febaf8744e06a42dccd7a101365b2ca055188ed3a9f67f9d3520ccc25d29c/detection/f-027febaf8744e06a42dccd7a101365b2ca055188ed3a9f67f9d3520ccc25d29c-1599177216",
+              "description": "Setup, *.exe",
+              "size_kb": 3691,
+              "size_in_bytes": null,
+              "changelog_html": "Extended Nuclear Winter mode, added more options\nAdded context menu to gallery. (Open, Open folder, Copy, Cut, Delete)\nAdded the possibility to add additional paths to the gallery.\nAdded new option: \"Don't use Fallout76Custom.ini for tweaks.\"\nMinor additions and bug fixes",
+              "content_preview_link": "https://file-metadata.nexusmods.com/file/production-nexus-files-s3-meta/2590/546/Quick Configuration v1.8.2 - Installer (recommended)-546-1-8-2-1599177201.exe.json"
+            }
+          ]
+        }
+    "#};
+    let result: Result<ModFiles, serde_json::Error> = serde_json::from_str(&test_str);
+    assert!(result.is_ok(), "{}", result.unwrap_err());
+
+    let mod_files: ModFiles = result.unwrap();
+    assert_eq!(mod_files.file_updates.len(), 0);
+    assert_eq!(mod_files.files.len(), 1);
 }
 
 #[test]

@@ -193,7 +193,7 @@ pub struct ModFile {
     pub name: String,
     pub version: String,
     pub category_id: u32,
-    pub category_name: String,
+    pub category_name: Option<String>,
     pub is_primary: bool,
     pub size: u32,
     pub file_name: String,
@@ -203,12 +203,13 @@ pub struct ModFile {
     pub external_virus_scan_url: Option<String>,
     pub description: String,
     pub size_kb: u32,
-    pub size_in_bytes: u64,
+    pub size_in_bytes: Option<u64>,
     pub changelog_html: Option<String>,
     pub content_preview_link: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Default, Debug, Serialize, Deserialize, Clone)]
+#[serde(default)]
 pub struct ModFiles {
     pub file_updates: Vec<FileUpdate>,
     pub files: Vec<ModFile>,

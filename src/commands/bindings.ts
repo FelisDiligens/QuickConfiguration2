@@ -671,9 +671,10 @@ export type NXMNewLink = string
 export type NexusModsAccountInfo = { profile: NexusModsProfile; rateLimit: NexusModsRateLimit }
 export type NexusModsDownloadLink = { name: string; shortName: string; uri: string }
 export type NexusModsEndorseStatus = "Endorsed" | "Abstained" | "Undecided"
+export type NexusModsFileCategory = "MAIN" | "UPDATE" | "OPTIONAL" | "OLD_VERSION" | "MISCELLANEOUS" | "ARCHIVED"
 export type NexusModsFileUpdate = { oldFileId: number; newFileId: number; oldFileName: string; newFileName: string; uploadedTime: string }
 export type NexusModsMembership = "Basic" | "Supporter" | "Premium"
-export type NexusModsModFile = { id: number[]; uid: number; fileId: number; name: string; version: string; categoryId: number; categoryName: string; isPrimary: boolean; size: number; fileName: string; uploadedTime: string; modVersion: string; externalVirusScanUrl: string | null; description: string; sizeKb: number; sizeInBytes: string; changelogHtml: string | null; contentPreviewLink: string | null }
+export type NexusModsModFile = { id: number[]; uid: number; fileId: number; name: string; version: string; categoryId: number; categoryName: string | null; category: NexusModsFileCategory | null; isPrimary: boolean; size: number; fileName: string; uploadedTime: string; modVersion: string; externalVirusScanUrl: string | null; description: string; sizeKb: number; sizeInBytes: string | null; changelogHtml: string | null; contentPreviewLink: string | null }
 export type NexusModsModFiles = { fileUpdates: NexusModsFileUpdate[]; files: NexusModsModFile[] }
 export type NexusModsModInfo = { 
 /**

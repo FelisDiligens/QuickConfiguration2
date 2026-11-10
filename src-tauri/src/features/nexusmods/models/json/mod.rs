@@ -11,6 +11,19 @@ use specta::Type;
 
 use crate::features::nexusmods::models::api;
 
+#[derive(Serialize, Deserialize, strum::Display, Type, Debug, PartialEq, Clone)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
+#[specta(rename = "NexusModsFileCategory")]
+pub enum FileCategory {
+    Main,
+    Update,
+    Optional,
+    OldVersion,
+    Miscellaneous,
+    Archived,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone, Type)]
 #[serde(rename_all = "camelCase")]
 #[specta(rename = "NexusModsFileUpdate")]
@@ -33,7 +46,8 @@ pub struct ModFile {
     pub name: String,
     pub version: String,
     pub category_id: u32,
-    pub category_name: String,
+    pub category_name: Option<String>,
+    pub category: Option<FileCategory>,
     pub is_primary: bool,
     pub size: u32,
     pub file_name: String,
@@ -43,7 +57,7 @@ pub struct ModFile {
     pub external_virus_scan_url: Option<String>,
     pub description: String,
     pub size_kb: u32,
-    pub size_in_bytes: String, // integer as a string (cannot serialize u64)
+    pub size_in_bytes: Option<String>, // integer as a string (cannot serialize u64)
     pub changelog_html: Option<String>,
     pub content_preview_link: Option<String>,
 }
@@ -85,6 +99,18 @@ impl From<api::ModFile> for ModFile {
             file_id: value.file_id,
             name: value.name,
             version: value.version,
+            category: value
+                .category_name
+                .as_ref()
+                .and_then(|name| match name.as_str() {
+                    "MAIN" => Some(FileCategory::Main), // category_id 1
+                    "UPDATE" => Some(FileCategory::Update),
+                    "OPTIONAL" => Some(FileCategory::Optional), // category_id 3
+                    "OLD_VERSION" => Some(FileCategory::OldVersion), // category_id 4
+                    "MISCELLANEOUS" => Some(FileCategory::Miscellaneous),
+                    "ARCHIVED" => Some(FileCategory::Archived), // category_id 7
+                    _ => None,
+                }),
             category_id: value.category_id,
             category_name: value.category_name,
             is_primary: value.is_primary,
@@ -95,7 +121,7 @@ impl From<api::ModFile> for ModFile {
             external_virus_scan_url: value.external_virus_scan_url,
             description: value.description,
             size_kb: value.size_kb,
-            size_in_bytes: value.size_in_bytes.to_string(),
+            size_in_bytes: value.size_in_bytes.map(|s| s.to_string()),
             changelog_html: value.changelog_html,
             content_preview_link: value.content_preview_link,
         }
