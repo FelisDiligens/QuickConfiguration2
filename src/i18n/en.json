@@ -817,7 +817,13 @@
         "modDeleted": "Mod deleted",
         "modDeletedFailed": "Mod couldn't be deleted",
         "modsDeployed": "Mods deployed",
+        "modsDeployedText_one": "{{count}} mod deployed in {{duration}}",
+        "modsDeployedText_other": "{{count}} mods deployed in {{duration}}",
+        "modsDeployedText_zero": "No mods deployed in {{duration}}",
         "modsRemoved": "Mods removed",
+        "modsRemovedText_one": "{{count}} mod removed in {{duration}}",
+        "modsRemovedText_other": "{{count}} mods removed in {{duration}}",
+        "modsRemovedText_zero": "No mods removed in {{duration}}",
         "modsRemovalFailed": "Mods couldn't be removed",
         "archive2Created": "Created archive",
         "archive2Extracted": "Extracted archive",
@@ -858,8 +864,17 @@
         "loadingFailed": "Couldn't load resource list",
         "savingFailed": "Couldn't save resource list",
         "removedNonExistantArchives": "All non-existing archives were removed from the list",
+        "removedNonExistantArchivesText_one": "{{count}} non-existing archive was removed from the list",
+        "removedNonExistantArchivesText_other": "{{count}} non-existing archives were removed from the list",
+        "removedNonExistantArchivesText_zero": "No non-existing archives were removed from the list",
         "addedUnlistedArchives": "All unlisted archives in the Data folder were added to the list",
-        "removedGameArchives": "All the archives that belong to the game were removed from the list"
+        "addedUnlistedArchivesText_one": "{{count}} archive was added to the list",
+        "addedUnlistedArchivesText_other": "{{count}} archives were added to the list",
+        "addedUnlistedArchivesText_zero": "No archives were added to the list",
+        "removedGameArchives": "All the archives that belong to the game were removed from the list",
+        "removedGameArchivesText_one": "{{count}} game archive was removed from the list",
+        "removedGameArchivesText_other": "{{count}} game archives were removed from the list",
+        "removedGameArchivesText_zero": "No game archives were removed from the list"
       }
     },
     "settingsTab": {

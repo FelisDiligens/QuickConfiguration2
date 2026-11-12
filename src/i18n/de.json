@@ -817,7 +817,13 @@
         "modDeleted": "Mod gelöscht",
         "modDeletedFailed": "Mod konnte nicht gelöscht werden",
         "modsDeployed": "Mods angewendet",
+        "modsDeployedText_one": "{{count}} Mod in {{duration}} angewendet",
+        "modsDeployedText_other": "{{count}} Mods in {{duration}} angewendet",
+        "modsDeployedText_zero": "Keine Mods in {{duration}} angewendet",
         "modsRemoved": "Mods entfernt",
+        "modsRemovedText_one": "{{count}} Mod in {{duration}} entfernt",
+        "modsRemovedText_other": "{{count}} Mods in {{duration}} entfernt",
+        "modsRemovedText_zero": "Keine Mods in {{duration}} entfernt",
         "modsRemovalFailed": "Mods konnten nicht entfernt werden",
         "archive2Created": "Archiv erstellt",
         "archive2Extracted": "Archiv extrahiert",
@@ -833,8 +839,7 @@
         "addArchiveName": "Archivnamen hinzufügen",
         "addUnlisted": "Nicht aufgelistete Archive hinzufügen",
         "removeUnavailable": "Nicht existierende Archive entfernen",
-        "removeGameArchives": "Zum Spiel gehörende Archive entfernen",
-        "removedGameArchives": "Alle Archive, die zum Spiel selbst gehören, wurden von der Liste entfernt"
+        "removeGameArchives": "Zum Spiel gehörende Archive entfernen"
       },
       "table": {
         "header": {
@@ -859,7 +864,17 @@
         "loadingFailed": "Ressourcenliste konnte nicht geladen werden",
         "savingFailed": "Ressourcenliste konnte nicht gespeichert werden",
         "removedNonExistantArchives": "Alle nicht existierenden Archive wurden von der Liste entfernt",
-        "addedUnlistedArchives": "Alle nicht aufgelisteten Archive wurden zur Liste hinzugefügt"
+        "removedNonExistantArchivesText_one": "{{count}} nicht existierendes Archiv wurde von der Liste entfernt",
+        "removedNonExistantArchivesText_other": "{{count}} nicht existierende Archive wurden von der Liste entfernt",
+        "removedNonExistantArchivesText_zero": "Keine nicht existierenden Archive wurden von der Liste entfernt",
+        "addedUnlistedArchives": "Alle nicht aufgelisteten Archive wurden zur Liste hinzugefügt",
+        "addedUnlistedArchivesText_one": "{{count}} Archiv wurde zur Liste hinzugefügt",
+        "addedUnlistedArchivesText_other": "{{count}} Archive wurden zur Liste hinzugefügt",
+        "addedUnlistedArchivesText_zero": "Keine Archive wurden zur Liste hinzugefügt",
+        "removedGameArchives": "Alle Archive, die zum Spiel selbst gehören, wurden von der Liste entfernt",
+        "removedGameArchivesText_one": "{{count}} Archiv des Spiels wurde von der Liste entfernt",
+        "removedGameArchivesText_other": "{{count}} Archive des Spiels wurden von der Liste entfernt",
+        "removedGameArchivesText_zero": "Keine Archive des Spiels wurden von der Liste entfernt"
       }
     },
     "settingsTab": {

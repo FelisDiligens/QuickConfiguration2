@@ -36,7 +36,9 @@ export function useResourceListActions() {
 
       useToastsStore.getState().addToast(
         t("mods.resourceListTab.toasts.addedUnlistedArchives"),
-        "", // TODO: Add details, e.g. how many new archives were added
+        t("mods.resourceListTab.toasts.addedUnlistedArchivesText", {
+          count: _.difference(newResources, resources).length,
+        }),
         "success",
       );
     } catch (error) {
@@ -64,7 +66,9 @@ export function useResourceListActions() {
 
       useToastsStore.getState().addToast(
         t("mods.resourceListTab.toasts.removedNonExistantArchives"),
-        "", // TODO: Add details, e.g. how many archives were removed
+        t("mods.resourceListTab.toasts.removedNonExistantArchivesText", {
+          count: _.difference(resources, newResources).length,
+        }),
         "success",
       );
     } catch (error) {
@@ -87,7 +91,9 @@ export function useResourceListActions() {
 
       useToastsStore.getState().addToast(
         t("mods.resourceListTab.toasts.removedGameArchives"),
-        "", // TODO: Add details, e.g. how many archives were removed
+        t("mods.resourceListTab.toasts.removedGameArchivesText", {
+          count: _.difference(resources, newResources).length,
+        }),
         "success",
       );
     } catch (error) {

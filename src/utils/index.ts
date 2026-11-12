@@ -50,3 +50,14 @@ export function formatBytes(bytes: number): string {
     value < 10 && unitIndex > 0 ? value.toFixed(2) : Math.floor(value);
   return `${formattedValue} ${units[unitIndex]}`;
 }
+
+/** Formats a duration given in milliseconds into a human-readable string. */
+export function formatDuration(ms: number): string {
+  const seconds = ms / 1000;
+  if (seconds >= 60) {
+    const minutes = Math.floor(seconds / 60);
+    const restSeconds = Math.round(seconds % 60);
+    return `${minutes} min ${restSeconds} s`;
+  }
+  return seconds < 10 ? `${seconds.toFixed(1)} s` : `${Math.round(seconds)} s`;
+}

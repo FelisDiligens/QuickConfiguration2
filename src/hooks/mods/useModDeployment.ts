@@ -7,6 +7,7 @@ import { useProfilesStore } from "@/stores/profiles";
 import { useResourceListStore } from "@/stores/resourceList";
 import { useSettingsStore } from "@/stores/settings";
 import { useToastsStore } from "@/stores/toasts";
+import { formatDuration } from "@/utils";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 
@@ -114,6 +115,7 @@ export function useModDeployment() {
       });
 
       // Deploy mods:
+      const startTime = performance.now();
       const [update, newResources] = await Mods.actions.deploy(
         managedMods,
         modSettings,
@@ -121,6 +123,7 @@ export function useModDeployment() {
         gamePath,
         resources,
       );
+      const duration = formatDuration(performance.now() - startTime);
 
       // Update state:
       updateModsStore(update);
@@ -129,13 +132,26 @@ export function useModDeployment() {
       // Done:
       modsEventBus.emitProgressFinished();
       if (globalEnabled) {
-        useToastsStore
-          .getState()
-          .addToast(t("mods.modOrderTab.toasts.modsDeployed"), "", "success"); // TODO: Add details, e.g. how many mods were deployed, how long it took, etc.
+        const deployedCount = managedMods.mods.filter(
+          (mod) => mod.enabled,
+        ).length;
+        useToastsStore.getState().addToast(
+          t("mods.modOrderTab.toasts.modsDeployed"),
+          t("mods.modOrderTab.toasts.modsDeployedText", {
+            count: deployedCount,
+            duration,
+          }),
+          "success",
+        );
       } else {
-        useToastsStore
-          .getState()
-          .addToast(t("mods.modOrderTab.toasts.modsRemoved"), "", "success"); // TODO: Add details, e.g. how many mods were removed, how long it took, etc.
+        useToastsStore.getState().addToast(
+          t("mods.modOrderTab.toasts.modsRemoved"),
+          t("mods.modOrderTab.toasts.modsRemovedText", {
+            count: managedMods.state.length,
+            duration,
+          }),
+          "success",
+        );
       }
     } catch (error) {
       modsEventBus.emitProgressAborted(error as AnyError);
