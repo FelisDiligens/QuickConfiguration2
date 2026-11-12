@@ -44,8 +44,15 @@ export type ProgressEvent =
   | { type: "has-finished" }
   | { type: "error"; error: AnyError };
 
+/* eslint-disable-next-line @typescript-eslint/consistent-type-definitions --
+ * Uses type instead of interface for consistency with other event types.
+ */
 export type Archive2Event = { type: "show-error-modal"; error: AnyError };
 
+/* eslint-disable-next-line @typescript-eslint/consistent-type-definitions --
+ * `Events` needs to "satisfy the constraint 'Record<EventType, unknown>'"
+ * otherwise it cannot be used with mitt.
+ */
 export type Events = {
   uiAction: UIActionEvent;
   progress: ProgressEvent;
