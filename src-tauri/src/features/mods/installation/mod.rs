@@ -74,15 +74,15 @@ impl ManagedMods {
             fs_util::move_file(&source_path, &destination_path)?;
         }
 
-        let updated;
-        if existing_mod.is_some() && self.replace_mod(&r#mod.key, r#mod.clone()).is_some() {
-            log::trace!("Replaced mod details by key {}", r#mod.key);
-            updated = true;
-        } else {
-            self.mods.push(r#mod.clone());
-            log::trace!("Added mod details with key {}", r#mod.key);
-            updated = false;
-        }
+        let updated =
+            if existing_mod.is_some() && self.replace_mod(&r#mod.key, r#mod.clone()).is_some() {
+                log::trace!("Replaced mod details by key {}", r#mod.key);
+                true
+            } else {
+                self.mods.push(r#mod.clone());
+                log::trace!("Added mod details with key {}", r#mod.key);
+                false
+            };
 
         if updated && let Some(state) = self.get_mod_state(&r#mod.key) {
             let mut state = state.clone();

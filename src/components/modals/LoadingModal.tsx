@@ -26,7 +26,7 @@ export default function LoadingModal(props: Props) {
         <FlexRow center gap="1rem">
           <FlexCol noGrow noShrink>
             <Spinner animation="border" role="status">
-              <span className="visually-hidden">Pending...</span>
+              <span className="visually-hidden">{t("common.loading")}</span>
             </Spinner>
           </FlexCol>
           <FlexCol

@@ -46,7 +46,7 @@ impl DirEntry {
             Self::Folder {
                 name,
                 contents: fs_util::list_entries(&path)?
-                    .sorted_by(cmp_paths_by_type_and_name)
+                    .sorted_by(|a, b| cmp_paths_by_type_and_name(a, b))
                     .map(|path| DirEntry::new(&path, &relative_path))
                     .collect::<Result<Vec<_>, _>>()?,
                 path: relative_path,
@@ -56,7 +56,7 @@ impl DirEntry {
 
     pub fn folder_contents<P: AsRef<Path>>(path: P) -> ModActionResult<Vec<DirEntry>> {
         fs_util::list_entries(path.as_ref())?
-            .sorted_by(cmp_paths_by_type_and_name)
+            .sorted_by(|a, b| cmp_paths_by_type_and_name(a, b))
             .map(DirEntry::try_from)
             .collect::<ModActionResult<Vec<_>>>()
     }
@@ -70,10 +70,10 @@ impl TryFrom<PathBuf> for DirEntry {
     }
 }
 
-fn cmp_paths_by_type_and_name(a: &PathBuf, b: &PathBuf) -> Ordering {
-    match (a.is_dir(), b.is_dir()) {
+fn cmp_paths_by_type_and_name<P: AsRef<Path>>(a: P, b: P) -> Ordering {
+    match (a.as_ref().is_dir(), b.as_ref().is_dir()) {
         (true, false) => std::cmp::Ordering::Less,
         (false, true) => std::cmp::Ordering::Greater,
-        _ => a.file_name().cmp(&b.file_name()),
+        _ => a.as_ref().file_name().cmp(&b.as_ref().file_name()),
     }
 }

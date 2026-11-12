@@ -36,7 +36,7 @@ export interface FileContentsProps {
 interface FlattenedNode {
   key: string;
   label: string;
-  icon?: "file" | "file-zipper" | "folder";
+  icon: "file" | "file-zipper" | "folder";
   iconColor?: string;
   selectable?: boolean;
   selected?: boolean;
@@ -165,7 +165,7 @@ export default function FileContents(props: FileContentsProps) {
 
 function TreeNode(props: {
   label: string;
-  icon?: string;
+  icon: string;
   iconColor?: string;
   selectable?: boolean;
   selected?: boolean;

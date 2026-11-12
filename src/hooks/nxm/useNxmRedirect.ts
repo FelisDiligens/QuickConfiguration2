@@ -14,7 +14,7 @@ export function useNxmRedirect() {
   useEffect(() => {
     return nxmLinksQueueService.subscribe(() => {
       if (location.pathname !== "/mods") {
-        navigate("/mods");
+        void navigate("/mods");
         setModTab("modorder");
         console.log("Navigating to /mods");
       }

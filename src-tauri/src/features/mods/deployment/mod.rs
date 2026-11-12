@@ -25,15 +25,19 @@ pub const CONFIG_FILE_EXTENSIONS: &[&str] = &[
     "ini", "json", "jsonc", "yaml", "yml", "xml", "toml", "conf", "cfg",
 ];
 
+pub struct DeployModsOptions {
+    pub copy_method: ModCopyMethod,
+    pub resource_insertion_position: ResourceInsertionPosition,
+    pub keep_config_files: bool,
+}
+
 #[function_name::named]
 pub fn deploy_mods<P: AsRef<Path>>(
     managed: &mut ManagedMods,
     list: &mut ResourceList,
     mods_path: P,
     game_path: P,
-    copy_method: ModCopyMethod,
-    resource_insertion_position: ResourceInsertionPosition,
-    keep_config_files: bool,
+    options: DeployModsOptions,
     tx: Option<tokio::sync::mpsc::Sender<ModsDeployProgress>>,
 ) -> ModActionResult<()> {
     let global_enabled = managed.enabled;
@@ -48,7 +52,7 @@ pub fn deploy_mods<P: AsRef<Path>>(
         mods_path,
         game_path,
         global_enabled,
-        copy_method
+        options.copy_method
     );
     let _ = channel::blocking_send_opt(&tx, function_name!(), ModsDeployProgress::Preparing);
 
@@ -73,7 +77,13 @@ pub fn deploy_mods<P: AsRef<Path>>(
         }
     }));
 
-    remove_mods(managed, list, game_path, keep_config_files, Some(remove_tx))?;
+    remove_mods(
+        managed,
+        list,
+        game_path,
+        options.keep_config_files,
+        Some(remove_tx),
+    )?;
 
     let _ = handle.join().tap_err(|e| {
         log::error!(
@@ -120,8 +130,7 @@ pub fn deploy_mods<P: AsRef<Path>>(
                 &mut deployed_files,
                 mods_path,
                 game_path,
-                copy_method.clone(),
-                keep_config_files,
+                &options,
                 Some(mod_tx),
             )?;
             // Update state:
@@ -138,7 +147,7 @@ pub fn deploy_mods<P: AsRef<Path>>(
         }
 
         // Update resource list:
-        match resource_insertion_position {
+        match options.resource_insertion_position {
             ResourceInsertionPosition::Prepend => list.prepend(new_resources.into_iter()),
             ResourceInsertionPosition::Append => list.append(new_resources.into_iter()),
         }
@@ -155,8 +164,7 @@ fn deploy_mod_internal<P: AsRef<Path>>(
     deployed_files: &mut Vec<PathBuf>,
     mods_path: P,
     game_path: P,
-    copy_method: ModCopyMethod,
-    keep_config_files: bool,
+    options: &DeployModsOptions,
     tx: Option<tokio::sync::mpsc::Sender<ModDeployProgress>>,
 ) -> ModActionResult<ModInstallationState> {
     let src_path = r#mod.folder_path(mods_path)?;
@@ -263,7 +271,7 @@ fn deploy_mod_internal<P: AsRef<Path>>(
         let mut no_overwrite = false;
 
         // Check if it's a configuration file:
-        if keep_config_files
+        if options.keep_config_files
             && CONFIG_FILE_EXTENSIONS.contains(&file_ext.to_lowercase().as_str())
             && dst_path.exists()
         {
@@ -287,7 +295,7 @@ fn deploy_mod_internal<P: AsRef<Path>>(
                 );
             }
 
-            fs_util::copy_or_link(&file_path, &dst_path, copy_method.clone().into())
+            fs_util::copy_or_link(&file_path, &dst_path, options.copy_method.clone().into())
                 .tap_err(|e| log::error!("Couldn't copy file: {e}"))?;
         }
         copied_files += 1;

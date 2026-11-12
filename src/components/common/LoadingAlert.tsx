@@ -1,6 +1,7 @@
 import { css } from "@emotion/react";
 import * as React from "react";
 import { Alert, Spinner } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 import { AppTheme } from "../MyThemeProvider";
 import { FlexCol, FlexRow } from "./Flex";
 
@@ -10,12 +11,13 @@ interface Props {
 }
 
 export default function LoadingAlert(props: Props) {
+  const { t } = useTranslation();
   return (
     <Alert variant="dark" className={props.className}>
       <FlexRow center gap="1rem">
         <FlexCol noGrow noShrink>
           <Spinner animation="border" role="status">
-            <span className="visually-hidden">Pending...</span>
+            <span className="visually-hidden">{t("common.loading")}</span>
           </Spinner>
         </FlexCol>
         <FlexCol>{props.children}</FlexCol>

@@ -35,9 +35,11 @@ pub async fn mods_deploy(
                 &mut list,
                 &mods_path,
                 &game_path,
-                mod_settings.copy_method.clone(),
-                mod_settings.resource_insertion_position.clone(),
-                mod_settings.keep_config_files,
+                mods::deployment::DeployModsOptions {
+                    copy_method: mod_settings.copy_method.clone(),
+                    resource_insertion_position: mod_settings.resource_insertion_position.clone(),
+                    keep_config_files: mod_settings.keep_config_files,
+                },
                 Some(tx),
             )
             .tap_err(|e| log::error!("Couldn't deploy mods: {e}"))?;

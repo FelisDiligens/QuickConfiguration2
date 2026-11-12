@@ -4,7 +4,7 @@ use std::{fs, path::PathBuf};
 
 use tempfile::TempDir;
 
-use crate::features::mods::deployment::deploy_mods;
+use crate::features::mods::deployment::{DeployModsOptions, deploy_mods};
 use crate::features::mods::models::json::{
     ManagedMod, ManagedMods, ModInstallationOptions, ModInstallationState,
 };
@@ -171,9 +171,11 @@ fn test_deploy_mods_1() {
         &mut list,
         &paths.mods_path,
         &paths.game_path,
-        copy_method,
-        ResourceInsertionPosition::Append,
-        true,
+        DeployModsOptions {
+            copy_method,
+            resource_insertion_position: ResourceInsertionPosition::Append,
+            keep_config_files: true,
+        },
         None,
     )
     .unwrap();
@@ -362,9 +364,11 @@ fn test_deploy_mods_2() {
         &mut list,
         &paths.mods_path,
         &paths.game_path,
-        copy_method,
-        ResourceInsertionPosition::Append,
-        true,
+        DeployModsOptions {
+            copy_method,
+            resource_insertion_position: ResourceInsertionPosition::Append,
+            keep_config_files: true,
+        },
         None,
     )
     .unwrap();
@@ -498,9 +502,11 @@ fn test_deploy_mods_3() {
         &mut list,
         &paths.mods_path,
         &paths.game_path,
-        copy_method,
-        ResourceInsertionPosition::Append,
-        true,
+        DeployModsOptions {
+            copy_method,
+            resource_insertion_position: ResourceInsertionPosition::Append,
+            keep_config_files: true,
+        },
         None,
     )
     .unwrap();

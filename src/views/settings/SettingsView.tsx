@@ -254,7 +254,9 @@ export default function SettingsView() {
               <FlexRow center gap="1rem" css={css`padding: 10px 0;`}>
                 <FlexCol noGrow noShrink>
                   <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Pending...</span>
+                    <span className="visually-hidden">
+                      {t("common.loading")}
+                    </span>
                   </Spinner>
                 </FlexCol>
                 <FlexCol>
@@ -391,7 +393,9 @@ export default function SettingsView() {
               >
                 <FlexCol noGrow noShrink>
                   <Spinner animation="border" role="status">
-                    <span className="visually-hidden">Pending...</span>
+                    <span className="visually-hidden">
+                      {t("common.loading")}
+                    </span>
                   </Spinner>
                 </FlexCol>
                 <FlexCol>{t("common.loading")}</FlexCol>
