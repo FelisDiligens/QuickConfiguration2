@@ -162,7 +162,7 @@ Please use the following commands while working on the code base:
 - Use `pnpm`, not `npm` when running scripts.
 - Use scripts in `package.json` instead of running `npx` etc.
 - Use strict typing, never use `any` or any exemptions (no disabling checks), avoid `unknown` if possible.
-- When adding or changing UI text, update the translation strings in `./src/i18n/en.json` and `./src/i18n/de.json` as well (the `translate` skill can help with the German translations).
+- When adding or changing UI text, update the translation strings in `./src/i18n/en.json` and `./src/i18n/de.json` as well (the `translate` skill informs you about conventions and usage).
 
 ## Git Commit Conventions
 
