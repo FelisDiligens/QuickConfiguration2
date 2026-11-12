@@ -28,8 +28,6 @@ QuickConfiguration2_GitHub/
 │   ├── Layout.tsx              App shell: navigation panel + router outlet
 │   ├── router.tsx              Route definitions
 │   ├── info.ts                 App info (version, author, urls)
-│   ├── api/                    Frontend-side calls to external APIs
-│   │   └── bethesdaServerStatus/  Fallout 76 server status (shown on the home page)
 │   ├── assets/
 │   │   ├── fonts/              Overseer (Fallout logo font, used for headers), Roboto, Roboto_Condensed
 │   │   ├── img/                Static images
@@ -105,6 +103,7 @@ QuickConfiguration2_GitHub/
     │   │   ├── nexusmods/      NexusMods API + cached remote mod info (api/, models/, sso/)
     │   │   ├── resourcelists/  Game resource lists (which BA2 archives get loaded)
     │   │   ├── screenshots/    Finding Steam / game screenshots, generating thumbnails
+    │   │   ├── serverstatus/   Fallout 76 server status (shown on the home page)
     │   │   ├── sevenzip/       Calling the bundled or $PATH 7z
     │   │   ├── steam/          Steam installation, libraries and screenshots
     │   │   ├── stores/         Global app state (settings/, profiles/, ini/)
