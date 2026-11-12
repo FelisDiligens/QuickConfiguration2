@@ -1,4 +1,4 @@
-import { Status, fetchLocalizedServerStatus } from "@/api/bethesdaServerStatus";
+import { commands } from "@/commands/bindings";
 import { sleep } from "@/utils";
 import { ServerStatusRow } from "@/views/home/ServerStatus";
 import { RenderResult, render, screen } from "@testing-library/react";
@@ -19,6 +19,7 @@ vi.mock("@/commands/bindings", () => ({
   commands: {
     // important: tell component that it's in debug mode:
     isDebug: vi.fn(() => Promise.resolve(true)),
+    fetchLocalizedServerStatus: vi.fn(),
   },
 }));
 
@@ -36,16 +37,6 @@ vi.mock("@/stores/settings", () => ({
     }),
 }));
 
-// Mock status API:
-vi.mock("@/api/bethesdaServerStatus", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@/api/bethesdaServerStatus")>();
-  return {
-    Status: actual.Status,
-    fetchLocalizedServerStatus: vi.fn(),
-  };
-});
-
 beforeEach(() => {
   vi.clearAllMocks();
   vi.resetModules();
@@ -53,8 +44,8 @@ beforeEach(() => {
 
 describe("<ServerStatus> component", () => {
   it("should fetch and display the proper message.", async () => {
-    vi.mocked(fetchLocalizedServerStatus).mockResolvedValueOnce({
-      status: Status.Operational,
+    vi.mocked(commands.fetchLocalizedServerStatus).mockResolvedValueOnce({
+      status: "Operational",
       message: "Funktionsfähig",
     });
 
@@ -74,7 +65,7 @@ describe("<ServerStatus> component", () => {
     await sleep(SLEEP_INTERVAL);
 
     // Check if function was called only once:
-    expect(fetchLocalizedServerStatus).toHaveBeenCalledTimes(1);
+    expect(commands.fetchLocalizedServerStatus).toHaveBeenCalledTimes(1);
 
     // Check if localized "operational" string is displayed:
     const element = await dom.findByText(/Funktionsfähig/);
@@ -82,7 +73,7 @@ describe("<ServerStatus> component", () => {
   });
 
   it("should display error message when Promise rejects.", async () => {
-    vi.mocked(fetchLocalizedServerStatus).mockRejectedValueOnce(
+    vi.mocked(commands.fetchLocalizedServerStatus).mockRejectedValueOnce(
       new Error("Mocked error message"),
     );
 
@@ -102,7 +93,7 @@ describe("<ServerStatus> component", () => {
     await sleep(SLEEP_INTERVAL);
 
     // Check if function was called only once:
-    expect(fetchLocalizedServerStatus).toHaveBeenCalledTimes(1);
+    expect(commands.fetchLocalizedServerStatus).toHaveBeenCalledTimes(1);
 
     // Check if error string is displayed:
     const element = await dom.findByText(/home.serverStatus.error/);

@@ -82,6 +82,9 @@ async saveProfiles(profiles: Profiles) : Promise<null> {
 async launchGame(profile: Profile) : Promise<null> {
     return await TAURI_INVOKE("launch_game", { profile });
 },
+async fetchLocalizedServerStatus(language: string) : Promise<LocalizedServerStatus> {
+    return await TAURI_INVOKE("fetch_localized_server_status", { language });
+},
 async iniLoad(iniPath: string, iniPrefix: string) : Promise<null> {
     return await TAURI_INVOKE("ini_load", { iniPath, iniPrefix });
 },
@@ -541,6 +544,10 @@ export type IniFile = "Main" | "Prefs" | "Custom"
 export type JsonValue = null | boolean | number | string | JsonValue[] | { [key in string]: JsonValue }
 export type LaunchOption = "OpenURL" | "RunExec"
 /**
+ * The result of fetching the localized server status.
+ */
+export type LocalizedServerStatus = { status: ServerStatus; message: string }
+/**
  * Represents a managed mod. Stores information about the mod and how it should be installed.
  */
 export type ManagedMod = { 
@@ -700,6 +707,10 @@ export type ResourceInsertionPosition = "prepend" | "append"
 export type ResourceList = string[]
 export type Screenshot = { path: string; thumbnailPath: string }
 export type SerializableCommandResult<T> = { status: "ok"; value: T } | { status: "error"; value: CommandError }
+/**
+ * The normalized Fallout 76 server status.
+ */
+export type ServerStatus = "Operational" | "Maintenance" | "DegradedPerformance" | "PartialOutage" | "MajorOutage"
 export type Settings = { version: string; theme: Theme; useGameCursor: boolean; language: string | null; translationsLastUpdated: string | null; fetchServerStatusOnStart: boolean; checkForUpdatesOnStart: boolean; downloadTranslationsOnStart: boolean; quitOnGameLaunch: boolean; navigationCollapsed: boolean; bypassIniReadonly: boolean; modManager: ModManagerSettings; migratedFromV1?: SettingsMigration | null; prereleaseDismissed?: boolean | null }
 export type SettingsMigration = { fromVersion: string; toVersion: string; date: string; dismissed: boolean }
 export type SpecialPath = "AppInstallFolder" | "AppConfigFolder" | "AppTranslationsFolder" | "SteamScreenshotFolder"

@@ -12,6 +12,7 @@ pub mod paths;
 pub mod profiles;
 pub mod resourcelists;
 pub mod screenshots;
+pub mod serverstatus;
 pub mod settings;
 pub mod translations;
 

@@ -1,4 +1,3 @@
-import { Status, fetchLocalizedServerStatus } from "@/api/bethesdaServerStatus";
 import {
   StatusMaintenance24Icon,
   StatusMajorOutage24Icon,
@@ -6,7 +5,7 @@ import {
   StatusPartialOutage24Icon,
 } from "@/assets/img";
 import { isRelease } from "@/commands/additions";
-import { commands } from "@/commands/bindings";
+import { commands, ServerStatus } from "@/commands/bindings";
 import useTheme from "@/hooks/useTheme";
 import { useSettingsStore } from "@/stores/settings";
 import { css } from "@emotion/react";
@@ -28,7 +27,7 @@ enum State {
   Finished,
 }
 
-const statusAtom = atom<Status | null>(null);
+const statusAtom = atom<ServerStatus | null>(null);
 const statusMessageAtom = atom<string | null>(null);
 const stateAtom = atom(State.Uninitialized);
 const buttonDisabledAtom = atom(false);
@@ -52,7 +51,7 @@ export function ServerStatusRow() {
     setStatusMessage(t("home.serverStatus.loading"));
     setButtonDisabled(true);
     try {
-      const { status, message } = await fetchLocalizedServerStatus(
+      const { status, message } = await commands.fetchLocalizedServerStatus(
         language || "en",
       );
       setState(State.Finished);
@@ -110,15 +109,13 @@ export function ServerStatusRow() {
         {state == State.Uninitialized && (
           <FontAwesomeIcon icon={faCircleQuestion} />
         )}
-        {status == Status.Operational && <img src={StatusOperational24Icon} />}
-        {status == Status.Maintenance && <img src={StatusMaintenance24Icon} />}
-        {status == Status.DegradedPerformance && (
+        {status == "Operational" && <img src={StatusOperational24Icon} />}
+        {status == "Maintenance" && <img src={StatusMaintenance24Icon} />}
+        {status == "DegradedPerformance" && (
           <img src={StatusPartialOutage24Icon} />
         )}
-        {status == Status.ParialOutage && (
-          <img src={StatusPartialOutage24Icon} />
-        )}
-        {status == Status.MajorOutage && <img src={StatusMajorOutage24Icon} />}
+        {status == "PartialOutage" && <img src={StatusPartialOutage24Icon} />}
+        {status == "MajorOutage" && <img src={StatusMajorOutage24Icon} />}
         <span
           css={css`
             margin-left: 10px;

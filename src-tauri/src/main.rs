@@ -38,6 +38,7 @@ fn main() {
             commands::profiles::get_profiles,
             commands::profiles::save_profiles,
             commands::game::launch_game,
+            commands::serverstatus::fetch_localized_server_status,
             commands::ini::ini_load,
             commands::ini::ini_save,
             commands::ini::ini_create_files,

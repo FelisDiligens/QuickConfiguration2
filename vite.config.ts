@@ -44,7 +44,6 @@ export default defineConfig({
       reporter: ["html"],
       exclude: ["src-tauri/**", ...coverageConfigDefaults.exclude],
       include: [
-        "src/api/**/*.{ts,tsx}",
         "src/components/**/*.{ts,tsx}",
         "src/hooks/**/*.{ts,tsx}",
         "src/lib/**/*.{ts,tsx}",

@@ -28,12 +28,6 @@
         },
         {
           "url": "https://raw.githubusercontent.com/FelisDiligens/QuickConfiguration2/*"
-        },
-        {
-          "url": "https://status.bethesda.net/en/status/api/statuses"
-        },
-        {
-          "url": "https://api.locize.app/657e9e0e-8225-4266-88dd-75f047f1a2b3/live/*/status"
         }
       ]
     }

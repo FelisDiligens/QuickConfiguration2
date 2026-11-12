@@ -7,6 +7,7 @@ pub mod mods;
 pub mod nexusmods;
 pub mod resourcelists;
 pub mod screenshots;
+pub mod serverstatus;
 pub mod sevenzip;
 pub mod steam;
 pub mod stores;
