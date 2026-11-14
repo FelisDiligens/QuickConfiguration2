@@ -1,4 +1,4 @@
-Files used in unit texts.
+Files used in unit tests.
 
 | File name                  | Description                                                                                                                   |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -10,5 +10,8 @@ Files used in unit texts.
 | `pixel_extracted.dds`      | `pixel.dds` packed into BA2 and then extracted from it                                                                        |
 | `general_default.ba2`      | BA2 archive containing `test.txt` with format `General` and compression `Default`                                             |
 | `general_none.ba2`         | BA2 archive containing `test.txt` with format `General` and compression `None`                                                |
+| `general_none_sounds.ba2`  | BA2 archive containing `sound/fx/sine.wav` and `sound/fx/sine.xwm` files with format `General` and compression `None`         |
 | `dds_default.ba2`          | BA2 archive containing `pixel.dds` with format `DDS` and compression `Default`                                                |
 | `dds_default_textures.ba2` | BA2 archive containing `pixel.dds` in `Textures` folder (=> `Textures/pixel.dds`) with format `DDS` and compression `Default` |
+| `sine.wav`                 | 440Hz sine wave made with Audacity                                                                                            |
+| `sine.xwm`                 | WAV file converted using Skyrim Audio Converter                                                                               |
