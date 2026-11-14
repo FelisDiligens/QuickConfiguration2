@@ -535,3 +535,106 @@ fn test_deploy_mods_3() {
         "original backup"
     );
 }
+
+#[test]
+fn test_deploy_mods_4() {
+    test_utils::setup_stdout_logger();
+    let paths = TestPaths::new();
+    let mut mods = ManagedMods::default();
+    let mut list = ResourceList::parse("");
+    let copy_method = ModCopyMethod::Copy;
+    let string_files = [
+        "seventy_six_en.dlstrings",
+        "seventy_six_en.ilstrings",
+        "seventy_six_en.strings",
+    ];
+
+    // Setup files and folders:
+    fs::create_dir_all(&paths.game_data_path).unwrap();
+    fs::create_dir_all(&paths.mods_path).unwrap();
+
+    // Mod 1: Loose files deployed from the game root ("."), containing Data/strings/...
+    let mod1 = ManagedMod {
+        key: "9ffa4858-d899-412a-87d7-7c6967f6f698".to_string(),
+        title: "ModLooseFilesStringsDeployed".to_string(),
+        folder_name: "ModLooseFilesStringsDeployed".to_string(),
+        enabled: true,
+        options: ModInstallationOptions {
+            root_folder: ".".to_string(),
+        },
+        ..Default::default()
+    };
+    let mod1_path = paths.mods_path.join(&mod1.folder_name);
+    fs::create_dir_all(mod1_path.join("Data").join("strings")).unwrap();
+    for file_name in string_files {
+        fs_util::write_to_file(
+            mod1_path.join("Data").join("strings").join(file_name),
+            "mod1 content",
+        )
+        .unwrap();
+    }
+    mods.mods.push(mod1);
+
+    // Mod 2: Same string files but deployed from "Data", containing strings/...
+    let mod2 = ManagedMod {
+        key: "6eb57375-516b-4356-826e-e62604639b48".to_string(),
+        title: "ModLooseFilesStringsDataDeployed".to_string(),
+        folder_name: "ModLooseFilesStringsDataDeployed".to_string(),
+        enabled: true,
+        options: ModInstallationOptions {
+            root_folder: "Data".to_string(),
+        },
+        ..Default::default()
+    };
+    let mod2_path = paths.mods_path.join(&mod2.folder_name);
+    fs::create_dir_all(mod2_path.join("strings")).unwrap();
+    for file_name in string_files {
+        fs_util::write_to_file(mod2_path.join("strings").join(file_name), "mod2 content").unwrap();
+    }
+    mods.mods.push(mod2);
+
+    // Deploy mods twice to also cover re-deployment:
+    for _ in 0..2 {
+        deploy_mods(
+            &mut mods,
+            &mut list,
+            &paths.mods_path,
+            &paths.game_path,
+            DeployModsOptions {
+                copy_method: copy_method.clone(),
+                resource_insertion_position: ResourceInsertionPosition::Append,
+                keep_config_files: true,
+            },
+            None,
+        )
+        .unwrap();
+
+        // Both mods deploy to the same files in Data/strings, so the second mod
+        // should simply overwrite the first mod's files (no .old backups):
+        let strings_path = paths.game_data_path.join("strings");
+        for file_name in &string_files {
+            let file_path = strings_path.join(file_name);
+            assert!(file_path.is_file());
+            assert_eq!(fs::read_to_string(&file_path).unwrap(), "mod2 content");
+            assert!(!strings_path.join(format!("{file_name}.old")).exists());
+        }
+
+        // Exactly the three string files should exist in Data/strings:
+        let mut entries: Vec<String> = fs::read_dir(&strings_path)
+            .unwrap()
+            .map(|entry| entry.unwrap().file_name().to_string_lossy().to_string())
+            .collect();
+        entries.sort();
+        assert_eq!(
+            entries,
+            vec![
+                "seventy_six_en.dlstrings".to_string(),
+                "seventy_six_en.ilstrings".to_string(),
+                "seventy_six_en.strings".to_string()
+            ]
+        );
+    }
+
+    // Both mods should have deployment state:
+    assert_eq!(mods.state.len(), 2);
+}

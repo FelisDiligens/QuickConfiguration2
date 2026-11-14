@@ -260,6 +260,7 @@ fn deploy_mod_internal<P: AsRef<Path>>(
         // Determine relative path and full destination path:
         let relative_path = fs_util::get_relative_path(&src_path, &file_path)?;
         let dst_path = dst_path.join(&relative_path);
+        let deployed_path = dst_path.normalize();
 
         // Create parent directory:
         if let Some(parent_path) = dst_path.parent() {
@@ -282,7 +283,7 @@ fn deploy_mod_internal<P: AsRef<Path>>(
         // Copy (or hardlink/symlink) file:
         if !no_overwrite {
             // Make a backup ("filename.ext" -> "filename.ext.old") if the file already exists:
-            let file_belongs_to_another_mod = deployed_files.contains(&relative_path);
+            let file_belongs_to_another_mod = deployed_files.contains(&deployed_path);
             if dst_path.exists()
                 && !dst_path.with_added_extension("old").exists()
                 && !file_belongs_to_another_mod
@@ -300,8 +301,8 @@ fn deploy_mod_internal<P: AsRef<Path>>(
         }
         copied_files += 1;
 
-        // Add relative path to the list of all deployed files:
-        deployed_files.push(relative_path.to_owned()); // Current deployment (all mods)
+        // Add destination path to the list of all deployed files:
+        deployed_files.push(deployed_path); // Current deployment (all mods)
         let relative_path = relative_path.to_str().ok_or_else(|| {
             ModActionError::PathUtf8Converation(file_path.to_string_lossy().to_string())
         })?;
