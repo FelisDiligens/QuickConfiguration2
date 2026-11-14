@@ -19,7 +19,7 @@ pub fn get_relative_path<P1: AsRef<Path>, P2: AsRef<Path>>(
     path: P2,
 ) -> Result<PathBuf, StripPrefixError> {
     let relative_path = path.as_ref().strip_prefix(base_path.as_ref())?;
-    if relative_path == "" {
+    if relative_path.is_empty() {
         return Ok(PathBuf::from("."));
     }
     Ok(relative_path.to_path_buf())
