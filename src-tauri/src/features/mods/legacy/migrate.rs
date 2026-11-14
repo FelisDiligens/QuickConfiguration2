@@ -32,7 +32,7 @@ const BUNDLED_ARCHIVES: &[&str] = &[
 
 /// Path to the mod's frozen archive.
 /// Example: @"C:\Program Files (x86)\Steam\steamapps\common\Fallout 76\FrozenData\{2f2d3b3b-b21b-4ec2-b555-c8806a801b16}.ba2"
-fn get_frozen_archive_path<P: AsRef<Path>, S: AsRef<str>>(
+pub(super) fn get_frozen_archive_path<P: AsRef<Path>, S: AsRef<str>>(
     mods_path: P,
     guid: S,
 ) -> anyhow::Result<PathBuf> {

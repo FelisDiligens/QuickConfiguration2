@@ -8,6 +8,7 @@ use ini::Ini;
 use tempfile::TempDir;
 
 use crate::features::mods::{get_mods_temp_path, load_mods};
+use crate::utils::ini::IniAccessors;
 use crate::utils::{fs_util, test_utils};
 
 struct TestPaths {
@@ -581,6 +582,36 @@ fn setup_test_empty_mod_folders() -> TestPaths {
             </DiskState>
             <Notes></Notes>
         </Mod>
+        <Mod guid="test-guid-frozen-missing">
+            <Title>ModFrozenMissing</Title>
+            <Folder>ModFrozenMissing</Folder>
+            <Version>1.0</Version>
+            <NexusMods id="-1">
+            <URL></URL>
+            </NexusMods>
+            <DiskState>
+            <Current isDeployed="true">
+                <InstallationMethod>SeparateBA2</InstallationMethod>
+                <ArchiveName>ModFrozenMissing.ba2</ArchiveName>
+                <ArchiveFormat>General</ArchiveFormat>
+                <ArchiveCompression>Compressed</ArchiveCompression>
+                <RootFolder>.</RootFolder>
+                <InstalledLooseFiles />
+            </Current>
+            <Pending isEnabled="true">
+                <InstallationMethod>SeparateBA2</InstallationMethod>
+                <ArchiveName>ModFrozenMissing.ba2</ArchiveName>
+                <ArchiveFormat>General</ArchiveFormat>
+                <ArchiveCompression>Compressed</ArchiveCompression>
+                <RootFolder>Data</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="true" freeze="true">
+                <ArchiveFormat>General</ArchiveFormat>
+                <ArchiveCompression>Compressed</ArchiveCompression>
+            </FrozenData>
+            </DiskState>
+            <Notes></Notes>
+        </Mod>
         </ManagedMods>
     "#};
     let resources_txt = "";
@@ -602,6 +633,19 @@ fn setup_test_empty_mod_folders() -> TestPaths {
     fs::create_dir_all(&mod_bundled_path).unwrap();
     fs::create_dir_all(&mod_separate_path).unwrap();
     fs::create_dir_all(&mod_separate_auto_path).unwrap();
+
+    fs::copy(
+        Path::new("tests/fixtures/general_default.ba2"),
+        paths
+            .frozen_data_path
+            .join("{test-guid-frozen-missing}.ba2"),
+    )
+    .unwrap();
+    fs::copy(
+        Path::new("tests/fixtures/general_default.ba2"),
+        paths.game_data_path.join("ModFrozenMissing.ba2"),
+    )
+    .unwrap();
 
     paths
 }
@@ -642,10 +686,19 @@ pub fn test_migration_empty_mod_folders() {
         paths.mods_path.join("ModSeparateAutoEmpty").exists(),
         "Empty SeparateBA2 (Auto) mod folder should be created"
     );
+    assert!(
+        paths
+            .mods_path
+            .join("ModFrozenMissing")
+            .join("ModFrozenMissing.ba2")
+            .exists(),
+        "Frozen SeparateBA2 with missing mod folder should get the frozen archive moved into the new mod folder"
+    );
+    assert!(!paths.game_data_path.join("ModFrozenMissing.ba2").exists());
 
     let managed = load_mods(&paths.mods_path).unwrap().unwrap();
     assert!(managed.enabled);
-    assert_eq!(managed.mods.len(), 4);
+    assert_eq!(managed.mods.len(), 5);
 }
 
 /// Setup for test case: mod without mod folder for each installation method
@@ -1098,4 +1151,1172 @@ pub fn test_migration_existing_tmp_folder() {
     let managed = load_mods(&paths.mods_path).unwrap().unwrap();
     assert!(managed.enabled);
     assert_eq!(managed.mods.len(), 1);
+}
+
+fn setup_test_case_2() -> TestPaths {
+    let paths = TestPaths::new();
+    let managed_xml = indoc! {r#"
+      <?xml version="1.0" encoding="utf-8"?>
+      <ManagedMods enabled="true" nwmode="false">
+        <Mod guid="3283cd91-d01f-4ca7-a386-854abc3ea133">
+          <Title>ModFrozenSeparateDeployed</Title>
+          <Folder>ModFrozenSeparateDeployed</Folder>
+          <Version>1.0</Version>
+          <NexusMods id="-1">
+            <URL></URL>
+          </NexusMods>
+          <DiskState>
+            <Current isDeployed="true">
+              <InstallationMethod>SeparateBA2</InstallationMethod>
+              <ArchiveName>ModFrozenSeparateDeployed.ba2</ArchiveName>
+              <ArchiveFormat>General</ArchiveFormat>
+              <ArchiveCompression>Compressed</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+              <InstalledLooseFiles />
+            </Current>
+            <Pending isEnabled="true">
+              <InstallationMethod>SeparateBA2</InstallationMethod>
+              <ArchiveName>ModFrozenSeparateDeployed.ba2</ArchiveName>
+              <ArchiveFormat>General</ArchiveFormat>
+              <ArchiveCompression>Compressed</ArchiveCompression>
+              <RootFolder>Data</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="true" freeze="true">
+              <ArchiveFormat>General</ArchiveFormat>
+              <ArchiveCompression>Compressed</ArchiveCompression>
+            </FrozenData>
+          </DiskState>
+          <Notes></Notes>
+        </Mod>
+        <Mod guid="787f1467-e67c-4dab-afa9-76c92f555aa8">
+          <Title>ModFrozenSeparateDisabled</Title>
+          <Folder>ModFrozenSeparateDisabled</Folder>
+          <Version>1.0</Version>
+          <NexusMods id="-1">
+            <URL></URL>
+          </NexusMods>
+          <DiskState>
+            <Current isDeployed="false">
+              <InstallationMethod>SeparateBA2</InstallationMethod>
+              <ArchiveName>ModFrozenSeparateDisabled.ba2</ArchiveName>
+              <ArchiveFormat>General</ArchiveFormat>
+              <ArchiveCompression>Compressed</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+              <InstalledLooseFiles />
+            </Current>
+            <Pending isEnabled="false">
+              <InstallationMethod>SeparateBA2</InstallationMethod>
+              <ArchiveName>ModFrozenSeparateDisabled.ba2</ArchiveName>
+              <ArchiveFormat>General</ArchiveFormat>
+              <ArchiveCompression>Compressed</ArchiveCompression>
+              <RootFolder>Data</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="true" freeze="true">
+              <ArchiveFormat>General</ArchiveFormat>
+              <ArchiveCompression>Compressed</ArchiveCompression>
+            </FrozenData>
+          </DiskState>
+          <Notes></Notes>
+        </Mod>
+        <Mod guid="4b3811e0-1e42-4cee-a2b0-dc2f905aeb78">
+          <Title>ModFreezeSeparateDisabled</Title>
+          <Folder>ModFreezeSeparateDisabled</Folder>
+          <Version>1.0</Version>
+          <NexusMods id="-1">
+            <URL></URL>
+          </NexusMods>
+          <DiskState>
+            <Current isDeployed="false">
+              <InstallationMethod>LooseFiles</InstallationMethod>
+              <ArchiveName />
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+              <InstalledLooseFiles />
+            </Current>
+            <Pending isEnabled="false">
+              <InstallationMethod>SeparateBA2</InstallationMethod>
+              <ArchiveName>ModFreezeSeparateDisabled.ba2</ArchiveName>
+              <ArchiveFormat>General</ArchiveFormat>
+              <ArchiveCompression>Compressed</ArchiveCompression>
+              <RootFolder>Data</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="true">
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+            </FrozenData>
+          </DiskState>
+          <Notes></Notes>
+        </Mod>
+        <Mod guid="5f42d646-879e-4325-96b4-474c5a6d2dd7">
+          <Title>ModSeparateDisabled</Title>
+          <Folder>ModSeparateDisabled</Folder>
+          <Version>1.0</Version>
+          <NexusMods id="-1">
+            <URL></URL>
+          </NexusMods>
+          <DiskState>
+            <Current isDeployed="false">
+              <InstallationMethod>LooseFiles</InstallationMethod>
+              <ArchiveName />
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+              <InstalledLooseFiles />
+            </Current>
+            <Pending isEnabled="false">
+              <InstallationMethod>SeparateBA2</InstallationMethod>
+              <ArchiveName>ModSeparateDisabled.ba2</ArchiveName>
+              <ArchiveFormat>General</ArchiveFormat>
+              <ArchiveCompression>Compressed</ArchiveCompression>
+              <RootFolder>Data</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="false">
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+            </FrozenData>
+          </DiskState>
+          <Notes></Notes>
+        </Mod>
+        <Mod guid="5cfbb9d3-f01d-46db-8078-32481707c522">
+          <Title>ModSeparateDeployed</Title>
+          <Folder>ModSeparateDeployed</Folder>
+          <Version>1.0</Version>
+          <NexusMods id="-1">
+            <URL></URL>
+          </NexusMods>
+          <DiskState>
+            <Current isDeployed="true">
+              <InstallationMethod>SeparateBA2</InstallationMethod>
+              <ArchiveName>ModSeparateDeployed.ba2</ArchiveName>
+              <ArchiveFormat>General</ArchiveFormat>
+              <ArchiveCompression>Compressed</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+              <InstalledLooseFiles />
+            </Current>
+            <Pending isEnabled="true">
+              <InstallationMethod>SeparateBA2</InstallationMethod>
+              <ArchiveName>ModSeparateDeployed.ba2</ArchiveName>
+              <ArchiveFormat>General</ArchiveFormat>
+              <ArchiveCompression>Compressed</ArchiveCompression>
+              <RootFolder>Data</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="false">
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+            </FrozenData>
+          </DiskState>
+          <Notes></Notes>
+        </Mod>
+        <Mod guid="14134a25-db6b-4e18-ab1c-49935da792bd">
+          <Title>ModBundledDeployed</Title>
+          <Folder>ModBundledDeployed</Folder>
+          <Version>1.0</Version>
+          <NexusMods id="-1">
+            <URL></URL>
+          </NexusMods>
+          <DiskState>
+            <Current isDeployed="true">
+              <InstallationMethod>BundledBA2</InstallationMethod>
+              <ArchiveName />
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+              <InstalledLooseFiles />
+            </Current>
+            <Pending isEnabled="true">
+              <InstallationMethod>BundledBA2</InstallationMethod>
+              <ArchiveName>untitled.ba2</ArchiveName>
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="false">
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+            </FrozenData>
+          </DiskState>
+          <Notes></Notes>
+        </Mod>
+        <Mod guid="789e276a-4be7-4722-af61-00eee3ddc620">
+          <Title>ModBundledDisabled</Title>
+          <Folder>ModBundledDisabled</Folder>
+          <Version>1.0</Version>
+          <NexusMods id="-1">
+            <URL></URL>
+          </NexusMods>
+          <DiskState>
+            <Current isDeployed="false">
+              <InstallationMethod>LooseFiles</InstallationMethod>
+              <ArchiveName />
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+              <InstalledLooseFiles />
+            </Current>
+            <Pending isEnabled="false">
+              <InstallationMethod>BundledBA2</InstallationMethod>
+              <ArchiveName>untitled.ba2</ArchiveName>
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="false">
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+            </FrozenData>
+          </DiskState>
+          <Notes></Notes>
+        </Mod>
+        <Mod guid="828a67d7-480f-4f46-9ac0-435b3b397383">
+          <Title>ModLooseFilesDeployed</Title>
+          <Folder>ModLooseFilesDeployed</Folder>
+          <Version>1.0</Version>
+          <NexusMods id="-1">
+            <URL></URL>
+          </NexusMods>
+          <DiskState>
+            <Current isDeployed="true">
+              <InstallationMethod>LooseFiles</InstallationMethod>
+              <ArchiveName />
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+              <InstalledLooseFiles>
+                <File path=".\example.dll" />
+              </InstalledLooseFiles>
+            </Current>
+            <Pending isEnabled="true">
+              <InstallationMethod>LooseFiles</InstallationMethod>
+              <ArchiveName>untitled.ba2</ArchiveName>
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="false">
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+            </FrozenData>
+          </DiskState>
+          <Notes></Notes>
+        </Mod>
+        <Mod guid="f5af55f9-c32b-4bb9-b0d9-72e93634ba54">
+          <Title>ModLooseFilesDisabled</Title>
+          <Folder>ModLooseFilesDisabled</Folder>
+          <Version>1.0</Version>
+          <NexusMods id="-1">
+            <URL></URL>
+          </NexusMods>
+          <DiskState>
+            <Current isDeployed="false">
+              <InstallationMethod>LooseFiles</InstallationMethod>
+              <ArchiveName />
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+              <InstalledLooseFiles />
+            </Current>
+            <Pending isEnabled="false">
+              <InstallationMethod>LooseFiles</InstallationMethod>
+              <ArchiveName>untitled.ba2</ArchiveName>
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="false">
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+            </FrozenData>
+          </DiskState>
+          <Notes></Notes>
+        </Mod>
+        <Mod guid="9ffa4858-d899-412a-87d7-7c6967f6f698">
+          <Title>ModLooseFilesStringsDeployed</Title>
+          <Folder>ModLooseFilesStringsDeployed</Folder>
+          <Version>1.0</Version>
+          <NexusMods id="-1">
+            <URL></URL>
+          </NexusMods>
+          <DiskState>
+            <Current isDeployed="true">
+              <InstallationMethod>LooseFiles</InstallationMethod>
+              <ArchiveName />
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+              <InstalledLooseFiles>
+                <File path=".\Data\strings\seventy_six_en.dlstrings" />
+                <File path=".\Data\strings\seventy_six_en.ilstrings" />
+                <File path=".\Data\strings\seventy_six_en.strings" />
+              </InstalledLooseFiles>
+            </Current>
+            <Pending isEnabled="true">
+              <InstallationMethod>LooseFiles</InstallationMethod>
+              <ArchiveName>untitled.ba2</ArchiveName>
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="false">
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+            </FrozenData>
+          </DiskState>
+          <Notes></Notes>
+        </Mod>
+        <Mod guid="6eb57375-516b-4356-826e-e62604639b48">
+          <Title>ModLooseFilesStringsDataDeployed</Title>
+          <Folder>ModLooseFilesStringsDataDeployed</Folder>
+          <Version>1.0</Version>
+          <NexusMods id="-1">
+            <URL></URL>
+          </NexusMods>
+          <DiskState>
+            <Current isDeployed="true">
+              <InstallationMethod>LooseFiles</InstallationMethod>
+              <ArchiveName />
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>Data</RootFolder>
+              <InstalledLooseFiles>
+                <File path=".\strings\seventy_six_en.dlstrings" />
+                <File path=".\strings\seventy_six_en.ilstrings" />
+                <File path=".\strings\seventy_six_en.strings" />
+              </InstalledLooseFiles>
+            </Current>
+            <Pending isEnabled="true">
+              <InstallationMethod>LooseFiles</InstallationMethod>
+              <ArchiveName>untitled.ba2</ArchiveName>
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>Data</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="false">
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+            </FrozenData>
+          </DiskState>
+          <Notes></Notes>
+        </Mod>
+        <Mod guid="2e45a868-1d35-49c9-be03-845c6b199afe">
+          <Title>ModSeparateAutoDeployed</Title>
+          <Folder>ModSeparateAutoDeployed</Folder>
+          <Version>1.0</Version>
+          <NexusMods id="-1">
+            <URL></URL>
+          </NexusMods>
+          <DiskState>
+            <Current isDeployed="true">
+              <InstallationMethod>SeparateBA2</InstallationMethod>
+              <ArchiveName>ModSeparateAutoDeployed.ba2</ArchiveName>
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+              <InstalledLooseFiles />
+            </Current>
+            <Pending isEnabled="true">
+              <InstallationMethod>SeparateBA2</InstallationMethod>
+              <ArchiveName>ModSeparateAutoDeployed.ba2</ArchiveName>
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>Data</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="false">
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+            </FrozenData>
+          </DiskState>
+          <Notes></Notes>
+        </Mod>
+        <Mod guid="a1b2c3d4-0001-4000-8000-000000000001">
+          <Title>ModBundledSounds</Title>
+          <Folder>ModBundledSounds</Folder>
+          <Version>1.0</Version>
+          <NexusMods id="-1">
+            <URL></URL>
+          </NexusMods>
+          <DiskState>
+            <Current isDeployed="true">
+              <InstallationMethod>BundledBA2</InstallationMethod>
+              <ArchiveName />
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+              <InstalledLooseFiles />
+            </Current>
+            <Pending isEnabled="true">
+              <InstallationMethod>BundledBA2</InstallationMethod>
+              <ArchiveName>untitled.ba2</ArchiveName>
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="false">
+              <ArchiveFormat>Auto</ArchiveFormat>
+              <ArchiveCompression>Auto</ArchiveCompression>
+            </FrozenData>
+          </DiskState>
+          <Notes></Notes>
+        </Mod>
+        <Mod guid="a1b2c3d4-0002-4000-8000-000000000002">
+          <Title>ModSeparateSounds</Title>
+          <Folder>ModSeparateSounds</Folder>
+          <Version>1.0</Version>
+          <NexusMods id="-1">
+            <URL></URL>
+          </NexusMods>
+          <DiskState>
+            <Current isDeployed="true">
+              <InstallationMethod>SeparateBA2</InstallationMethod>
+              <ArchiveName>ModSeparateSounds.ba2</ArchiveName>
+              <ArchiveFormat>General</ArchiveFormat>
+              <ArchiveCompression>Uncompressed</ArchiveCompression>
+              <RootFolder>.</RootFolder>
+              <InstalledLooseFiles />
+            </Current>
+            <Pending isEnabled="true">
+              <InstallationMethod>SeparateBA2</InstallationMethod>
+              <ArchiveName>ModSeparateSounds.ba2</ArchiveName>
+              <ArchiveFormat>General</ArchiveFormat>
+              <ArchiveCompression>Uncompressed</ArchiveCompression>
+              <RootFolder>Data</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="false">
+              <ArchiveFormat>General</ArchiveFormat>
+              <ArchiveCompression>Uncompressed</ArchiveCompression>
+            </FrozenData>
+          </DiskState>
+          <Notes></Notes>
+        </Mod>
+      </ManagedMods>
+    "#};
+    let resources_txt = "Bundled.ba2,ModFrozenSeparateDeployed.ba2,ModSeparateDeployed.ba2,ModSeparateAutoDeployed.ba2,ModSeparateSounds.ba2";
+
+    // Setup folders and standard files:
+    fs::create_dir_all(&paths.game_data_path).unwrap();
+    fs::create_dir_all(&paths.mods_path).unwrap();
+    fs::create_dir_all(&paths.frozen_data_path).unwrap();
+    fs_util::write_to_file(paths.game_data_path.join("SeventySix.esm"), "").unwrap();
+
+    // Setup mod meta data:
+    fs_util::write_to_file(paths.mods_path.join("managed.xml"), managed_xml).unwrap();
+    fs_util::write_to_file(paths.mods_path.join("resources.txt"), resources_txt).unwrap();
+
+    // Setup deployed files in Data:
+    fs::copy(
+        Path::new("tests/fixtures/general_default.ba2"),
+        paths.game_data_path.join("Bundled.ba2"),
+    )
+    .unwrap();
+    fs::copy(
+        Path::new("tests/fixtures/general_default.ba2"),
+        paths.game_data_path.join("ModFrozenSeparateDeployed.ba2"),
+    )
+    .unwrap();
+    fs::copy(
+        Path::new("tests/fixtures/general_default.ba2"),
+        paths.game_data_path.join("ModSeparateDeployed.ba2"),
+    )
+    .unwrap();
+    fs::copy(
+        Path::new("tests/fixtures/general_default.ba2"),
+        paths.game_data_path.join("ModSeparateAutoDeployed.ba2"),
+    )
+    .unwrap();
+    fs::copy(
+        Path::new("tests/fixtures/general_none_sounds.ba2"),
+        paths.game_data_path.join("ModSeparateSounds.ba2"),
+    )
+    .unwrap();
+
+    // Setup deployed strings files in Data/strings:
+    let data_strings_path = paths.game_data_path.join("strings");
+    fs::create_dir_all(&data_strings_path).unwrap();
+    fs_util::write_to_file(data_strings_path.join("seventy_six_en.strings"), "strings").unwrap();
+    fs_util::write_to_file(
+        data_strings_path.join("seventy_six_en.ilstrings"),
+        "ilstrings",
+    )
+    .unwrap();
+    fs_util::write_to_file(
+        data_strings_path.join("seventy_six_en.dlstrings"),
+        "dlstrings",
+    )
+    .unwrap();
+
+    // Setup frozen archives:
+    fs::copy(
+        Path::new("tests/fixtures/general_default.ba2"),
+        paths
+            .frozen_data_path
+            .join("{3283cd91-d01f-4ca7-a386-854abc3ea133}.ba2"),
+    )
+    .unwrap();
+    fs::copy(
+        Path::new("tests/fixtures/general_default.ba2"),
+        paths
+            .frozen_data_path
+            .join("{787f1467-e67c-4dab-afa9-76c92f555aa8}.ba2"),
+    )
+    .unwrap();
+
+    // Setup deployed loose file in game root:
+    fs_util::write_to_file(paths.game_path.join("example.dll"), "dll").unwrap();
+
+    // Setup mod folders with files:
+    let mod_folders = [
+        "ModFrozenSeparateDeployed",
+        "ModFrozenSeparateDisabled",
+        "ModFreezeSeparateDisabled",
+        "ModSeparateDisabled",
+        "ModSeparateDeployed",
+        "ModBundledDeployed",
+        "ModBundledDisabled",
+        "ModSeparateAutoDeployed",
+    ];
+    for folder in mod_folders {
+        let materials_path = paths
+            .mods_path
+            .join(folder)
+            .join("materials")
+            .join("landscape")
+            .join("plants");
+        fs::create_dir_all(&materials_path).unwrap();
+        fs_util::write_to_file(materials_path.join("greensealeaf01.bgsm"), "BGSM").unwrap();
+    }
+
+    let sound_mod_folders = ["ModBundledSounds", "ModSeparateSounds"];
+    for folder in sound_mod_folders {
+        let sound_fx_path = paths.mods_path.join(folder).join("sound").join("fx");
+        fs::create_dir_all(&sound_fx_path).unwrap();
+        fs::copy(
+            Path::new("tests/fixtures/sine.wav"),
+            sound_fx_path.join("sine.wav"),
+        )
+        .unwrap();
+        fs::copy(
+            Path::new("tests/fixtures/sine.xwm"),
+            sound_fx_path.join("sine.xwm"),
+        )
+        .unwrap();
+    }
+
+    fs::create_dir_all(paths.mods_path.join("ModLooseFilesDeployed")).unwrap();
+    fs_util::write_to_file(
+        paths
+            .mods_path
+            .join("ModLooseFilesDeployed")
+            .join("example.dll"),
+        "MZ",
+    )
+    .unwrap();
+
+    fs::create_dir_all(paths.mods_path.join("ModLooseFilesDisabled")).unwrap();
+    fs_util::write_to_file(
+        paths
+            .mods_path
+            .join("ModLooseFilesDisabled")
+            .join("example.dll"),
+        "MZ",
+    )
+    .unwrap();
+
+    let strings_deployed_path = paths
+        .mods_path
+        .join("ModLooseFilesStringsDeployed")
+        .join("Data")
+        .join("strings");
+    fs::create_dir_all(&strings_deployed_path).unwrap();
+    fs_util::write_to_file(
+        strings_deployed_path.join("seventy_six_en.strings"),
+        "strings",
+    )
+    .unwrap();
+    fs_util::write_to_file(
+        strings_deployed_path.join("seventy_six_en.ilstrings"),
+        "ilstrings",
+    )
+    .unwrap();
+    fs_util::write_to_file(
+        strings_deployed_path.join("seventy_six_en.dlstrings"),
+        "dlstrings",
+    )
+    .unwrap();
+
+    let strings_data_deployed_path = paths
+        .mods_path
+        .join("ModLooseFilesStringsDataDeployed")
+        .join("strings");
+    fs::create_dir_all(&strings_data_deployed_path).unwrap();
+    fs_util::write_to_file(
+        strings_data_deployed_path.join("seventy_six_en.strings"),
+        "strings",
+    )
+    .unwrap();
+    fs_util::write_to_file(
+        strings_data_deployed_path.join("seventy_six_en.ilstrings"),
+        "ilstrings",
+    )
+    .unwrap();
+    fs_util::write_to_file(
+        strings_data_deployed_path.join("seventy_six_en.dlstrings"),
+        "dlstrings",
+    )
+    .unwrap();
+
+    paths
+}
+
+#[ignore = "Can take up to one minute to complete with wine"]
+#[test]
+pub fn test_migration_migrate_2() {
+    use crate::features::resourcelists::ResourceList;
+
+    test_utils::setup_stdout_logger();
+    let paths = setup_test_case_2();
+
+    let mut ini = Ini::new();
+    ini.set_string(
+        Some("Archive"),
+        "sResourceArchive2List",
+        "Bundled.ba2,ModFrozenSeparateDeployed.ba2,ModSeparateDeployed.ba2,ModSeparateAutoDeployed.ba2,ModSeparateSounds.ba2",
+    );
+
+    let archive_list_before =
+        ResourceList::load_from_ini(&ini, Some("Archive"), "sResourceArchive2List");
+    assert_eq!(archive_list_before.resources.len(), 5);
+
+    super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None).unwrap();
+
+    // INI archive lists should be empty after migration:
+    let archive_list_after =
+        ResourceList::load_from_ini(&ini, Some("Archive"), "sResourceArchive2List");
+    assert!(
+        archive_list_after.resources.is_empty(),
+        "sResourceArchive2List should be empty after migration, got: {:?}",
+        archive_list_after.resources
+    );
+    let index_list_after =
+        ResourceList::load_from_ini(&ini, Some("Archive"), "sResourceIndexFileList");
+    assert!(
+        index_list_after.resources.is_empty(),
+        "sResourceIndexFileList should be empty after migration, got: {:?}",
+        index_list_after.resources
+    );
+
+    // Metadata files:
+    assert!(paths.mods_path.join("managed.xml").exists());
+    assert!(paths.mods_path.join("resources.txt").exists());
+    assert!(paths.mods_path.join("mods.json").exists());
+
+    // Cleanup:
+    assert!(!get_mods_temp_path(&paths.mods_path).exists());
+    assert!(!paths.game_path.join("Mods.old").exists());
+    assert!(!paths.frozen_data_path.exists());
+
+    // Game Data folder should only contain SeventySix.esm:
+    assert!(!paths.game_data_path.join("Bundled.ba2").exists());
+    assert!(
+        !paths
+            .game_data_path
+            .join("ModFrozenSeparateDeployed.ba2")
+            .exists()
+    );
+    assert!(
+        !paths
+            .game_data_path
+            .join("ModSeparateDeployed.ba2")
+            .exists()
+    );
+    assert!(
+        !paths
+            .game_data_path
+            .join("ModSeparateAutoDeployed.ba2")
+            .exists()
+    );
+    assert!(!paths.game_data_path.join("ModSeparateSounds.ba2").exists());
+    assert!(!paths.game_data_path.join("strings").exists());
+    assert!(paths.game_data_path.join("SeventySix.esm").exists());
+
+    // Loose file in game root should be removed:
+    assert!(!paths.game_path.join("example.dll").exists());
+
+    // Mod folders should exist with expected structure:
+    assert!(
+        paths
+            .mods_path
+            .join("ModFrozenSeparateDeployed")
+            .join("ModFrozenSeparateDeployed.ba2")
+            .exists()
+    );
+    assert!(
+        paths
+            .mods_path
+            .join("ModFrozenSeparateDisabled")
+            .join("ModFrozenSeparateDisabled.ba2")
+            .exists()
+    );
+    assert!(
+        paths
+            .mods_path
+            .join("ModSeparateDeployed")
+            .join("ModSeparateDeployed.ba2")
+            .exists()
+    );
+    assert!(
+        paths
+            .mods_path
+            .join("ModFreezeSeparateDisabled")
+            .join("ModFreezeSeparateDisabled.ba2")
+            .exists()
+    );
+    assert!(
+        paths
+            .mods_path
+            .join("ModSeparateDisabled")
+            .join("ModSeparateDisabled.ba2")
+            .exists()
+    );
+    assert!(
+        paths
+            .mods_path
+            .join("ModBundledDeployed")
+            .join("Data")
+            .join("ModBundledDeployed.ba2")
+            .exists()
+    );
+    assert!(
+        paths
+            .mods_path
+            .join("ModBundledDisabled")
+            .join("Data")
+            .join("ModBundledDisabled.ba2")
+            .exists()
+    );
+    assert!(
+        paths
+            .mods_path
+            .join("ModSeparateAutoDeployed")
+            .join("Data")
+            .join("ModSeparateAutoDeployed.ba2")
+            .exists()
+    );
+    assert!(
+        paths
+            .mods_path
+            .join("ModBundledSounds")
+            .join("Data")
+            .join("ModBundledSounds - Sounds.ba2")
+            .exists()
+    );
+    assert!(
+        paths
+            .mods_path
+            .join("ModSeparateSounds")
+            .join("ModSeparateSounds.ba2")
+            .exists()
+    );
+    assert!(
+        paths
+            .mods_path
+            .join("ModLooseFilesDeployed")
+            .join("example.dll")
+            .exists()
+    );
+    assert!(
+        paths
+            .mods_path
+            .join("ModLooseFilesDisabled")
+            .join("example.dll")
+            .exists()
+    );
+    assert!(
+        paths
+            .mods_path
+            .join("ModLooseFilesStringsDeployed")
+            .join("Data")
+            .join("strings")
+            .join("seventy_six_en.strings")
+            .exists()
+    );
+    assert!(
+        paths
+            .mods_path
+            .join("ModLooseFilesStringsDataDeployed")
+            .join("strings")
+            .join("seventy_six_en.strings")
+            .exists()
+    );
+
+    // Verify mods.json:
+    let managed = load_mods(&paths.mods_path).unwrap().unwrap();
+    assert!(managed.enabled);
+    assert_eq!(managed.mods.len(), 14);
+    assert!(managed.state.is_empty());
+    assert!(managed.migrated_from_v1.is_some());
+
+    // Verify enabled states match the pending isEnabled from managed.xml:
+    let enabled_mods: Vec<&str> = managed
+        .mods
+        .iter()
+        .filter(|m| m.enabled)
+        .map(|m| m.title.as_str())
+        .collect();
+    assert_eq!(enabled_mods.len(), 9);
+    assert!(enabled_mods.contains(&"ModFrozenSeparateDeployed"));
+    assert!(enabled_mods.contains(&"ModSeparateDeployed"));
+    assert!(enabled_mods.contains(&"ModBundledDeployed"));
+    assert!(enabled_mods.contains(&"ModLooseFilesDeployed"));
+    assert!(enabled_mods.contains(&"ModLooseFilesStringsDeployed"));
+    assert!(enabled_mods.contains(&"ModLooseFilesStringsDataDeployed"));
+    assert!(enabled_mods.contains(&"ModSeparateAutoDeployed"));
+    assert!(enabled_mods.contains(&"ModBundledSounds"));
+    assert!(enabled_mods.contains(&"ModSeparateSounds"));
+
+    let disabled_mods: Vec<&str> = managed
+        .mods
+        .iter()
+        .filter(|m| !m.enabled)
+        .map(|m| m.title.as_str())
+        .collect();
+    assert_eq!(disabled_mods.len(), 5);
+    assert!(disabled_mods.contains(&"ModFrozenSeparateDisabled"));
+    assert!(disabled_mods.contains(&"ModFreezeSeparateDisabled"));
+    assert!(disabled_mods.contains(&"ModSeparateDisabled"));
+    assert!(disabled_mods.contains(&"ModBundledDisabled"));
+    assert!(disabled_mods.contains(&"ModLooseFilesDisabled"));
+}
+
+/// LooseFiles deployed file paths with different separator / prefix styles.
+/// All variants should resolve to the same file in the game folder.
+#[test]
+pub fn test_migration_loose_path_variations() {
+    test_utils::setup_stdout_logger();
+    let paths = TestPaths::new();
+    let managed_xml = indoc! {r#"
+        <?xml version="1.0" encoding="utf-8"?>
+        <ManagedMods enabled="true" nwmode="false">
+        <Mod guid="path-variants-1">
+            <Title>ModPathVariants</Title>
+            <Folder>ModPathVariants</Folder>
+            <Version>1.0</Version>
+            <NexusMods id="-1">
+            <URL></URL>
+            </NexusMods>
+            <DiskState>
+            <Current isDeployed="true">
+                <InstallationMethod>LooseFiles</InstallationMethod>
+                <ArchiveName />
+                <ArchiveFormat>Auto</ArchiveFormat>
+                <ArchiveCompression>Auto</ArchiveCompression>
+                <RootFolder>.</RootFolder>
+                <InstalledLooseFiles>
+                <File path=".\backslash.dll" />
+                <File path=".\forward\slash.dll" />
+                <File path="./dot_slash.dll" />
+                <File path=".\dot_backslash.dll" />
+                <File path="no_prefix.dll" />
+                <File path="barefile.dll" />
+                </InstalledLooseFiles>
+            </Current>
+            <Pending isEnabled="true">
+                <InstallationMethod>LooseFiles</InstallationMethod>
+                <ArchiveName>untitled.ba2</ArchiveName>
+                <ArchiveFormat>Auto</ArchiveFormat>
+                <ArchiveCompression>Auto</ArchiveCompression>
+                <RootFolder>.</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="false">
+                <ArchiveFormat>Auto</ArchiveFormat>
+                <ArchiveCompression>Auto</ArchiveCompression>
+            </FrozenData>
+            </DiskState>
+            <Notes></Notes>
+        </Mod>
+        </ManagedMods>
+    "#};
+
+    fs::create_dir_all(&paths.game_data_path).unwrap();
+    fs::create_dir_all(&paths.mods_path).unwrap();
+    fs::create_dir_all(&paths.frozen_data_path).unwrap();
+    fs_util::write_to_file(paths.game_data_path.join("SeventySix.esm"), "").unwrap();
+    fs_util::write_to_file(paths.mods_path.join("managed.xml"), managed_xml).unwrap();
+    fs_util::write_to_file(paths.mods_path.join("resources.txt"), "").unwrap();
+
+    let mod_path = paths.mods_path.join("ModPathVariants");
+    fs::create_dir_all(&mod_path).unwrap();
+    fs_util::write_to_file(mod_path.join("modfile.txt"), "mod").unwrap();
+
+    fs_util::write_to_file(paths.game_path.join("backslash.dll"), "1").unwrap();
+    let forward_dir = paths.game_path.join("forward");
+    fs::create_dir_all(&forward_dir).unwrap();
+    fs_util::write_to_file(forward_dir.join("slash.dll"), "2").unwrap();
+    fs_util::write_to_file(paths.game_path.join("dot_slash.dll"), "3").unwrap();
+    fs_util::write_to_file(paths.game_path.join("dot_backslash.dll"), "4").unwrap();
+    fs_util::write_to_file(paths.game_path.join("no_prefix.dll"), "5").unwrap();
+    fs_util::write_to_file(paths.game_path.join("barefile.dll"), "6").unwrap();
+
+    let mut ini = Ini::new();
+    super::remove_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None).unwrap();
+
+    assert!(!paths.game_path.join("backslash.dll").exists());
+    assert!(!paths.game_path.join("forward").join("slash.dll").exists());
+    assert!(!paths.game_path.join("dot_slash.dll").exists());
+    assert!(!paths.game_path.join("dot_backslash.dll").exists());
+    assert!(!paths.game_path.join("no_prefix.dll").exists());
+    assert!(!paths.game_path.join("barefile.dll").exists());
+}
+
+/// `get_frozen_archive_path` must match v1's `ManagedMod.FrozenArchivePath`:
+/// `<game path>\FrozenData\{<guid>}.ba2`, i.e. FrozenData is a sibling of the Mods folder
+/// and the archive name is the guid wrapped in braces.
+#[test]
+pub fn test_get_frozen_archive_path() {
+    let tmp_dir = TempDir::new().unwrap();
+    let mods_path = tmp_dir.path().join("Fallout 76").join("Mods");
+    let guid = "2f2d3b3b-b21b-4ec2-b555-c8806a801b16";
+
+    let path = super::migrate::get_frozen_archive_path(&mods_path, guid).unwrap();
+
+    assert_eq!(
+        path,
+        tmp_dir
+            .path()
+            .join("Fallout 76")
+            .join("FrozenData")
+            .join("{2f2d3b3b-b21b-4ec2-b555-c8806a801b16}.ba2")
+    );
+}
+
+// ============================================================================
+// Edge Case Tests
+// ============================================================================
+
+fn setup_minimal_mod() -> TestPaths {
+    let paths = TestPaths::new();
+    let managed_xml = indoc! {r#"
+        <?xml version="1.0" encoding="utf-8"?>
+        <ManagedMods enabled="true" nwmode="false">
+        <Mod guid="edge-guid-1">
+            <Title>EdgeMod</Title>
+            <Folder>EdgeMod</Folder>
+            <Version>1.0</Version>
+            <NexusMods id="-1">
+            <URL></URL>
+            </NexusMods>
+            <DiskState>
+            <Current isDeployed="true">
+                <InstallationMethod>LooseFiles</InstallationMethod>
+                <ArchiveName />
+                <ArchiveFormat>Auto</ArchiveFormat>
+                <ArchiveCompression>Auto</ArchiveCompression>
+                <RootFolder>.</RootFolder>
+                <InstalledLooseFiles />
+            </Current>
+            <Pending isEnabled="true">
+                <InstallationMethod>LooseFiles</InstallationMethod>
+                <ArchiveName>untitled.ba2</ArchiveName>
+                <ArchiveFormat>Auto</ArchiveFormat>
+                <ArchiveCompression>Auto</ArchiveCompression>
+                <RootFolder>.</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="false">
+                <ArchiveFormat>Auto</ArchiveFormat>
+                <ArchiveCompression>Auto</ArchiveCompression>
+            </FrozenData>
+            </DiskState>
+            <Notes></Notes>
+        </Mod>
+        </ManagedMods>
+    "#};
+
+    fs::create_dir_all(&paths.game_data_path).unwrap();
+    fs::create_dir_all(&paths.mods_path).unwrap();
+    fs_util::write_to_file(paths.game_data_path.join("SeventySix.esm"), "").unwrap();
+    fs_util::write_to_file(paths.mods_path.join("managed.xml"), managed_xml).unwrap();
+    fs_util::write_to_file(paths.mods_path.join("resources.txt"), "").unwrap();
+    let mod_path = paths.mods_path.join("EdgeMod");
+    fs::create_dir_all(&mod_path).unwrap();
+    fs_util::write_to_file(mod_path.join("file.txt"), "content").unwrap();
+
+    paths
+}
+
+#[test]
+pub fn test_migration_mods_old_exists_fails() {
+    test_utils::setup_stdout_logger();
+    let paths = setup_minimal_mod();
+    let mods_old_path = paths.game_path.join("Mods.old");
+    fs::create_dir_all(&mods_old_path).unwrap();
+    fs_util::write_to_file(mods_old_path.join("stale.txt"), "stale").unwrap();
+
+    let mut ini = Ini::new();
+    let result =
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+    assert!(
+        result.is_err(),
+        "Migration should fail when Mods.old already exists"
+    );
+}
+
+#[test]
+pub fn test_migration_missing_managed_xml_fails() {
+    test_utils::setup_stdout_logger();
+    let paths = setup_minimal_mod();
+    fs::remove_file(paths.mods_path.join("managed.xml")).unwrap();
+
+    let mut ini = Ini::new();
+    let result =
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+    assert!(
+        result.is_err(),
+        "Migration should fail when managed.xml is missing"
+    );
+}
+
+#[test]
+pub fn test_migration_missing_resources_txt_succeeds() {
+    test_utils::setup_stdout_logger();
+    let paths = setup_minimal_mod();
+    fs::remove_file(paths.mods_path.join("resources.txt")).unwrap();
+
+    let mut ini = Ini::new();
+    let result =
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+    assert!(
+        result.is_ok(),
+        "Migration should succeed even when resources.txt is missing"
+    );
+    assert!(paths.mods_path.join("mods.json").exists());
+    assert!(paths.mods_path.join("resources.txt").exists());
+}
+
+#[test]
+pub fn test_migration_different_mods_path() {
+    test_utils::setup_stdout_logger();
+    let tmp_dir = TempDir::new().unwrap();
+    let game_path = tmp_dir.path().join("game").join("Fallout76");
+    let game_data_path = game_path.join("Data");
+    let mods_path = tmp_dir.path().join("mods").join("Mods");
+    let mods_old_path = tmp_dir.path().join("mods").join("Mods.old");
+    let frozen_data_path = tmp_dir.path().join("mods").join("FrozenData");
+
+    let managed_xml = indoc! {r#"
+        <?xml version="1.0" encoding="utf-8"?>
+        <ManagedMods enabled="true" nwmode="false">
+        <Mod guid="diff-path-guid-1">
+            <Title>DiffPathMod</Title>
+            <Folder>DiffPathMod</Folder>
+            <Version>1.0</Version>
+            <NexusMods id="-1">
+            <URL></URL>
+            </NexusMods>
+            <DiskState>
+            <Current isDeployed="true">
+                <InstallationMethod>LooseFiles</InstallationMethod>
+                <ArchiveName />
+                <ArchiveFormat>Auto</ArchiveFormat>
+                <ArchiveCompression>Auto</ArchiveCompression>
+                <RootFolder>.</RootFolder>
+                <InstalledLooseFiles />
+            </Current>
+            <Pending isEnabled="true">
+                <InstallationMethod>LooseFiles</InstallationMethod>
+                <ArchiveName>untitled.ba2</ArchiveName>
+                <ArchiveFormat>Auto</ArchiveFormat>
+                <ArchiveCompression>Auto</ArchiveCompression>
+                <RootFolder>.</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="false">
+                <ArchiveFormat>Auto</ArchiveFormat>
+                <ArchiveCompression>Auto</ArchiveCompression>
+            </FrozenData>
+            </DiskState>
+            <Notes></Notes>
+        </Mod>
+        <Mod guid="diff-path-guid-frozen">
+            <Title>DiffPathFrozen</Title>
+            <Folder>DiffPathFrozen</Folder>
+            <Version>1.0</Version>
+            <NexusMods id="-1">
+            <URL></URL>
+            </NexusMods>
+            <DiskState>
+            <Current isDeployed="true">
+                <InstallationMethod>SeparateBA2</InstallationMethod>
+                <ArchiveName>DiffPathFrozen.ba2</ArchiveName>
+                <ArchiveFormat>General</ArchiveFormat>
+                <ArchiveCompression>Compressed</ArchiveCompression>
+                <RootFolder>.</RootFolder>
+                <InstalledLooseFiles />
+            </Current>
+            <Pending isEnabled="true">
+                <InstallationMethod>SeparateBA2</InstallationMethod>
+                <ArchiveName>DiffPathFrozen.ba2</ArchiveName>
+                <ArchiveFormat>General</ArchiveFormat>
+                <ArchiveCompression>Compressed</ArchiveCompression>
+                <RootFolder>Data</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="true" freeze="true">
+                <ArchiveFormat>General</ArchiveFormat>
+                <ArchiveCompression>Compressed</ArchiveCompression>
+            </FrozenData>
+            </DiskState>
+            <Notes></Notes>
+        </Mod>
+        </ManagedMods>
+    "#};
+
+    fs::create_dir_all(&game_data_path).unwrap();
+    fs::create_dir_all(&mods_path).unwrap();
+    fs::create_dir_all(&frozen_data_path).unwrap();
+    fs_util::write_to_file(game_data_path.join("SeventySix.esm"), "").unwrap();
+    fs_util::write_to_file(mods_path.join("managed.xml"), managed_xml).unwrap();
+    fs_util::write_to_file(mods_path.join("resources.txt"), "").unwrap();
+    let mod_path = mods_path.join("DiffPathMod");
+    fs::create_dir_all(&mod_path).unwrap();
+    fs_util::write_to_file(mod_path.join("file.txt"), "content").unwrap();
+
+    let frozen_mod_path = mods_path.join("DiffPathFrozen");
+    let frozen_materials = frozen_mod_path.join("materials");
+    fs::create_dir_all(&frozen_materials).unwrap();
+    fs_util::write_to_file(frozen_materials.join("mat.bgsm"), "BGSM").unwrap();
+    fs::copy(
+        Path::new("tests/fixtures/general_default.ba2"),
+        frozen_data_path.join("{diff-path-guid-frozen}.ba2"),
+    )
+    .unwrap();
+    fs::copy(
+        Path::new("tests/fixtures/general_default.ba2"),
+        game_data_path.join("DiffPathFrozen.ba2"),
+    )
+    .unwrap();
+
+    let mut ini = Ini::new();
+    let result = super::migrate_legacy_managed_mods(&game_path, &mods_path, &mut ini, None);
+    assert!(
+        result.is_ok(),
+        "Migration should succeed when mods_path is not game_path/Mods, got: {:?}",
+        result.err()
+    );
+
+    assert!(mods_path.join("mods.json").exists());
+    assert!(mods_path.join("managed.xml").exists());
+    assert!(mods_path.join("resources.txt").exists());
+    assert!(mods_path.join("DiffPathMod").join("file.txt").exists());
+    assert!(
+        mods_path
+            .join("DiffPathFrozen")
+            .join("DiffPathFrozen.ba2")
+            .exists(),
+        "Frozen archive should be moved from mods_path.parent()/FrozenData into the new mod folder"
+    );
+    assert!(!game_data_path.join("DiffPathFrozen.ba2").exists());
+    assert!(!mods_old_path.exists());
+    assert!(!frozen_data_path.exists());
+
+    let managed = load_mods(&mods_path).unwrap().unwrap();
+    assert!(managed.enabled);
+    assert_eq!(managed.mods.len(), 2);
+    assert!(managed.migrated_from_v1.is_some());
 }
