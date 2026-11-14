@@ -362,6 +362,15 @@ pub fn write_to_file<P: AsRef<Path>, S: AsRef<str>>(path: P, content: S) -> io::
     Ok(())
 }
 
+/// Writes the string to a file atomically: writes to a temporary file in the same
+/// directory first, then renames it over the target file.
+pub fn write_atomic<P: AsRef<Path>, S: AsRef<str>>(path: P, content: S) -> io::Result<()> {
+    let path = path.as_ref();
+    let tmp_path = path.with_added_extension("tmp");
+    write_to_file(&tmp_path, content)?;
+    move_file(&tmp_path, path)
+}
+
 /// Returns `Ok(true)` if the path points to an existing directory that is empty.
 pub fn is_empty<P: AsRef<Path>>(path: P) -> io::Result<bool> {
     Ok(fs::read_dir(path)?.next().is_none())

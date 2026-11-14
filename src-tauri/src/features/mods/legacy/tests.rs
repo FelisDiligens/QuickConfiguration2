@@ -7,7 +7,7 @@ use indoc::indoc;
 use ini::Ini;
 use tempfile::TempDir;
 
-use crate::features::mods::{get_mods_temp_path, load_mods};
+use crate::features::mods::{get_mods_temp_path, load_legacy_mods, load_mods};
 use crate::utils::ini::IniAccessors;
 use crate::utils::{fs_util, test_utils};
 
@@ -2157,6 +2157,12 @@ pub fn test_migration_mods_old_exists_fails() {
         result.is_err(),
         "Migration should fail when Mods.old already exists"
     );
+
+    // Pre-flight should fail before anything is deleted or moved:
+    assert!(paths.mods_path.join("managed.xml").exists());
+    assert!(paths.mods_path.join("EdgeMod").join("file.txt").exists());
+    assert!(paths.game_data_path.join("SeventySix.esm").exists());
+    assert!(!paths.mods_path.join("mods.json").exists());
 }
 
 #[test]
@@ -2319,4 +2325,207 @@ pub fn test_migration_different_mods_path() {
     assert!(managed.enabled);
     assert_eq!(managed.mods.len(), 2);
     assert!(managed.migrated_from_v1.is_some());
+}
+
+// ============================================================================
+// Recoverability Tests
+// ============================================================================
+
+#[test]
+pub fn test_migration_failure_rolls_back_and_retry_succeeds() {
+    test_utils::setup_stdout_logger();
+    let paths = setup_minimal_mod();
+
+    // Sabotage the mod folder: replace it with a file, so that copying fails after the Mods -> Mods.old rename:
+    let mod_path = paths.mods_path.join("EdgeMod");
+    fs::remove_dir_all(&mod_path).unwrap();
+    fs::write(&mod_path, "not a folder").unwrap();
+
+    let mut ini = Ini::new();
+    let result =
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+    assert!(
+        result.is_err(),
+        "Migration should fail when the mod folder cannot be copied"
+    );
+
+    // The rollback should have restored the state from before the migration:
+    assert!(
+        !paths.game_path.join("Mods.old").exists(),
+        "Mods.old should not exist after rollback"
+    );
+    assert!(
+        paths.mods_path.join("managed.xml").exists(),
+        "managed.xml should be restored by the rollback"
+    );
+    assert!(
+        paths.mods_path.join("EdgeMod").is_file(),
+        "Mods folder content should be restored by the rollback"
+    );
+    assert!(!paths.mods_path.join("mods.json").exists());
+
+    // Fix the sabotage and retry, migration should succeed now:
+    fs::remove_file(&mod_path).unwrap();
+    fs::create_dir_all(&mod_path).unwrap();
+    fs_util::write_to_file(mod_path.join("file.txt"), "content").unwrap();
+
+    let mut ini = Ini::new();
+    let result =
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+    assert!(
+        result.is_ok(),
+        "Retry after a failed migration should succeed, got: {:?}",
+        result.err()
+    );
+    assert!(paths.mods_path.join("mods.json").exists());
+    assert!(paths.mods_path.join("EdgeMod").join("file.txt").exists());
+    assert!(!paths.game_path.join("Mods.old").exists());
+    assert!(!paths.frozen_data_path.exists());
+}
+
+/// Setup for test case: State checkpointing when the removal of old mods fails partway through.
+/// First mod is a deployed LooseFiles mod with one file in the game folder,
+/// second mod is a deployed SeparateBA2 mod whose archive in Data is blocked by a directory.
+fn setup_checkpoint_on_failure() -> TestPaths {
+    let paths = TestPaths::new();
+    let managed_xml = indoc! {r#"
+        <?xml version="1.0" encoding="utf-8"?>
+        <ManagedMods enabled="true" nwmode="false">
+        <Mod guid="checkpoint-guid-loose">
+            <Title>CheckLoose</Title>
+            <Folder>CheckLoose</Folder>
+            <Version>1.0</Version>
+            <NexusMods id="-1">
+            <URL></URL>
+            </NexusMods>
+            <DiskState>
+            <Current isDeployed="true">
+                <InstallationMethod>LooseFiles</InstallationMethod>
+                <ArchiveName></ArchiveName>
+                <ArchiveFormat>Auto</ArchiveFormat>
+                <ArchiveCompression>Auto</ArchiveCompression>
+                <RootFolder>.</RootFolder>
+                <InstalledLooseFiles>
+                <File path=".\CheckLoose.dll" />
+                </InstalledLooseFiles>
+            </Current>
+            <Pending isEnabled="true">
+                <InstallationMethod>LooseFiles</InstallationMethod>
+                <ArchiveName>untitled.ba2</ArchiveName>
+                <ArchiveFormat>Auto</ArchiveFormat>
+                <ArchiveCompression>Auto</ArchiveCompression>
+                <RootFolder>.</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="false">
+                <ArchiveFormat>Auto</ArchiveFormat>
+                <ArchiveCompression>Auto</ArchiveCompression>
+            </FrozenData>
+            </DiskState>
+            <Notes></Notes>
+        </Mod>
+        <Mod guid="checkpoint-guid-sep">
+            <Title>CheckSep</Title>
+            <Folder>CheckSep</Folder>
+            <Version>1.0</Version>
+            <NexusMods id="-1">
+            <URL></URL>
+            </NexusMods>
+            <DiskState>
+            <Current isDeployed="true">
+                <InstallationMethod>SeparateBA2</InstallationMethod>
+                <ArchiveName>CheckSep.ba2</ArchiveName>
+                <ArchiveFormat>Textures</ArchiveFormat>
+                <ArchiveCompression>Compressed</ArchiveCompression>
+                <RootFolder>.</RootFolder>
+                <InstalledLooseFiles />
+            </Current>
+            <Pending isEnabled="true">
+                <InstallationMethod>SeparateBA2</InstallationMethod>
+                <ArchiveName>CheckSep.ba2</ArchiveName>
+                <ArchiveFormat>Textures</ArchiveFormat>
+                <ArchiveCompression>Compressed</ArchiveCompression>
+                <RootFolder>.</RootFolder>
+            </Pending>
+            <FrozenData isFrozen="false" freeze="false">
+                <ArchiveFormat>Textures</ArchiveFormat>
+                <ArchiveCompression>Compressed</ArchiveCompression>
+            </FrozenData>
+            </DiskState>
+            <Notes></Notes>
+        </Mod>
+        </ManagedMods>
+    "#};
+
+    fs::create_dir_all(&paths.game_data_path).unwrap();
+    fs::create_dir_all(&paths.mods_path).unwrap();
+    fs_util::write_to_file(paths.game_data_path.join("SeventySix.esm"), "").unwrap();
+    fs_util::write_to_file(paths.game_path.join("CheckLoose.dll"), "dll").unwrap();
+    // Block the archive removal: a directory cannot be deleted with remove_file:
+    fs::create_dir_all(paths.game_data_path.join("CheckSep.ba2")).unwrap();
+    fs_util::write_to_file(paths.mods_path.join("managed.xml"), managed_xml).unwrap();
+    fs_util::write_to_file(paths.mods_path.join("resources.txt"), "").unwrap();
+
+    paths
+}
+
+#[test]
+pub fn test_migration_checkpoints_state_when_removal_fails() {
+    test_utils::setup_stdout_logger();
+    let paths = setup_checkpoint_on_failure();
+
+    let mut ini = Ini::new();
+    let result =
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+    assert!(
+        result.is_err(),
+        "Migration should fail when a deployed archive cannot be removed"
+    );
+
+    // The failure happened before the Mods -> Mods.old rename, nothing was migrated yet:
+    assert!(!paths.game_path.join("Mods.old").exists());
+    assert!(!paths.mods_path.join("mods.json").exists());
+
+    // The loose file of the first mod was already removed and checkpointed to disk:
+    assert!(!paths.game_path.join("CheckLoose.dll").exists());
+    let legacy = load_legacy_mods(&paths.mods_path).unwrap().unwrap();
+    assert!(
+        !legacy.mods[0].state.current.deployed,
+        "First mod should be saved as not deployed"
+    );
+    assert!(
+        legacy.mods[1].state.current.deployed,
+        "Second mod should still be saved as deployed"
+    );
+
+    // Retry after removing the blocker succeeds:
+    fs::remove_dir_all(paths.game_data_path.join("CheckSep.ba2")).unwrap();
+    let mut ini = Ini::new();
+    let result =
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+    assert!(
+        result.is_ok(),
+        "Retry after a failed migration should succeed, got: {:?}",
+        result.err()
+    );
+    assert!(paths.mods_path.join("mods.json").exists());
+    assert!(paths.mods_path.join("managed.xml").exists());
+    assert!(!paths.game_path.join("Mods.old").exists());
+}
+
+#[test]
+pub fn test_remove_legacy_mods_removes_stale_mods_old() {
+    test_utils::setup_stdout_logger();
+    let paths = setup_minimal_mod();
+    let mods_old_path = paths.game_path.join("Mods.old");
+    fs::create_dir_all(&mods_old_path).unwrap();
+    fs_util::write_to_file(mods_old_path.join("stale.txt"), "stale").unwrap();
+
+    let mut ini = Ini::new();
+    super::remove_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None).unwrap();
+
+    assert!(!paths.mods_path.exists());
+    assert!(
+        !mods_old_path.exists(),
+        "Stale Mods.old folder should be removed"
+    );
 }

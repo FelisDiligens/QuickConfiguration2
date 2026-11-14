@@ -18,7 +18,7 @@ use crate::features::mods::{
 };
 use crate::features::resourcelists::{ResourceList, get_legacy_mods_resources_path};
 use crate::utils::channel;
-use crate::utils::fs_util;
+use crate::utils::fs_util::{self, CopyMethod};
 
 use super::ModsMigrationProgress;
 
@@ -58,7 +58,7 @@ pub fn cleanup_resources(resources_to_remove: Vec<String>, ini: &mut Ini) {
 #[function_name::named]
 pub fn remove_bundled_archives<P: AsRef<Path>>(
     game_path: P,
-    ini: &mut Ini,
+    resources_to_remove: &mut Vec<String>,
     tx: Option<Sender<ModsMigrationProgress>>,
 ) -> ModActionResult<()> {
     log::trace!("Removing bundled archives");
@@ -68,7 +68,6 @@ pub fn remove_bundled_archives<P: AsRef<Path>>(
         ModsMigrationProgress::RemovingBundledArchives,
     );
     let game_path = game_path.as_ref();
-    let mut resources_to_remove: Vec<String> = Vec::new();
 
     // Delete bundled archives:
     for archive in BUNDLED_ARCHIVES {
@@ -83,8 +82,6 @@ pub fn remove_bundled_archives<P: AsRef<Path>>(
         resources_to_remove.push(archive.to_string());
     }
 
-    log::trace!("Removing resources: {}", resources_to_remove.join(", "));
-    cleanup_resources(resources_to_remove, ini);
     Ok(())
 }
 
@@ -107,88 +104,94 @@ pub fn remove_all_old_mods<P: AsRef<Path>>(
         .tap_none(|| log::error!("Couldn't load managed.xml: managed.xml does not exist"))
         .ok_or(anyhow::anyhow!("managed.xml does not exist"))?;
 
-    // Delete bundled archives:
-    remove_bundled_archives(game_path, ini, tx.clone())
-        .tap_err(|e| log::error!("Couldn't remove bundled archives: {e:?}"))?;
-
     let mut resources_to_remove = Vec::new();
+
+    // Delete bundled archives:
+    remove_bundled_archives(game_path, &mut resources_to_remove, tx.clone())
+        .tap_err(|e| log::error!("Couldn't remove bundled archives: {e:?}"))?;
 
     // Remove mods:
     let total_mods = legacy_managed.mods.len();
-    for (mod_index, r#mod) in legacy_managed.mods.iter_mut().enumerate() {
-        log::trace!("Mod {}", r#mod.title);
-        if !r#mod.state.current.deployed {
-            log::trace!("Not deployed, skipped.");
-            continue;
-        }
-        let _ = channel::blocking_send_opt(
-            &tx,
-            function_name!(),
-            ModsMigrationProgress::RemovingMod {
-                mod_title: r#mod.title.clone(),
-                current_mod: mod_index as u32,
-                total_mods: total_mods as u32,
-            },
-        );
-        match r#mod.state.current.installation_method {
-            xml::InstallationMethod::LooseFiles => {
-                let root_path = game_path.join(&r#mod.state.current.root_folder);
-                let Some(ref files) = r#mod.state.current.installed_loose_files.files else {
-                    continue;
-                };
-                for file in files.iter() {
-                    let relative_path = file
-                        .path
-                        .replace(r"\", std::path::MAIN_SEPARATOR_STR)
-                        .replace(r"/", std::path::MAIN_SEPARATOR_STR);
-                    let file_path = root_path.join(&relative_path).normalize();
+    for mod_index in 0..total_mods {
+        {
+            let r#mod = &mut legacy_managed.mods[mod_index];
+            log::trace!("Mod {}", r#mod.title);
+            if !r#mod.state.current.deployed {
+                log::trace!("Not deployed, skipped.");
+                continue;
+            }
+            let _ = channel::blocking_send_opt(
+                &tx,
+                function_name!(),
+                ModsMigrationProgress::RemovingMod {
+                    mod_title: r#mod.title.clone(),
+                    current_mod: mod_index as u32,
+                    total_mods: total_mods as u32,
+                },
+            );
+            match r#mod.state.current.installation_method {
+                xml::InstallationMethod::LooseFiles => {
+                    let root_path = game_path.join(&r#mod.state.current.root_folder);
+                    let Some(ref files) = r#mod.state.current.installed_loose_files.files else {
+                        continue;
+                    };
+                    for file in files.iter() {
+                        let relative_path = file
+                            .path
+                            .replace(r"\", std::path::MAIN_SEPARATOR_STR)
+                            .replace(r"/", std::path::MAIN_SEPARATOR_STR);
+                        let file_path = root_path.join(&relative_path).normalize();
+
+                        // Delete file, if existing:
+                        if file_path.exists() {
+                            fs::remove_file(&file_path)?;
+                            log::trace!("Removed {file_path:?}");
+                        }
+
+                        // Rename backup, if there is one:
+                        if file_path.with_added_extension("old").exists() {
+                            fs_util::move_file(
+                                file_path.with_added_extension("old"),
+                                file_path.clone(),
+                            )?;
+                            log::trace!("Restored {:?}", file_path.with_added_extension("old"));
+                        }
+                        // Remove empty folders one by one, if existing:
+                        else if let Some(folder_path) = file_path.parent()
+                            && folder_path.exists()
+                        {
+                            fs_util::remove_empty_dirs(folder_path)?;
+                        }
+                    }
+
+                    r#mod.state.current.installed_loose_files.files = None;
+                }
+                xml::InstallationMethod::BundledBA2 => (),
+                xml::InstallationMethod::SeparateBA2 => {
+                    // Get the current archive path:
+                    let current_path = game_path
+                        .join("Data")
+                        .join(&r#mod.state.current.archive_name);
 
                     // Delete file, if existing:
-                    if file_path.exists() {
-                        fs::remove_file(&file_path)?;
-                        log::trace!("Removed {file_path:?}");
+                    if current_path.exists() {
+                        fs::remove_file(&current_path)?;
+                        log::trace!("Removed {current_path:?}");
                     }
 
-                    // Rename backup, if there is one:
-                    if file_path.with_added_extension("old").exists() {
-                        fs_util::move_file(
-                            file_path.with_added_extension("old"),
-                            file_path.clone(),
-                        )?;
-                        log::trace!("Restored {:?}", file_path.with_added_extension("old"));
-                    }
-                    // Remove empty folders one by one, if existing:
-                    else if let Some(folder_path) = file_path.parent()
-                        && folder_path.exists()
-                    {
-                        fs_util::remove_empty_dirs(folder_path)?;
-                    }
+                    resources_to_remove.push(r#mod.state.current.archive_name.clone());
                 }
-
-                r#mod.state.current.installed_loose_files.files = None;
             }
-            xml::InstallationMethod::BundledBA2 => (),
-            xml::InstallationMethod::SeparateBA2 => {
-                // Get the current archive path:
-                let current_path = game_path
-                    .join("Data")
-                    .join(&r#mod.state.current.archive_name);
 
-                // Delete file, if existing:
-                if current_path.exists() {
-                    fs::remove_file(&current_path)?;
-                    log::trace!("Removed {current_path:?}");
-                }
-
-                resources_to_remove.push(r#mod.state.current.archive_name.clone());
-            }
+            r#mod.state.current.deployed = false;
         }
 
-        r#mod.state.current.deployed = false;
+        // Save the state to disk after each mod, so that a failure partway through
+        // leaves a consistent state behind and the removal can simply be retried:
+        log::trace!("Checkpoint: Saving managed.xml in {mods_path:?}");
+        save_legacy_mods(mods_path, &legacy_managed)?;
     }
 
-    log::trace!("Saving managed.xml in {mods_path:?}");
-    save_legacy_mods(mods_path, &legacy_managed)?;
     log::trace!("Truncating resources.txt in {mods_path:?}");
     fs_util::write_to_file(&resources_txt_path, "")?; // Truncate resources.txt
 
@@ -198,7 +201,6 @@ pub fn remove_all_old_mods<P: AsRef<Path>>(
     Ok(())
 }
 
-#[function_name::named]
 pub fn migrate_legacy_managed_mods<P: AsRef<Path>>(
     game_path: P,
     mods_path: P,
@@ -214,6 +216,43 @@ pub fn migrate_legacy_managed_mods<P: AsRef<Path>>(
             "Couldn't get the parent directory from mods path"
         ))?
         .join("Mods.old");
+
+    log::trace!("Migrating old mods from managed.xml in {mods_path:?}");
+
+    // Pre-flight checks, fail before anything is deleted or moved:
+    if old_mods_path.exists() {
+        return Err(anyhow::anyhow!(
+            "{old_mods_path:?} already exists. Cannot migrate with invalid state."
+        )
+        .into());
+    }
+    load_legacy_mods(mods_path)
+        .tap_err(|e| log::error!("Couldn't load managed.xml: {e:?}"))?
+        .ok_or(anyhow::anyhow!("managed.xml does not exist"))?;
+
+    // Delete all mods from game path, produce blank slate:
+    remove_all_old_mods(game_path, mods_path, ini, tx.clone())
+        .tap_err(|e| log::error!("Couldn't remove old mods: {e}"))?;
+
+    // Migrate the mods into the new "Mods" folder, roll back to the previous state on failure:
+    if let Err(e) = migrate_mods_from_old_folder(mods_path, &old_mods_path, tx) {
+        let _ = rollback_migration(mods_path, &old_mods_path);
+        return Err(e);
+    }
+
+    Ok(())
+}
+
+/// Moves the current "Mods" folder to "Mods.old", creates a new "Mods" folder
+/// and migrates all mods from "Mods.old" into it.
+/// Nothing is deleted from "Mods.old" or "FrozenData" until everything else succeeded,
+/// so that `rollback_migration` can restore the previous state if this fails.
+#[function_name::named]
+fn migrate_mods_from_old_folder(
+    mods_path: &Path,
+    old_mods_path: &Path,
+    tx: Option<Sender<ModsMigrationProgress>>,
+) -> ModActionResult<()> {
     let tmp_path = get_mods_temp_path(mods_path);
     let frozen_data_path = mods_path
         .parent()
@@ -222,23 +261,17 @@ pub fn migrate_legacy_managed_mods<P: AsRef<Path>>(
         ))?
         .join("FrozenData");
 
-    log::trace!("Migrating old mods from managed.xml in {mods_path:?}");
-
-    // Delete all mods from game path, produce blank slate:
-    remove_all_old_mods(game_path, mods_path, ini, tx.clone())
-        .tap_err(|e| log::error!("Couldn't remove old mods: {e}"))?;
+    // Move current "Mods" folder to "Mods.old" and create a new "Mods" folder:
+    log::trace!("Renaming {mods_path:?} to {old_mods_path:?}");
+    fs::rename(mods_path, old_mods_path)?;
+    fs::create_dir(mods_path)?;
 
     // Load meta data files:
-    let legacy_managed = load_legacy_mods(mods_path)
+    let legacy_managed = load_legacy_mods(old_mods_path)
         .tap_err(|e| log::error!("Couldn't load managed.xml: {e:?}"))?
         .tap_none(|| log::error!("Couldn't load managed.xml: managed.xml does not exist"))
         .ok_or(anyhow::anyhow!("managed.xml does not exist"))?;
     let mut managed = load_mods(mods_path)?.unwrap_or_default();
-
-    // Move current "Mods" folder to "Mods.old" and create a new "Mods" folder:
-    log::trace!("Renaming {mods_path:?} to {old_mods_path:?}");
-    fs::rename(mods_path, &old_mods_path)?;
-    fs::create_dir(mods_path)?;
 
     // Make sure the temporary folder is empty:
     if tmp_path.exists() && !fs_util::is_empty(&tmp_path)? {
@@ -272,7 +305,7 @@ pub fn migrate_legacy_managed_mods<P: AsRef<Path>>(
         match r#mod.state.pending.installation_method {
             xml::InstallationMethod::LooseFiles => {
                 // Method: "Copy files over without packing"
-                // Just move the files as is.
+                // Just copy the files as is.
                 let src_path = old_mods_path.join(&r#mod.folder);
                 let dst_path = mods_path.join(&r#mod.folder);
 
@@ -281,9 +314,9 @@ pub fn migrate_legacy_managed_mods<P: AsRef<Path>>(
 
                 if src_path.exists() {
                     log::trace!(
-                        "Loose files --> Moving mod folder from {src_path:?} to {dst_path:?}"
+                        "Loose files --> Copying mod folder from {src_path:?} to {dst_path:?}"
                     );
-                    fs_util::move_folder(&src_path, &dst_path)?;
+                    fs_util::copy_dir_all(&src_path, &dst_path, CopyMethod::Hardlink)?;
                 } else {
                     log::warn!("Mod folder {src_path:?} does not exist. Skipping.");
                 }
@@ -306,9 +339,6 @@ pub fn migrate_legacy_managed_mods<P: AsRef<Path>>(
                 if src_path.exists() && !fs_util::is_empty(&src_path)? {
                     log::trace!("Bundled BA2 --> Packing BA2 archives");
                     pack_ba2_archives(&mod_name, &src_path, &dst_path, &tmp_path)?;
-
-                    // Remove old folder:
-                    fs::remove_dir_all(&src_path)?;
                 } else if src_path.exists() {
                     log::warn!("Mod folder {src_path:?} is empty. Skipping.");
                 } else {
@@ -338,14 +368,8 @@ pub fn migrate_legacy_managed_mods<P: AsRef<Path>>(
                         let dst_path = mods_path
                             .join(&r#mod.folder)
                             .join(&r#mod.state.pending.archive_name);
-                        log::trace!("Frozen Separate BA2 --> Moving frozen BA2 archive");
-                        fs_util::move_file(&frozen_path, &dst_path)?;
-
-                        // Remove old folder:
-                        let old_folder = old_mods_path.join(&r#mod.folder);
-                        if old_folder.exists() {
-                            fs::remove_dir_all(&old_folder)?;
-                        }
+                        log::trace!("Frozen Separate BA2 --> Copying frozen BA2 archive");
+                        fs_util::copy_or_link(&frozen_path, &dst_path, CopyMethod::Hardlink)?;
 
                         // Add mod to the list of installed mods:
                         managed.remove_mod(&r#mod.guid); // Dedup
@@ -381,9 +405,6 @@ pub fn migrate_legacy_managed_mods<P: AsRef<Path>>(
                             "Separate BA2 with specific format and compression --> Creating BA2 archive"
                         );
                         archive2::create_archive2(&ba2_archive, &src_path, format, compression)?;
-
-                        // Remove old folder:
-                        fs::remove_dir_all(&src_path)?;
                     } else if src_path.exists() {
                         log::warn!("Mod folder {src_path:?} is empty. Skipping.");
                     } else {
@@ -415,9 +436,6 @@ pub fn migrate_legacy_managed_mods<P: AsRef<Path>>(
                 if src_path.exists() && !fs_util::is_empty(&src_path)? {
                     log::trace!("Separate BA2 with \"Auto\" preset --> Packing BA2 archives");
                     pack_ba2_archives(&mod_name, &src_path, &dst_path, &tmp_path)?;
-
-                    // Remove old folder:
-                    fs::remove_dir_all(&src_path)?;
                 } else if src_path.exists() {
                     log::warn!("Mod folder {src_path:?} is empty. Skipping.");
                 } else {
@@ -448,17 +466,37 @@ pub fn migrate_legacy_managed_mods<P: AsRef<Path>>(
     )
     .tap_err(|e| log::error!("Couldn't move Mods.old/resources.txt to Mods/resources.txt: {e}"));
 
-    // Cleanup files:
+    // Cleanup files, best-effort: The migration itself succeeded at this point,
+    // leftovers must not trigger a rollback or fail the migration:
     let _ = channel::blocking_send_opt(&tx, function_name!(), ModsMigrationProgress::Cleanup);
     log::trace!("Deleting Mods.old");
-    if old_mods_path.exists() {
-        fs::remove_dir_all(&old_mods_path)?;
-    }
+    let _ = fs::remove_dir_all(old_mods_path)
+        .tap_err(|e| log::error!("Couldn't delete {old_mods_path:?}: {e}"));
     log::trace!("Deleting FrozenData");
-    if frozen_data_path.exists() {
-        fs::remove_dir_all(&frozen_data_path)?;
-    }
+    let _ = fs::remove_dir_all(&frozen_data_path)
+        .tap_err(|e| log::error!("Couldn't delete {frozen_data_path:?}: {e}"));
 
+    Ok(())
+}
+
+/// Best-effort rollback of a failed migration: deletes the new "Mods" folder and
+/// moves "Mods.old" back to "Mods", restoring the state from before the migration.
+/// Only safe to call while nothing has been deleted from "Mods.old" yet.
+fn rollback_migration(mods_path: &Path, old_mods_path: &Path) -> anyhow::Result<()> {
+    if !old_mods_path.exists() {
+        log::trace!("Nothing to roll back, {old_mods_path:?} does not exist");
+        return Ok(());
+    }
+    log::warn!(
+        "Rolling back failed migration: Deleting {mods_path:?} and moving {old_mods_path:?} back"
+    );
+    if mods_path.exists() {
+        fs::remove_dir_all(mods_path)
+            .tap_err(|e| log::error!("Couldn't delete {mods_path:?} during rollback: {e}"))?;
+    }
+    fs::rename(old_mods_path, mods_path).tap_err(|e| {
+        log::error!("Couldn't move {old_mods_path:?} back to {mods_path:?} during rollback: {e}")
+    })?;
     Ok(())
 }
 
@@ -481,6 +519,12 @@ pub fn remove_legacy_managed_mods<P: AsRef<Path>>(
         .join("FrozenData");
     let legacy_metadata_path = get_legacy_mods_metadata_path(mods_path);
     let resources_txt_path = get_legacy_mods_resources_path(mods_path);
+    let old_mods_path = mods_path
+        .parent()
+        .ok_or(anyhow::anyhow!(
+            "Couldn't get the parent directory from mods path"
+        ))?
+        .join("Mods.old");
 
     log::trace!("Deleting old mods from managed.xml in {mods_path:?}");
 
@@ -504,6 +548,11 @@ pub fn remove_legacy_managed_mods<P: AsRef<Path>>(
     }
     if mods_path.exists() {
         fs::remove_dir_all(mods_path)?;
+    }
+    // Remove a leftover "Mods.old" folder from a possible failed migration:
+    if old_mods_path.exists() {
+        let _ = fs::remove_dir_all(&old_mods_path)
+            .tap_err(|e| log::error!("Couldn't remove {old_mods_path:?}: {e}"));
     }
 
     Ok(())

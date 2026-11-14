@@ -1,12 +1,11 @@
 use std::{
-    fs::{self, File},
-    io::Write,
+    fs::{self},
     path::{Path, PathBuf},
 };
 
 use crate::{
     features::mods::models::{json, xml},
-    utils::serde_xml,
+    utils::{fs_util, serde_xml},
 };
 
 use anyhow::anyhow;
@@ -58,7 +57,7 @@ pub fn save_legacy_mods<P: AsRef<Path>>(
 ) -> anyhow::Result<()> {
     let path = get_legacy_mods_metadata_path(mods_path);
     fs::create_dir_all(path.parent().ok_or(anyhow!("Couldn't get parent path"))?)?;
-    serde_xml::xml_to_file_pretty(path, &mods)?;
+    fs_util::write_atomic(path, serde_xml::xml_to_string_pretty(mods)?)?;
     Ok(())
 }
 
@@ -68,8 +67,8 @@ pub fn load_mods<P: AsRef<Path>>(mods_path: P) -> anyhow::Result<Option<json::Ma
     if !path.exists() {
         Ok(None)
     } else {
-        let file = File::open(path)?;
-        let mods: json::ManagedMods = serde_json::from_reader(file)?;
+        let content = fs::read_to_string(path)?;
+        let mods: json::ManagedMods = serde_json::from_str(&content)?;
         Ok(Some(mods))
     }
 }
@@ -78,7 +77,6 @@ pub fn load_mods<P: AsRef<Path>>(mods_path: P) -> anyhow::Result<Option<json::Ma
 pub fn save_mods<P: AsRef<Path>>(mods_path: P, mods: &json::ManagedMods) -> anyhow::Result<()> {
     let path = get_mods_metadata_path(mods_path);
     fs::create_dir_all(path.parent().ok_or(anyhow!("Couldn't get parent path"))?)?;
-    let mut file = File::create(path)?;
-    write!(file, "{}", serde_json::to_string_pretty(mods)?)?;
+    fs_util::write_atomic(path, serde_json::to_string_pretty(mods)?)?;
     Ok(())
 }
