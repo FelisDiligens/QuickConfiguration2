@@ -900,6 +900,11 @@
       "sResourceIndexFileList": "Das hier zu benutzen, könnte helfen, wenn sich die Sprachausgabe zu Englisch ändert.",
       "keepConfigFiles": "Konfigurationsdateien behalten",
       "keepConfigFilesSubtitle": "Überschreibt keine bereits existierenden Konfigurationsdateien ({{extensions}}) und entfernt sie auch nicht.",
+      "compareFiles": "Dateien vor dem Kopieren vergleichen",
+      "compareFilesSubtitle": "Kann das Anwenden von Mods beschleunigen, indem unnötiges Kopieren vermieden wird.",
+      "compareFilesAuto": "Automatisch",
+      "compareFilesAlways": "Immer",
+      "compareFilesNever": "Nie",
       "resourceInsertionPosition": "Wo sollen *.ba2-Archive in der Ressourcenliste beim Anwenden platziert werden?",
       "resourceInsertionPositionAppend": "An das Ende der Liste (anhängen)",
       "resourceInsertionPositionPrepend": "An den Anfang der Liste (voranstellen)"

@@ -59,10 +59,20 @@ pub struct ModManagerSettings {
     pub resource_insertion_position: ResourceInsertionPosition,
     /// Does not overwrite existing config files and also does not remove them.
     pub keep_config_files: bool,
+    /// Whether to compare files before redeploying them.
+    pub compare_files: ModCompareFiles,
     /// Where to download mods to?
     pub download_path: String,
     /// Display NexusMods titles instead of mod names if available. User-preference.
     pub show_nexus_mods_title: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Type)]
+#[serde(rename_all = "lowercase")]
+pub enum ModCompareFiles {
+    Auto,
+    Always,
+    Never,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Type)]
@@ -118,6 +128,7 @@ impl Default for ModManagerSettings {
             copy_method: ModCopyMethod::Hardlink,
             resource_insertion_position: ResourceInsertionPosition::Append,
             keep_config_files: true,
+            compare_files: ModCompareFiles::Auto,
             download_path: dirs::download_dir()
                 .unwrap_or_default()
                 .to_string_lossy()

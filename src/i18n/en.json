@@ -900,6 +900,11 @@
       "sResourceIndexFileListSubtitle": "Using this might help if the voice over language changes to English.",
       "keepConfigFiles": "Keep config files",
       "keepConfigFilesSubtitle": "Does not overwrite existing config files ({{extensions}}) and also does not remove them.",
+      "compareFiles": "Compare files before copying",
+      "compareFilesSubtitle": "Can speed up deployment of mods by avoiding unnecessary copying.",
+      "compareFilesAuto": "Auto",
+      "compareFilesAlways": "Always",
+      "compareFilesNever": "Never",
       "resourceInsertionPosition": "Where to put *.ba2 archives in the resource list on deployment?",
       "resourceInsertionPositionAppend": "At the end of the list (append)",
       "resourceInsertionPositionPrepend": "At the start of the list (prepend)"

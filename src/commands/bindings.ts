@@ -595,6 +595,7 @@ mods: ManagedMod[];
  * Current disk state: How mods are currently deployed to disk.
  */
 state: ModInstallationState[]; migratedFromV1?: ModsMigration | null }
+export type ModCompareFiles = "auto" | "always" | "never"
 export type ModCopyMethod = "copy" | "symlink" | "hardlink"
 export type ModInstallationOptions = { 
 /**
@@ -641,6 +642,10 @@ resourceInsertionPosition: ResourceInsertionPosition;
  * Does not overwrite existing config files and also does not remove them.
  */
 keepConfigFiles: boolean; 
+/**
+ * Whether to compare files before redeploying them.
+ */
+compareFiles: ModCompareFiles; 
 /**
  * Where to download mods to?
  */

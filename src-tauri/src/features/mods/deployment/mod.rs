@@ -3,6 +3,7 @@
 #[cfg(test)]
 pub mod tests;
 
+use std::collections::{HashMap, HashSet};
 use std::path::{self, Path, PathBuf};
 use std::{fs, io, thread};
 
@@ -25,10 +26,21 @@ pub const CONFIG_FILE_EXTENSIONS: &[&str] = &[
     "ini", "json", "jsonc", "yaml", "yml", "xml", "toml", "conf", "cfg",
 ];
 
+#[derive(Clone)]
 pub struct DeployModsOptions {
     pub copy_method: ModCopyMethod,
     pub resource_insertion_position: ResourceInsertionPosition,
     pub keep_config_files: bool,
+    pub compare_files: bool,
+}
+
+/// Tracks the destination files of a deployment run.
+struct DeployedFiles {
+    /// Destination paths that were actually copied/linked in this run (across all mods).
+    deployed: Vec<PathBuf>,
+    /// Previously deployed files that were kept during removal because they were
+    /// already compared and found identical to the file that will be redeployed.
+    kept: HashSet<PathBuf>,
 }
 
 #[function_name::named]
@@ -40,19 +52,21 @@ pub fn deploy_mods<P: AsRef<Path>>(
     options: DeployModsOptions,
     tx: Option<tokio::sync::mpsc::Sender<ModsDeployProgress>>,
 ) -> ModActionResult<()> {
+    let start_time = std::time::Instant::now();
     let global_enabled = managed.enabled;
     let mods_path = mods_path.as_ref();
     let game_path = game_path.as_ref();
     let enabled_mod_count = managed.mods.iter().filter(|m| m.enabled).count();
 
     log::info!(
-        "[{}] Deploying {} mods from {:?} to {:?} (global enabled: {}, copy method: {:?})",
+        "[{}] Deploying {} mods from {:?} to {:?} (global enabled: {}, copy method: {:?}, compare files: {:?})",
         function_name!(),
         enabled_mod_count,
         mods_path,
         game_path,
         global_enabled,
-        options.copy_method
+        options.copy_method,
+        options.compare_files
     );
     let _ = channel::blocking_send_opt(&tx, function_name!(), ModsDeployProgress::Preparing);
 
@@ -63,6 +77,21 @@ pub fn deploy_mods<P: AsRef<Path>>(
         }
         r#mod.folder_path(mods_path)?;
         r#mod.destination_path(game_path)?;
+    }
+
+    // Determine which previously deployed files can be kept because an enabled
+    // mod will redeploy a byte-identical file to the same path:
+    let files_to_keep = if options.compare_files && global_enabled {
+        find_files_to_keep(managed, mods_path, game_path)?
+    } else {
+        HashSet::new()
+    };
+    if !files_to_keep.is_empty() {
+        log::info!(
+            "[{}] Keeping {} files that will be redeployed identically",
+            function_name!(),
+            files_to_keep.len()
+        );
     }
 
     // Removing all mods prior to deployment:
@@ -81,7 +110,8 @@ pub fn deploy_mods<P: AsRef<Path>>(
         managed,
         list,
         game_path,
-        options.keep_config_files,
+        &options,
+        &files_to_keep,
         Some(remove_tx),
     )?;
 
@@ -95,7 +125,10 @@ pub fn deploy_mods<P: AsRef<Path>>(
 
     // Deploy all enabled mods unless mods were globally disabled:
     if global_enabled {
-        let mut deployed_files: Vec<PathBuf> = Vec::new();
+        let mut deployed_files = DeployedFiles {
+            deployed: Vec::new(),
+            kept: files_to_keep,
+        };
         let mut deployed_mod_count = 0;
         let mut new_resources = Vec::new();
 
@@ -154,14 +187,64 @@ pub fn deploy_mods<P: AsRef<Path>>(
     }
 
     let _ = channel::blocking_send_opt(&tx, function_name!(), ModsDeployProgress::Finished);
+
+    let duration = start_time.elapsed();
+    log::info!("Deployment took {duration:?}");
+
     Ok(())
+}
+
+/// Returns the previously deployed files (from `managed.state`) that can be kept during
+/// removal because an enabled mod will redeploy a byte-identical file to the same path.
+#[function_name::named]
+fn find_files_to_keep<P: AsRef<Path>>(
+    managed: &ManagedMods,
+    mods_path: P,
+    game_path: P,
+) -> ModActionResult<HashSet<PathBuf>> {
+    let mods_path = mods_path.as_ref();
+    let game_path = game_path.as_ref();
+
+    // Map the destination path of each file that will be deployed to its source path.
+    // If multiple mods deploy to the same path, the last one wins (same as during deployment):
+    let mut redeploy_sources: HashMap<PathBuf, PathBuf> = HashMap::new();
+    for r#mod in managed.mods.iter().filter(|r#mod| r#mod.enabled) {
+        let src_path = r#mod.folder_path(mods_path)?;
+        let dst_root = r#mod.destination_path(game_path)?;
+        for file_path in fs_util::list_files_recursively(&src_path, 50)? {
+            let file_path = file_path.canonicalize()?;
+            let relative_path = fs_util::get_relative_path(&src_path, &file_path)?;
+            redeploy_sources.insert(
+                fs_util::join_normalized(&dst_root, &relative_path)?,
+                file_path,
+            );
+        }
+    }
+
+    // Keep all previously deployed files whose new source file is identical:
+    let mut files_to_keep = HashSet::new();
+    for state in managed.state.iter() {
+        let root_path = game_path.join(&state.root_folder);
+        for relative_path in state.files.iter() {
+            let file_path = fs_util::join_normalized(&root_path, relative_path)?;
+            if let Some(src_path) = redeploy_sources.get(&file_path)
+                && file_path.is_file()
+                && fs_util::files_equal(src_path, &file_path)
+                    .tap_err(|e| log::warn!("[{}] Couldn't compare files: {e}", function_name!()))
+                    .unwrap_or(false)
+            {
+                files_to_keep.insert(file_path);
+            }
+        }
+    }
+    Ok(files_to_keep)
 }
 
 #[function_name::named]
 fn deploy_mod_internal<P: AsRef<Path>>(
     r#mod: &mut ManagedMod,
     new_resources: &mut Vec<String>,
-    deployed_files: &mut Vec<PathBuf>,
+    deployed_files: &mut DeployedFiles,
     mods_path: P,
     game_path: P,
     options: &DeployModsOptions,
@@ -228,6 +311,7 @@ fn deploy_mod_internal<P: AsRef<Path>>(
 
     // Iterate over each file in the mod's folder:
     let mut copied_files = 0;
+    let mut skipped_files = 0;
     for file_path in fs_util::list_files_recursively(&src_path, 50)? {
         // Determine full source path, file name and file extension:
         let file_path = file_path.canonicalize()?;
@@ -259,8 +343,8 @@ fn deploy_mod_internal<P: AsRef<Path>>(
 
         // Determine relative path and full destination path:
         let relative_path = fs_util::get_relative_path(&src_path, &file_path)?;
+        let deployed_path = fs_util::join_normalized(&dst_path, &relative_path)?;
         let dst_path = dst_path.join(&relative_path);
-        let deployed_path = dst_path.normalize();
 
         // Create parent directory:
         if let Some(parent_path) = dst_path.parent() {
@@ -282,27 +366,47 @@ fn deploy_mod_internal<P: AsRef<Path>>(
 
         // Copy (or hardlink/symlink) file:
         if !no_overwrite {
-            // Make a backup ("filename.ext" -> "filename.ext.old") if the file already exists:
-            let file_belongs_to_another_mod = deployed_files.contains(&deployed_path);
-            if dst_path.exists()
-                && !dst_path.with_added_extension("old").exists()
-                && !file_belongs_to_another_mod
-            {
-                fs_util::move_file(&dst_path, dst_path.with_added_extension("old"))?;
-                log::trace!(
-                    "[{}] Backup file: {:?}",
-                    function_name!(),
-                    dst_path.with_added_extension("old"),
-                );
-            }
+            // Skip the backup and copy if the file was kept during removal: it was already
+            // compared there and found identical to the file that will be redeployed, and
+            // no other mod has deployed to this path yet in this run:
+            let skip_copy = options.compare_files
+                && deployed_files.kept.contains(&deployed_path)
+                && !deployed_files.deployed.contains(&deployed_path)
+                && dst_path.is_file();
 
-            fs_util::copy_or_link(&file_path, &dst_path, options.copy_method.clone().into())
-                .tap_err(|e| log::error!("Couldn't copy file: {e}"))?;
+            if skip_copy {
+                skipped_files += 1;
+                log::trace!(
+                    "[{}] Skipping identical file: {:?}",
+                    function_name!(),
+                    dst_path
+                );
+            } else {
+                // Make a backup ("filename.ext" -> "filename.ext.old") if the file already exists.
+                // Files that were kept during removal are mod-owned, so they don't need a backup:
+                let file_is_mod_owned = deployed_files.deployed.contains(&deployed_path)
+                    || deployed_files.kept.contains(&deployed_path);
+                if dst_path.exists()
+                    && !dst_path.with_added_extension("old").exists()
+                    && !file_is_mod_owned
+                {
+                    fs_util::move_file(&dst_path, dst_path.with_added_extension("old"))?;
+                    log::trace!(
+                        "[{}] Backup file: {:?}",
+                        function_name!(),
+                        dst_path.with_added_extension("old"),
+                    );
+                }
+
+                fs_util::copy_or_link(&file_path, &dst_path, options.copy_method.clone().into())
+                    .tap_err(|e| log::error!("Couldn't copy file: {e}"))?;
+
+                // Add destination path to the list of all deployed files:
+                deployed_files.deployed.push(deployed_path); // Current deployment (all mods)
+            }
         }
         copied_files += 1;
 
-        // Add destination path to the list of all deployed files:
-        deployed_files.push(deployed_path); // Current deployment (all mods)
         let relative_path = relative_path.to_str().ok_or_else(|| {
             ModActionError::PathUtf8Converation(file_path.to_string_lossy().to_string())
         })?;
@@ -334,12 +438,21 @@ fn deploy_mod_internal<P: AsRef<Path>>(
     }
     drop(archives);
 
+    if skipped_files > 0 {
+        log::info!(
+            "[{}] Skipped {} identical files",
+            function_name!(),
+            skipped_files
+        );
+    }
+
     // Report progress:
     let _ = channel::blocking_send_opt(
         &tx,
         function_name!(),
         ModDeployProgress::Finished {
             copied: copied_files,
+            skipped: skipped_files,
             resources: archive_count as u32,
         },
     );
@@ -359,7 +472,8 @@ pub fn remove_mods<P: AsRef<Path>>(
     managed: &mut ManagedMods,
     list: &mut ResourceList,
     game_path: P,
-    keep_config_files: bool,
+    options: &DeployModsOptions,
+    files_to_keep: &HashSet<PathBuf>,
     tx: Option<tokio::sync::mpsc::Sender<ModsRemoveProgress>>,
 ) -> ModActionResult<()> {
     let game_path = game_path.as_ref();
@@ -388,11 +502,9 @@ pub fn remove_mods<P: AsRef<Path>>(
 
         // Remove all files:
         let mut removed_files = 0;
+        let mut skipped_files = 0;
         for relative_path in state.files.iter() {
-            let relative_path = relative_path
-                .replace(r"\", std::path::MAIN_SEPARATOR_STR)
-                .replace(r"/", std::path::MAIN_SEPARATOR_STR);
-            let file_path = root_path.join(&relative_path).normalize();
+            let file_path = fs_util::join_normalized(&root_path, relative_path)?;
 
             // Determine file name and extension:
             let file_name = file_path
@@ -424,21 +536,21 @@ pub fn remove_mods<P: AsRef<Path>>(
                 },
             );
 
-            // let mut is_redeployed = false;
-
-            // // Check if mod is redeployed with the same options:
-            // if let Some(r#mod) = r#mod
-            //     && r#mod.enabled
-            //     && r#mod.options.root_folder == state.root_folder
-            // {
-            //     is_redeployed = true;
-            // }
+            // Check if the file was kept because it will be redeployed identically:
+            let keep_because_redeployed = files_to_keep.contains(&file_path);
+            if keep_because_redeployed {
+                log::trace!(
+                    "[{}] Keeping file that will be redeployed identically: {:?}",
+                    function_name!(),
+                    file_path
+                );
+            }
 
             // There are some files that should be exempt...
-            let mut keep_file = false;
+            let mut keep_file = keep_because_redeployed;
 
             // Check if it's a configuration file:
-            if keep_config_files
+            if options.keep_config_files
                 && CONFIG_FILE_EXTENSIONS.contains(&file_ext.to_lowercase().as_str())
             {
                 // Keep configs, the user might have edited them:
@@ -448,6 +560,8 @@ pub fn remove_mods<P: AsRef<Path>>(
             // Delete file, if existing:
             if file_path.exists() && !keep_file {
                 fs::remove_file(&file_path)?;
+            } else {
+                skipped_files += 1;
             }
             removed_files += 1;
 
@@ -476,10 +590,11 @@ pub fn remove_mods<P: AsRef<Path>>(
         }
 
         log::info!(
-            "[{}] Removed mod '{}': {} files deleted",
+            "[{}] Removed mod '{}': {} files deleted, {} files skipped",
             function_name!(),
             mod_title,
-            removed_files,
+            removed_files - skipped_files,
+            skipped_files,
         );
         removed_mods += 1;
     }

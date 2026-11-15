@@ -40,6 +40,8 @@ pub enum ModDeployProgress {
     Finished {
         /// Number of files that were copied
         copied: u32,
+        /// Number of files that were skipped because they were identical
+        skipped: u32,
         /// Number of archives that were added to the resource list
         resources: u32,
     },

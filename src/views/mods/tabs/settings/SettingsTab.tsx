@@ -1,4 +1,5 @@
 import {
+  ModCompareFiles,
   ModCopyMethod,
   ResourceInsertionPosition,
   commands,
@@ -144,6 +145,25 @@ export default function SettingsTab() {
             setSettings((settings) => ({ ...settings, keepConfigFiles }))
           }
         />
+        <ComboRow
+          title={t("mods.settingsTab.compareFiles")}
+          subtitle={t("mods.settingsTab.compareFilesSubtitle")}
+          value={settings.compareFiles}
+          onChange={(option) =>
+            setSettings((settings) => ({
+              ...settings,
+              compareFiles: option as ModCompareFiles,
+            }))
+          }
+        >
+          <option value="auto">{t("mods.settingsTab.compareFilesAuto")}</option>
+          <option value="always">
+            {t("mods.settingsTab.compareFilesAlways")}
+          </option>
+          <option value="never">
+            {t("mods.settingsTab.compareFilesNever")}
+          </option>
+        </ComboRow>
         <ComboRow
           title={t("mods.settingsTab.resourceInsertionPosition")}
           value={settings.resourceInsertionPosition}

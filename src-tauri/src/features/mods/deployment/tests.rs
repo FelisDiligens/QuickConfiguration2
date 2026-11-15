@@ -4,7 +4,9 @@ use std::{fs, path::PathBuf};
 
 use tempfile::TempDir;
 
-use crate::features::mods::deployment::{DeployModsOptions, deploy_mods};
+use crate::features::mods::deployment::{
+    DeployModsOptions, ModDeployProgress, ModsDeployProgress, deploy_mods,
+};
 use crate::features::mods::models::json::{
     ManagedMod, ManagedMods, ModInstallationOptions, ModInstallationState,
 };
@@ -30,6 +32,47 @@ impl TestPaths {
             tmp_dir,
         }
     }
+}
+
+/// Deploys the mods and collects all progress messages sent on the channel.
+fn deploy_and_collect(
+    mods: &mut ManagedMods,
+    list: &mut ResourceList,
+    paths: &TestPaths,
+    options: DeployModsOptions,
+) -> Vec<ModsDeployProgress> {
+    let (tx, mut rx) = tokio::sync::mpsc::channel(100);
+    let collector = std::thread::spawn(move || {
+        let mut messages = Vec::new();
+        while let Some(message) = rx.blocking_recv() {
+            messages.push(message);
+        }
+        messages
+    });
+    deploy_mods(
+        mods,
+        list,
+        &paths.mods_path,
+        &paths.game_path,
+        options,
+        Some(tx),
+    )
+    .unwrap();
+    collector.join().unwrap()
+}
+
+/// Sums up the `skipped` counts of all per-mod `Finished` progress messages.
+fn count_skipped_files(messages: &[ModsDeployProgress]) -> u32 {
+    messages
+        .iter()
+        .filter_map(|message| match message {
+            ModsDeployProgress::Deploying {
+                progress: ModDeployProgress::Finished { skipped, .. },
+                ..
+            } => Some(*skipped),
+            _ => None,
+        })
+        .sum()
 }
 
 #[test]
@@ -175,6 +218,7 @@ fn test_deploy_mods_1() {
             copy_method,
             resource_insertion_position: ResourceInsertionPosition::Append,
             keep_config_files: true,
+            compare_files: true,
         },
         None,
     )
@@ -368,6 +412,7 @@ fn test_deploy_mods_2() {
             copy_method,
             resource_insertion_position: ResourceInsertionPosition::Append,
             keep_config_files: true,
+            compare_files: true,
         },
         None,
     )
@@ -506,6 +551,7 @@ fn test_deploy_mods_3() {
             copy_method,
             resource_insertion_position: ResourceInsertionPosition::Append,
             keep_config_files: true,
+            compare_files: true,
         },
         None,
     )
@@ -604,6 +650,7 @@ fn test_deploy_mods_4() {
                 copy_method: copy_method.clone(),
                 resource_insertion_position: ResourceInsertionPosition::Append,
                 keep_config_files: true,
+                compare_files: true,
             },
             None,
         )
@@ -637,4 +684,277 @@ fn test_deploy_mods_4() {
 
     // Both mods should have deployment state:
     assert_eq!(mods.state.len(), 2);
+}
+
+#[test]
+fn test_deploy_mods_compare_files_skips_identical_on_redeploy() {
+    test_utils::setup_stdout_logger();
+    let paths = TestPaths::new();
+    let mut mods = ManagedMods::default();
+    let mut list = ResourceList::parse("");
+    let copy_method = ModCopyMethod::Copy;
+
+    // Setup files and folders:
+    fs::create_dir_all(&paths.game_data_path).unwrap();
+    fs::create_dir_all(&paths.mods_path).unwrap();
+
+    let mod1 = ManagedMod {
+        key: "mod1-key".to_string(),
+        title: "Mod 1".to_string(),
+        folder_name: "Mod1".to_string(),
+        enabled: true,
+        options: ModInstallationOptions {
+            root_folder: "Data".to_string(),
+        },
+        ..Default::default()
+    };
+    let mod1_path = paths.mods_path.join(&mod1.folder_name);
+    fs::create_dir_all(&mod1_path).unwrap();
+    fs_util::write_to_file(mod1_path.join("Managed.ba2"), "v1").unwrap();
+    mods.mods.push(mod1);
+
+    let options = DeployModsOptions {
+        copy_method: copy_method.clone(),
+        resource_insertion_position: ResourceInsertionPosition::Append,
+        keep_config_files: true,
+        compare_files: true,
+    };
+    let no_compare_options = DeployModsOptions {
+        compare_files: false,
+        ..options.clone()
+    };
+    let deployed_file = paths.game_data_path.join("Managed.ba2");
+    let backup_file = paths.game_data_path.join("Managed.ba2.old");
+
+    // Initial deployment:
+    let messages = deploy_and_collect(&mut mods, &mut list, &paths, options.clone());
+    assert_eq!(count_skipped_files(&messages), 0);
+    assert_eq!(fs::read_to_string(&deployed_file).unwrap(), "v1");
+    assert!(!backup_file.exists());
+
+    // Replace the deployed file with a hardlink to a sentinel file with identical content,
+    // so we can detect whether the file was touched during redeployment:
+    #[cfg(unix)]
+    let sentinel = {
+        let sentinel = paths.mods_path.join("Sentinel.ba2");
+        fs_util::write_to_file(&sentinel, "v1").unwrap();
+        fs::remove_file(&deployed_file).unwrap();
+        fs::hard_link(&sentinel, &deployed_file).unwrap();
+        sentinel
+    };
+
+    // Redeploy unchanged with compare_files enabled: the identical file is kept and not re-copied:
+    let messages = deploy_and_collect(&mut mods, &mut list, &paths, options.clone());
+    assert_eq!(count_skipped_files(&messages), 1);
+    assert_eq!(fs::read_to_string(&deployed_file).unwrap(), "v1");
+    assert!(!backup_file.exists());
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+        let metadata = fs::metadata(&deployed_file).unwrap();
+        assert_eq!(
+            metadata.nlink(),
+            2,
+            "identical file should have been kept as-is"
+        );
+        assert_eq!(
+            metadata.ino(),
+            fs::metadata(&sentinel).unwrap().ino(),
+            "identical file should not have been re-copied"
+        );
+    }
+
+    // Redeploy unchanged with compare_files disabled: the file is removed and re-copied:
+    let messages = deploy_and_collect(&mut mods, &mut list, &paths, no_compare_options.clone());
+    assert_eq!(count_skipped_files(&messages), 0);
+    assert_eq!(fs::read_to_string(&deployed_file).unwrap(), "v1");
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+        assert_eq!(
+            fs::metadata(&deployed_file).unwrap().nlink(),
+            1,
+            "file should have been re-copied"
+        );
+    }
+
+    // Change the mod file and redeploy with compare_files enabled: the file is updated:
+    fs_util::write_to_file(mod1_path.join("Managed.ba2"), "v2").unwrap();
+    let messages = deploy_and_collect(&mut mods, &mut list, &paths, options.clone());
+    assert_eq!(count_skipped_files(&messages), 0);
+    assert_eq!(fs::read_to_string(&deployed_file).unwrap(), "v2");
+
+    // Disable the mod: the file is removed:
+    mods.mods[0].enabled = false;
+    let messages = deploy_and_collect(&mut mods, &mut list, &paths, options.clone());
+    assert_eq!(count_skipped_files(&messages), 0);
+    assert!(!deployed_file.exists());
+    assert!(mods.state.is_empty());
+}
+
+#[test]
+fn test_deploy_mods_compare_files_keeps_backup_of_unmanaged_identical_file() {
+    test_utils::setup_stdout_logger();
+    let paths = TestPaths::new();
+    let mut mods = ManagedMods::default();
+    let mut list = ResourceList::parse("");
+
+    // Setup files and folders:
+    fs::create_dir_all(&paths.game_data_path).unwrap();
+    fs::create_dir_all(&paths.mods_path).unwrap();
+
+    // Unmanaged file in the game folder, identical to the mod's file:
+    fs_util::write_to_file(paths.game_data_path.join("Unmanaged.txt"), "same content").unwrap();
+
+    let mod1 = ManagedMod {
+        key: "mod1-key".to_string(),
+        title: "Mod 1".to_string(),
+        folder_name: "Mod1".to_string(),
+        enabled: true,
+        options: ModInstallationOptions {
+            root_folder: "Data".to_string(),
+        },
+        ..Default::default()
+    };
+    let mod1_path = paths.mods_path.join(&mod1.folder_name);
+    fs::create_dir_all(&mod1_path).unwrap();
+    fs_util::write_to_file(mod1_path.join("Unmanaged.txt"), "same content").unwrap();
+    mods.mods.push(mod1);
+
+    let options = DeployModsOptions {
+        copy_method: ModCopyMethod::Copy,
+        resource_insertion_position: ResourceInsertionPosition::Append,
+        keep_config_files: true,
+        compare_files: true,
+    };
+
+    // Deploy: the file was not part of the previous deployment state, so a backup
+    // must still be created even though the contents are identical:
+    deploy_mods(
+        &mut mods,
+        &mut list,
+        &paths.mods_path,
+        &paths.game_path,
+        options.clone(),
+        None,
+    )
+    .unwrap();
+    assert!(paths.game_data_path.join("Unmanaged.txt").is_file());
+    assert!(paths.game_data_path.join("Unmanaged.txt.old").is_file());
+    assert_eq!(
+        fs::read_to_string(paths.game_data_path.join("Unmanaged.txt.old")).unwrap(),
+        "same content"
+    );
+
+    // Disable the mod: the deployed file is removed and the backup is restored:
+    mods.mods[0].enabled = false;
+    deploy_mods(
+        &mut mods,
+        &mut list,
+        &paths.mods_path,
+        &paths.game_path,
+        options.clone(),
+        None,
+    )
+    .unwrap();
+    assert!(paths.game_data_path.join("Unmanaged.txt").is_file());
+    assert!(!paths.game_data_path.join("Unmanaged.txt.old").exists());
+    assert_eq!(
+        fs::read_to_string(paths.game_data_path.join("Unmanaged.txt")).unwrap(),
+        "same content"
+    );
+}
+
+#[test]
+fn test_deploy_mods_compare_files_preserves_backup_on_redeploy() {
+    test_utils::setup_stdout_logger();
+    let paths = TestPaths::new();
+    let mut mods = ManagedMods::default();
+    let mut list = ResourceList::parse("");
+
+    // Setup files and folders:
+    fs::create_dir_all(&paths.game_data_path).unwrap();
+    fs::create_dir_all(&paths.mods_path).unwrap();
+
+    // Unmanaged original file in the game folder:
+    fs_util::write_to_file(paths.game_data_path.join("Original.txt"), "original").unwrap();
+
+    // Mod ships different content for that file:
+    let mod1 = ManagedMod {
+        key: "mod1-key".to_string(),
+        title: "Mod 1".to_string(),
+        folder_name: "Mod1".to_string(),
+        enabled: true,
+        options: ModInstallationOptions {
+            root_folder: "Data".to_string(),
+        },
+        ..Default::default()
+    };
+    let mod1_path = paths.mods_path.join(&mod1.folder_name);
+    fs::create_dir_all(&mod1_path).unwrap();
+    fs_util::write_to_file(mod1_path.join("Original.txt"), "modded").unwrap();
+    mods.mods.push(mod1);
+
+    let options = DeployModsOptions {
+        copy_method: ModCopyMethod::Copy,
+        resource_insertion_position: ResourceInsertionPosition::Append,
+        keep_config_files: true,
+        compare_files: true,
+    };
+
+    // Initial deployment: backup of the original file is created:
+    deploy_mods(
+        &mut mods,
+        &mut list,
+        &paths.mods_path,
+        &paths.game_path,
+        options.clone(),
+        None,
+    )
+    .unwrap();
+    assert_eq!(
+        fs::read_to_string(paths.game_data_path.join("Original.txt")).unwrap(),
+        "modded"
+    );
+    assert_eq!(
+        fs::read_to_string(paths.game_data_path.join("Original.txt.old")).unwrap(),
+        "original"
+    );
+
+    // Redeploy unchanged with compare_files: the identical file is kept and the
+    // existing backup is left untouched:
+    deploy_mods(
+        &mut mods,
+        &mut list,
+        &paths.mods_path,
+        &paths.game_path,
+        options.clone(),
+        None,
+    )
+    .unwrap();
+    assert_eq!(
+        fs::read_to_string(paths.game_data_path.join("Original.txt")).unwrap(),
+        "modded"
+    );
+    assert_eq!(
+        fs::read_to_string(paths.game_data_path.join("Original.txt.old")).unwrap(),
+        "original"
+    );
+
+    // Disable the mod: the deployed file is removed and the original is restored:
+    mods.mods[0].enabled = false;
+    deploy_mods(
+        &mut mods,
+        &mut list,
+        &paths.mods_path,
+        &paths.game_path,
+        options.clone(),
+        None,
+    )
+    .unwrap();
+    assert_eq!(
+        fs::read_to_string(paths.game_data_path.join("Original.txt")).unwrap(),
+        "original"
+    );
+    assert!(!paths.game_data_path.join("Original.txt.old").exists());
 }

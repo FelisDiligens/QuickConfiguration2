@@ -381,6 +381,42 @@ pub mod write_atomic_tests {
     }
 }
 
+pub mod join_normalized_tests {
+    use std::path::{MAIN_SEPARATOR, Path};
+
+    use crate::utils::fs_util::join_normalized;
+
+    #[test]
+    fn test_joins_and_normalizes_relative_path() {
+        let result = join_normalized(Path::new("root"), "sub/file.txt").unwrap();
+        assert!(result.is_absolute());
+        assert_eq!(
+            result,
+            std::path::absolute(Path::new("root").join("sub").join("file.txt")).unwrap()
+        );
+    }
+
+    #[test]
+    fn test_converts_foreign_path_separators() {
+        let result = join_normalized(Path::new("root"), "sub\\file.txt").unwrap();
+        let expected = format!("root{MAIN_SEPARATOR}sub{MAIN_SEPARATOR}file.txt");
+        assert!(
+            result.ends_with(&expected),
+            "expected {result:?} to end with {expected:?}"
+        );
+    }
+
+    #[test]
+    fn test_normalizes_dot_components() {
+        let result = join_normalized(Path::new("root"), "./sub/../file.txt").unwrap();
+        let expected = format!("root{MAIN_SEPARATOR}file.txt");
+        assert!(
+            result.ends_with(&expected),
+            "expected {result:?} to end with {expected:?}"
+        );
+    }
+}
+
 pub mod files_equal_tests {
     use std::{
         fs,

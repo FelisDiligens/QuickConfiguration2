@@ -44,6 +44,7 @@ export const useSettingsStore = create<SettingsStore>()((set, get) => ({
     copyMethod: "hardlink",
     resourceInsertionPosition: "append",
     keepConfigFiles: true,
+    compareFiles: "auto",
     downloadPath: "",
     showNexusModsTitle: true,
   },

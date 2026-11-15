@@ -11,6 +11,7 @@ use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf, StripPrefixError};
 
 use cfg_if::cfg_if;
+use normalize_path::NormalizePath;
 
 #[cfg(target_os = "windows")]
 use windows::Win32::Foundation::{ERROR_NOT_SAME_DEVICE, WIN32_ERROR};
@@ -26,6 +27,21 @@ pub fn get_relative_path<P1: AsRef<Path>, P2: AsRef<Path>>(
         return Ok(PathBuf::from("."));
     }
     Ok(relative_path.to_path_buf())
+}
+
+/// Joins a relative path onto a root path and returns the resulting normalized absolute path.
+/// Foreign path separators (`/` and `\`) in the relative path are converted
+/// to the current platform's separator first.
+pub fn join_normalized<P1: AsRef<Path>, P2: AsRef<Path>>(
+    root_path: P1,
+    relative_path: P2,
+) -> io::Result<PathBuf> {
+    let relative_path = relative_path
+        .as_ref()
+        .to_string_lossy()
+        .replace(r"\", std::path::MAIN_SEPARATOR_STR)
+        .replace(r"/", std::path::MAIN_SEPARATOR_STR);
+    Ok(std::path::absolute(root_path.as_ref().join(relative_path))?.normalize())
 }
 
 #[derive(Debug, Default, Clone)]

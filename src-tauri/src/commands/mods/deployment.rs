@@ -11,7 +11,9 @@ use crate::commands::mods::{
 use crate::features::mods;
 use crate::features::mods::models::json::ManagedMods;
 use crate::features::resourcelists::{ResourceList, get_legacy_mods_resources_path};
-use crate::features::stores::settings::models::ModManagerSettings;
+use crate::features::stores::settings::models::{
+    ModCompareFiles, ModCopyMethod, ModManagerSettings,
+};
 
 /// Deploy all mods from the given `mods_path` into the given `game_path`.
 /// Returns the updated mod store.
@@ -27,6 +29,15 @@ pub async fn mods_deploy(
     app: AppHandle,
 ) -> CommandResult<(ModsStateUpdate, ResourceList)> {
     log::trace!("Called command {}", function_name!());
+
+    let compare_files = match mod_settings.compare_files {
+        ModCompareFiles::Auto => {
+            !mods_path.starts_with(&game_path) || mod_settings.copy_method == ModCopyMethod::Copy
+        }
+        ModCompareFiles::Always => true,
+        ModCompareFiles::Never => false,
+    };
+
     let (tx, mut rx) = tokio::sync::mpsc::channel(10);
     let (result, _) = tokio::try_join!(
         spawn_blocking(move || {
@@ -39,6 +50,7 @@ pub async fn mods_deploy(
                     copy_method: mod_settings.copy_method.clone(),
                     resource_insertion_position: mod_settings.resource_insertion_position.clone(),
                     keep_config_files: mod_settings.keep_config_files,
+                    compare_files,
                 },
                 Some(tx),
             )
