@@ -1,6 +1,9 @@
 #[cfg(test)]
 pub mod tests;
 
+mod diff;
+pub use diff::*;
+
 use std::ffi::OsStr;
 pub use std::fs;
 use std::fs::File;
