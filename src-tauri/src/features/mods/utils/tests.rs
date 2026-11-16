@@ -56,6 +56,7 @@ fn test_get_conflicting_files() {
             options: ModInstallationOptions {
                 root_folder: ".".to_string(),
             },
+            ..Default::default()
         },
         ManagedMod {
             key: "mod2-id".to_string(),
@@ -68,6 +69,7 @@ fn test_get_conflicting_files() {
             options: ModInstallationOptions {
                 root_folder: "Data".to_string(),
             },
+            ..Default::default()
         },
         ManagedMod {
             key: "mod3-id".to_string(),
@@ -80,6 +82,7 @@ fn test_get_conflicting_files() {
             options: ModInstallationOptions {
                 root_folder: "Data/Strings".to_string(),
             },
+            ..Default::default()
         },
         ManagedMod {
             key: "mod4-id".to_string(),
@@ -92,6 +95,7 @@ fn test_get_conflicting_files() {
             options: ModInstallationOptions {
                 root_folder: "Data".to_string(),
             },
+            ..Default::default()
         },
     ];
 

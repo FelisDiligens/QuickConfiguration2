@@ -651,6 +651,8 @@
         "nexusmodsGroup": "NexusMods",
         "latestVersion": "Neueste Version",
         "setLatestVersion": "Neueste Version setzen",
+        "fileId": "Datei-ID",
+        "untrackFile": "Nicht mehr verfolgen",
         "author": "Autor",
         "downloadModInfo": "Modinformationen herunterladen",
         "renameFailed": "Konnte Ordner nicht umbenennen: {{error}}"

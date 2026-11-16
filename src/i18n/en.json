@@ -651,6 +651,8 @@
         "nexusmodsGroup": "NexusMods",
         "latestVersion": "Latest version",
         "setLatestVersion": "Set latest version",
+        "fileId": "File ID",
+        "untrackFile": "Untrack",
         "author": "Author",
         "downloadModInfo": "Download mod information",
         "renameFailed": "Couldn't rename folder: {{error}}"

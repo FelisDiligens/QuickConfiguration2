@@ -578,7 +578,11 @@ enabled: boolean;
 /**
  * Deployment options: How we want the mod to be deployed.
  */
-options: ModInstallationOptions }
+options: ModInstallationOptions; 
+/**
+ * The NexusMods file ID if downloaded using the API
+ */
+nexusFileId?: string | null }
 /**
  * State of managed mods for the game.
  */

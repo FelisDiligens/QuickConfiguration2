@@ -3,6 +3,7 @@ import {
   events,
   NexusModsDownloadLink,
   NexusModsModInfo,
+  NXMLinkDetails,
 } from "@/commands/bindings";
 import { AnyError, commandErrorToString } from "@/commands/errors";
 import NexusMods from "@/commands/nexusmods";
@@ -28,7 +29,9 @@ export default function ModDownloadModals() {
   const isAnyModalShown = useAtomValue(isAnyModalShownAtom);
   const [cdnLinks, setCdnLinks] = useState<NexusModsDownloadLink[]>([]);
   const isPendingRef = useRef(false);
-  const modLinkRef = useRef<string | undefined>(undefined);
+  const nxmDetails = useRef<(NXMLinkDetails & { url: string }) | undefined>(
+    undefined,
+  );
   const modDetailsRef = useRef<NexusModsModInfo | undefined>(undefined);
 
   function showCdnModal(cdnLinks: NexusModsDownloadLink[]) {
@@ -69,8 +72,11 @@ export default function ModDownloadModals() {
         t("mods.modOrderTab.progress.requestingCdnLinks"),
       );
 
-      const nxmDetails = await NexusMods.extractDetailsFromNxmUrl(nxmLink);
-      modLinkRef.current = `https://www.nexusmods.com/${nxmDetails.gameDomain}/mods/${nxmDetails.gameScopedId}`;
+      const resp = await NexusMods.extractDetailsFromNxmUrl(nxmLink);
+      nxmDetails.current = {
+        ...resp,
+        url: `https://www.nexusmods.com/${resp.gameDomain}/mods/${resp.gameScopedId}`,
+      };
       const cdnLinks = await NexusMods.api.requestDownloadLinks(
         apiKey,
         nxmLink,
@@ -123,9 +129,9 @@ export default function ModDownloadModals() {
       console.log("Downloaded:", downloadedFile);
 
       try {
-        if (modLinkRef.current) {
+        if (nxmDetails.current) {
           modDetailsRef.current = await nexusmodsApi.retrieveModinfo(
-            modLinkRef.current,
+            nxmDetails.current.url,
           );
         }
       } catch (error) {
@@ -150,7 +156,10 @@ export default function ModDownloadModals() {
     modsEventBus.emitInstallModFromFileWithPath(downloadedFilePath, {
       title: modDetailsRef.current?.name || undefined,
       version: modDetailsRef.current?.version,
-      url: modLinkRef.current,
+      url: nxmDetails.current?.url,
+      nexusFileId: nxmDetails.current?.fileId
+        ? String(nxmDetails.current?.fileId)
+        : undefined,
     });
   };
 

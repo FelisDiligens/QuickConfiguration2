@@ -7,7 +7,7 @@ import {
 import { AnyError, commandErrorToString } from "@/commands/errors";
 import Mods from "@/commands/mods";
 import Entry from "@/components/common/Entry";
-import { Flex, FlexCol, FlexRow } from "@/components/common/Flex";
+import { FlexCol, FlexRow } from "@/components/common/Flex";
 import { useLazyAsync } from "@/hooks/async";
 import useModinfos from "@/hooks/nexusmods/useModinfos";
 import { modsEventBus } from "@/services/mods";
@@ -220,6 +220,36 @@ function StickyHeader(props: {
   );
 }
 
+function InfoLine(props: {
+  label: string;
+  action?: React.ReactNode;
+  children?: React.ReactNode;
+}) {
+  return (
+    <FlexRow
+      gap="0.5rem"
+      css={css`
+        padding: 5px 4px;
+        align-items: baseline;
+        justify-content: space-between;
+        & > .info-line-text {
+          min-width: 0;
+          overflow-wrap: anywhere;
+        }
+        & > .info-line-action {
+          flex-shrink: 0;
+          white-space: nowrap;
+        }
+      `}
+    >
+      <span className="info-line-text">
+        <b>{props.label}</b>: {props.children}
+      </span>
+      {props.action && <span className="info-line-action">{props.action}</span>}
+    </FlexRow>
+  );
+}
+
 function Options(props: {
   mod: ManagedMod;
   state?: ModInstallationState;
@@ -396,33 +426,48 @@ function Options(props: {
           </CardHeader>
           <CardBody>
             <FlexCol gap="0.5rem">
-              <FlexRow gap="0.5rem" css={css`padding: 5px 4px;`}>
-                <span>
-                  <b>{t("mods.modOrderTab.detailsPane.latestVersion")}</b>
-                  :&nbsp;
-                </span>
-                <span>{props.modinfo?.version}</span>
-                <Flex grow />
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    props.setMod((mod) => ({
-                      ...mod,
-                      version: props.modinfo?.version || mod.version,
-                    }));
-                    e.preventDefault();
-                  }}
-                  role="button"
+              <InfoLine
+                label={t("mods.modOrderTab.detailsPane.latestVersion")}
+                action={
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      props.setMod((mod) => ({
+                        ...mod,
+                        version: props.modinfo?.version || mod.version,
+                      }));
+                      e.preventDefault();
+                    }}
+                    role="button"
+                  >
+                    {t("mods.modOrderTab.detailsPane.setLatestVersion")}
+                  </a>
+                }
+              >
+                {props.modinfo?.version}
+              </InfoLine>
+              {props.mod.nexusFileId && (
+                <InfoLine
+                  label={t("mods.modOrderTab.detailsPane.fileId")}
+                  action={
+                    <a
+                      href="#"
+                      onClick={(e) => {
+                        props.setMod((mod) => ({ ...mod, nexusFileId: null }));
+                        e.preventDefault();
+                      }}
+                      role="button"
+                    >
+                      {t("mods.modOrderTab.detailsPane.untrackFile")}
+                    </a>
+                  }
                 >
-                  {t("mods.modOrderTab.detailsPane.setLatestVersion")}
-                </a>
-              </FlexRow>
-              <FlexRow gap="0.5rem" css={css`padding: 5px 4px;`}>
-                <span>
-                  <b>{t("mods.modOrderTab.detailsPane.author")}</b>:&nbsp;
-                </span>
-                <span>{props.modinfo?.author}</span>
-              </FlexRow>
+                  {props.mod.nexusFileId}
+                </InfoLine>
+              )}
+              <InfoLine label={t("mods.modOrderTab.detailsPane.author")}>
+                {props.modinfo?.author}
+              </InfoLine>
               <Button
                 variant="secondary"
                 onClick={() =>

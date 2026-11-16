@@ -39,6 +39,9 @@ pub struct ManagedMod {
     pub enabled: bool,
     /// Deployment options: How we want the mod to be deployed.
     pub options: ModInstallationOptions,
+    /// The NexusMods file ID if downloaded using the API
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub nexus_file_id: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Type)]
@@ -146,6 +149,7 @@ impl Default for ManagedMod {
             notes: String::new(),
             enabled: false,
             options: ModInstallationOptions::default(),
+            nexus_file_id: None,
         }
     }
 }
@@ -191,6 +195,7 @@ impl From<xml::ManagedMod> for ManagedMod {
             options: ModInstallationOptions {
                 root_folder: value.state.pending.root_folder,
             },
+            nexus_file_id: None,
         }
     }
 }

@@ -43,6 +43,7 @@ pub mod install_tests {
                 options: ModInstallationOptions {
                     root_folder: ".".to_string(),
                 },
+                ..Default::default()
             },
             vec!["./test.txt"],
         )
@@ -87,6 +88,7 @@ pub mod install_tests {
                     options: ModInstallationOptions {
                         root_folder: ".".to_string(),
                     },
+                    ..Default::default()
                 },
                 vec!["./test.txt"],
             )
@@ -132,6 +134,7 @@ pub mod install_tests {
                     options: ModInstallationOptions {
                         root_folder: ".".to_string(),
                     },
+                    ..Default::default()
                 },
                 vec!["./test.txt"],
             )
@@ -179,6 +182,7 @@ pub mod install_tests {
                 options: ModInstallationOptions {
                     root_folder: ".".to_string(),
                 },
+                ..Default::default()
             },
             vec!["./test.txt"],
         )
@@ -198,6 +202,7 @@ pub mod install_tests {
                 options: ModInstallationOptions {
                     root_folder: ".".to_string(),
                 },
+                ..Default::default()
             },
             vec!["./test.txt"],
         );
@@ -241,6 +246,7 @@ pub mod install_tests {
                 options: ModInstallationOptions {
                     root_folder: ".".to_string(),
                 },
+                ..Default::default()
             },
             vec!["./test.txt"],
         );
@@ -284,6 +290,7 @@ pub mod install_tests {
                 options: ModInstallationOptions {
                     root_folder: ".".to_string(),
                 },
+                ..Default::default()
             },
             vec!["./test.txt"],
         )
@@ -314,6 +321,7 @@ pub mod install_tests {
                 options: ModInstallationOptions {
                     root_folder: ".".to_string(),
                 },
+                ..Default::default()
             },
             vec!["./test2.txt"],
         )
