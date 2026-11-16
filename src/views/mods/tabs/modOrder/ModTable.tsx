@@ -13,6 +13,7 @@ import { useSettingsStore } from "@/stores/settings";
 import { css } from "@emotion/react";
 import {
   faGripVertical,
+  faQuestionCircle,
   faSearch,
   faThumbsDown,
   faThumbsUp,
@@ -74,19 +75,23 @@ const ModTableRow = memo(function ModTableRow(props: {
   if (!props.mod.enabled && !props.state)
     status = t("mods.modOrderTab.table.rows.status.disabled");
   const rootFolder = props.mod.options.rootFolder || ".";
-  let endorsement;
+  let endorsement, endorsementIcon;
   switch (props.modinfo?.endorseStatus) {
     case "Endorsed":
       endorsement = t("mods.modOrderTab.table.rows.endorsed");
+      endorsementIcon = faThumbsUp;
       break;
     case "Abstained":
       endorsement = t("mods.modOrderTab.table.rows.abstained");
+      endorsementIcon = faThumbsDown;
       break;
     case "Undecided":
       endorsement = t("mods.modOrderTab.table.rows.undecided");
+      endorsementIcon = faQuestionCircle;
       break;
     default:
       endorsement = "-/-";
+      endorsementIcon = undefined;
       break;
   }
   const description = [
@@ -224,27 +229,9 @@ const ModTableRow = memo(function ModTableRow(props: {
             !needsDeployment && !props.mod.enabled ? "italic" : undefined,
         }}
       >
-        {props.modinfo?.endorseStatus === "Endorsed" ? (
-          <OverlayTrigger
-            overlay={
-              <Tooltip>{t("mods.modOrderTab.table.rows.endorsed")}</Tooltip>
-            }
-          >
-            <FontAwesomeIcon
-              icon={faThumbsUp}
-              aria-label={t("mods.modOrderTab.table.rows.endorsed")}
-            />
-          </OverlayTrigger>
-        ) : props.modinfo?.endorseStatus === "Abstained" ? (
-          <OverlayTrigger
-            overlay={
-              <Tooltip>{t("mods.modOrderTab.table.rows.abstained")}</Tooltip>
-            }
-          >
-            <FontAwesomeIcon
-              icon={faThumbsDown}
-              aria-label={t("mods.modOrderTab.table.rows.abstained")}
-            />
+        {endorsementIcon ? (
+          <OverlayTrigger overlay={<Tooltip>{endorsement}</Tooltip>}>
+            <FontAwesomeIcon icon={endorsementIcon} aria-label={endorsement} />
           </OverlayTrigger>
         ) : (
           endorsement
