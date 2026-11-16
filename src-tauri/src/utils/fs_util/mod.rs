@@ -141,27 +141,22 @@ pub fn copy_or_link<P1: AsRef<Path>, P2: AsRef<Path>>(
             }
 
             let result = fs::hard_link(src_path, dst_path);
-            // Check for errors:
-            #[cfg(target_os = "windows")]
+
+            // On Windows, hardlinking may fail with ERROR_NOT_SAME_DEVICE (os error 17).
+            // On Unix, hardlinking may fail with EXDEV ("Invalid cross-device link", os error 18).
+            // Rust maps both to ErrorKind::CrossesDevices since 1.85.0.
+            if let Err(ref error) = result
+                && error.kind() == io::ErrorKind::CrossesDevices
             {
-                // On Windows, let's try to extract the raw system error code and check
-                // if the error occurred because the paths are on different filesystems
-                // (and assuming our heuristic above didn't catch that).
-                if let Err(ref error) = result
-                    && let Some(os_error) = error.raw_os_error()
-                    && let Ok(win_error) = u32::try_from(os_error).map(WIN32_ERROR)
-                {
-                    // Compare https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499-
-                    if win_error == ERROR_NOT_SAME_DEVICE {
-                        // Fallback to copy if on different drives:
-                        log::trace!(
-                            "Attempted to hardlink {src_path:?} to {dst_path:?} but failed with OS error {os_error}: Falling back to copying."
-                        );
-                        fs::copy(src_path, dst_path)?;
-                        return Ok(());
-                    }
-                }
+                // Fallback to copy if on different filesystems:
+                log::trace!(
+                    "Attempted to hardlink {src_path:?} to {dst_path:?} but failed with OS error {:?}: Falling back to copying.",
+                    error.raw_os_error()
+                );
+                fs::copy(src_path, dst_path)?;
+                return Ok(());
             }
+
             result?
         }
         CopyMethod::Symlink => {
