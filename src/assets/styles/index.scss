@@ -20,6 +20,21 @@ body {
 }
 
 /*
+ * Bootstrap 5.3 removed `position: absolute` from .popover/.tooltip and relies on
+ * Popper to set it inline. But until Popper's first update runs (one frame after
+ * the overlay is shown), the overlay has no position at all and sits in normal
+ * flow inside its portal container, which makes the page content jump by the
+ * overlay's height for a frame (e.g. the color orb popovers in the Pip-Boy view).
+ * Restore absolute positioning so overlays are out of flow from the first frame.
+ */
+.popover,
+.tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/*
  * Prevents text selection and dragging on all HTML elements.
  * Source: https://gist.github.com/msuchodolski/41c9338f3a732379dc570142826ed76e
  */
