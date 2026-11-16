@@ -14,13 +14,22 @@ import { css } from "@emotion/react";
 import {
   faGripVertical,
   faSearch,
+  faThumbsDown,
+  faThumbsUp,
   faTrash,
   faX,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Button, Form, InputGroup, Table } from "react-bootstrap";
+import {
+  Button,
+  Form,
+  InputGroup,
+  OverlayTrigger,
+  Table,
+  Tooltip,
+} from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { createModinfoMap, getModInfoFromMap } from "./utils/getModInfo";
 
@@ -215,7 +224,31 @@ const ModTableRow = memo(function ModTableRow(props: {
             !needsDeployment && !props.mod.enabled ? "italic" : undefined,
         }}
       >
-        {endorsement}
+        {props.modinfo?.endorseStatus === "Endorsed" ? (
+          <OverlayTrigger
+            overlay={
+              <Tooltip>{t("mods.modOrderTab.table.rows.endorsed")}</Tooltip>
+            }
+          >
+            <FontAwesomeIcon
+              icon={faThumbsUp}
+              aria-label={t("mods.modOrderTab.table.rows.endorsed")}
+            />
+          </OverlayTrigger>
+        ) : props.modinfo?.endorseStatus === "Abstained" ? (
+          <OverlayTrigger
+            overlay={
+              <Tooltip>{t("mods.modOrderTab.table.rows.abstained")}</Tooltip>
+            }
+          >
+            <FontAwesomeIcon
+              icon={faThumbsDown}
+              aria-label={t("mods.modOrderTab.table.rows.abstained")}
+            />
+          </OverlayTrigger>
+        ) : (
+          endorsement
+        )}
       </td>
       <td className="center">
         <Button
