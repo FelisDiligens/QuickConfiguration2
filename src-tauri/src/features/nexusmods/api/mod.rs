@@ -204,7 +204,7 @@ impl NexusModsAPI {
         &mut self,
         game_domain: String,
         game_scoped_id: u64,
-        file_id: u64,
+        file_id: u32,
         key: Option<String>,
         expires: Option<u64>,
     ) -> anyhow::Result<Vec<json::DownloadLink>> {

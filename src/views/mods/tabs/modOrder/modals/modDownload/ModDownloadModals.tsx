@@ -157,9 +157,7 @@ export default function ModDownloadModals() {
       title: modDetailsRef.current?.name || undefined,
       version: modDetailsRef.current?.version,
       url: nxmDetails.current?.url,
-      nexusFileId: nxmDetails.current?.fileId
-        ? String(nxmDetails.current?.fileId)
-        : undefined,
+      nexusFileId: nxmDetails.current?.fileId,
     });
   };
 

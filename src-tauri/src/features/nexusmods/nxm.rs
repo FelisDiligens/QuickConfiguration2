@@ -4,7 +4,7 @@ use url::Url;
 pub struct NXMLinkDetails {
     pub game_domain: String,
     pub game_scoped_id: u64,
-    pub file_id: u64,
+    pub file_id: u32,
     pub key: String,
     pub expires: u64,
     pub user_id: u64,
@@ -27,7 +27,7 @@ pub fn parse_nxm_link<S: AsRef<str>>(link: S) -> anyhow::Result<NXMLinkDetails> 
     }
 
     let game_scoped_id = path_segments[1].parse::<u64>()?;
-    let file_id = path_segments[3].parse::<u64>()?;
+    let file_id = path_segments[3].parse::<u32>()?;
 
     let query: Vec<_> = url.query_pairs().collect();
     let key = query

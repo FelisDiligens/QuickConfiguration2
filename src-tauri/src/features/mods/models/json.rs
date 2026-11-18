@@ -41,7 +41,7 @@ pub struct ManagedMod {
     pub options: ModInstallationOptions,
     /// The NexusMods file ID if downloaded using the API
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub nexus_file_id: Option<String>,
+    pub nexus_file_id: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Type)]

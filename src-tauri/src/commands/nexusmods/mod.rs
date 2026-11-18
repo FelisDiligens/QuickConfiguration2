@@ -32,7 +32,7 @@ impl TryFrom<nexusmods::nxm::NXMLinkDetails> for NXMLinkDetails {
         Ok(Self {
             game_domain: value.game_domain,
             game_scoped_id: value.game_scoped_id.try_into()?,
-            file_id: value.file_id.try_into()?,
+            file_id: value.file_id,
             key: value.key,
             expires: value.expires.try_into()?,
             user_id: value.user_id.try_into()?,

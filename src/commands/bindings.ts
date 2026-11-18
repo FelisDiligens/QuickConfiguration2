@@ -582,7 +582,7 @@ options: ModInstallationOptions;
 /**
  * The NexusMods file ID if downloaded using the API
  */
-nexusFileId?: string | null }
+nexusFileId?: number | null }
 /**
  * State of managed mods for the game.
  */
