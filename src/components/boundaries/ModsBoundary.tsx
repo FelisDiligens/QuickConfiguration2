@@ -74,18 +74,18 @@ export function ModsBoundary(props: Props) {
         />
       </PagePathError>
     );
-  } else if (isPending || !hasLoaded || modsPathState === "checking") {
-    return (
-      <PageContainer>
-        <PageTitle>{props.title}</PageTitle>
-        <PageLoadingAlert>{t("common.loading")}</PageLoadingAlert>
-      </PageContainer>
-    );
   } else if (error) {
     return (
       <PageContainer>
         <PageTitle>{props.title}</PageTitle>
         <PageErrorAlert reason={error} />
+      </PageContainer>
+    );
+  } else if (isPending || !hasLoaded || modsPathState === "checking") {
+    return (
+      <PageContainer>
+        <PageTitle>{props.title}</PageTitle>
+        <PageLoadingAlert>{t("common.loading")}</PageLoadingAlert>
       </PageContainer>
     );
   }
