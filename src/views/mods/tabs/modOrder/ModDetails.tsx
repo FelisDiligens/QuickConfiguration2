@@ -14,22 +14,32 @@ import { modsEventBus } from "@/services/mods";
 import { updateModsStore, useModsStore } from "@/stores/mods";
 import { useProfilesStore } from "@/stores/profiles";
 import { useSettingsStore } from "@/stores/settings";
-import { determineLatestModVersion } from "@/utils/nexusmods";
 import { css } from "@emotion/react";
 import {
   faArrowUpRightFromSquare,
+  faDownload,
   faFolder,
   faFolderOpen,
+  faLocationCrosshairs,
   faRotateLeft,
   faThumbsDown,
   faThumbsUp,
+  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { path } from "@tauri-apps/api";
 import * as dialog from "@tauri-apps/plugin-dialog";
 import { open } from "@tauri-apps/plugin-shell";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Button, Card, CardBody, CardHeader, Form } from "react-bootstrap";
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Form,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -232,13 +242,12 @@ function InfoLine(props: {
         padding: 5px 4px;
         align-items: baseline;
         justify-content: space-between;
+        flex-wrap: wrap;
         & > .info-line-text {
           min-width: 0;
-          overflow-wrap: anywhere;
         }
         & > .info-line-action {
           flex-shrink: 0;
-          white-space: nowrap;
         }
       `}
     >
@@ -426,62 +435,119 @@ function Options(props: {
             {t("mods.modOrderTab.detailsPane.nexusmodsGroup")}
           </CardHeader>
           <CardBody>
-            <FlexCol gap="0.5rem">
+            <FlexCol>
+              <InfoLine label={t("mods.modOrderTab.detailsPane.author")}>
+                {props.modinfo?.author}
+              </InfoLine>
               <InfoLine
                 label={t("mods.modOrderTab.detailsPane.latestVersion")}
                 action={
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      props.setMod((mod) => ({
-                        ...mod,
-                        version:
-                          determineLatestModVersion({
-                            modinfo: props.modinfo,
-                            modfile: props.modfile,
-                          }) || mod.version,
-                      }));
-                      e.preventDefault();
-                    }}
-                    role="button"
+                  <OverlayTrigger
+                    placement="left"
+                    overlay={
+                      <Tooltip>
+                        {t("mods.modOrderTab.detailsPane.setLatestVersion")}
+                      </Tooltip>
+                    }
                   >
-                    {t("mods.modOrderTab.detailsPane.setLatestVersion")}
-                  </a>
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      aria-label={t(
+                        "mods.modOrderTab.detailsPane.setLatestVersion",
+                      )}
+                      onClick={() => {
+                        props.setMod((mod) => ({
+                          ...mod,
+                          version: props.modinfo?.version || mod.version,
+                        }));
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faLocationCrosshairs} />
+                    </Button>
+                  </OverlayTrigger>
                 }
               >
-                {determineLatestModVersion({
-                  modinfo: props.modinfo,
-                  modfile: props.modfile,
-                })}
+                {props.modinfo?.version}
               </InfoLine>
-              {props.mod.nexusFileId && (
+              {props.modfile && (
+                <InfoLine
+                  label={t("mods.modOrderTab.detailsPane.latestFileVersion")}
+                  action={
+                    <OverlayTrigger
+                      placement="left"
+                      overlay={
+                        <Tooltip>
+                          {t("mods.modOrderTab.detailsPane.setLatestVersion")}
+                        </Tooltip>
+                      }
+                    >
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        aria-label={t(
+                          "mods.modOrderTab.detailsPane.setLatestVersion",
+                        )}
+                        onClick={() => {
+                          props.setMod((mod) => ({
+                            ...mod,
+                            version:
+                              props.modfile?.latestFile?.version ||
+                              props.modfile?.version ||
+                              mod.version,
+                          }));
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faLocationCrosshairs} />
+                      </Button>
+                    </OverlayTrigger>
+                  }
+                >
+                  {props.modfile?.latestFile?.version || props.modfile?.version}
+                </InfoLine>
+              )}
+              {props.mod.nexusFileId != undefined && (
                 <InfoLine
                   label={t("mods.modOrderTab.detailsPane.fileId")}
                   action={
-                    <a
-                      href="#"
-                      onClick={(e) => {
-                        props.setMod((mod) => ({ ...mod, nexusFileId: null }));
-                        e.preventDefault();
-                      }}
-                      role="button"
+                    <OverlayTrigger
+                      placement="left"
+                      overlay={
+                        <Tooltip>
+                          {t("mods.modOrderTab.detailsPane.untrackFile")}
+                        </Tooltip>
+                      }
                     >
-                      {t("mods.modOrderTab.detailsPane.untrackFile")}
-                    </a>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        aria-label={t(
+                          "mods.modOrderTab.detailsPane.untrackFile",
+                        )}
+                        onClick={() => {
+                          props.setMod((mod) => ({
+                            ...mod,
+                            nexusFileId: null,
+                          }));
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faXmark} />
+                      </Button>
+                    </OverlayTrigger>
                   }
                 >
                   {props.mod.nexusFileId}
                 </InfoLine>
               )}
-              <InfoLine label={t("mods.modOrderTab.detailsPane.author")}>
-                {props.modinfo?.author}
-              </InfoLine>
               <Button
                 variant="secondary"
                 onClick={() =>
                   modsEventBus.emitNexusModsDownloadModInfo(props.mod.key)
                 }
+                css={css`margin-top: 8px;`}
               >
+                <FontAwesomeIcon icon={faDownload} />
+                &nbsp;
                 {t("mods.modOrderTab.detailsPane.downloadModInfo")}
               </Button>
             </FlexCol>

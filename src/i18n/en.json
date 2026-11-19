@@ -651,6 +651,7 @@
         "openModFolder": "Open mod folder",
         "nexusmodsGroup": "NexusMods",
         "latestVersion": "Latest version",
+        "latestFileVersion": "Latest file version",
         "setLatestVersion": "Set latest version",
         "fileId": "File ID",
         "untrackFile": "Untrack",
