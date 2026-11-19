@@ -66,7 +66,11 @@ function SuspendedModsView() {
   const [activeTab, setActiveTab] = useAtom(activeTabAtom);
   return (
     <ModsPageContainer>
-      <Tabs activeKey={activeTab} onSelect={(k) => setActiveTab(k as Tabs)}>
+      <Tabs
+        activeKey={activeTab}
+        onSelect={(k) => setActiveTab(k as Tabs)}
+        transition={false}
+      >
         <Tab
           eventKey="modorder"
           title={

@@ -73,6 +73,7 @@ function SuspendedPipBoyView() {
         <Tabs
           activeKey={activeTab}
           onSelect={(k) => setActiveTab(k as Tabs)}
+          transition={false}
           css={css`
             max-width: 660px;
             margin: 0 auto;
