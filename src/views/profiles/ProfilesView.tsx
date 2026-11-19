@@ -4,10 +4,11 @@ import PageContainer from "@/components/common/PageContainer";
 import PageContent from "@/components/common/PageContent";
 import PageTitle from "@/components/common/PageTitle";
 import { ConfirmModal } from "@/components/modals/ConfirmModal";
-import type { DragendEvent } from "@formkit/drag-and-drop";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
 import * as profilesService from "@/services/profiles";
 import { useProfilesStore } from "@/stores/profiles";
+import { Nullish } from "@/types";
+import type { DragendEvent } from "@formkit/drag-and-drop";
 import {
   faPenToSquare,
   faPlus,
@@ -98,9 +99,7 @@ export default function ProfilesView() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editModalKey, setEditModalKey] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [editedProfile, setEditedProfile] = useState<
-    Profile | undefined | null
-  >(null);
+  const [editedProfile, setEditedProfile] = useState<Nullish<Profile>>(null);
 
   const dndParentRef = useRef<HTMLDivElement | null>(null);
   const {

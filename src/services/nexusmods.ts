@@ -59,7 +59,7 @@ export async function endorse(url: string, modVersion: string) {
     // Update status in store, assuming the API call was successful since it didn't throw an error:
     useNexusModsStore
       .getState()
-      .setEndorseStatus(gameDomain, gameScopedId, "Endorsed");
+      .setEndorseStatus({ gameDomain, gameScopedId }, "Endorsed");
 
     modsEventBus.emitProgressFinished();
   } catch (error) {
@@ -87,7 +87,7 @@ export async function abstain(url: string, modVersion: string) {
     // Update status in store, assuming the API call was successful since it didn't throw an error:
     useNexusModsStore
       .getState()
-      .setEndorseStatus(gameDomain, gameScopedId, "Abstained");
+      .setEndorseStatus({ gameDomain, gameScopedId }, "Abstained");
 
     modsEventBus.emitProgressFinished();
   } catch (error) {
@@ -210,7 +210,7 @@ export async function endorseAll(mods: ManagedMod[]) {
       // Update status in store, assuming the API call was successful since it didn't throw an error:
       useNexusModsStore
         .getState()
-        .setEndorseStatus(gameDomain, gameScopedId, "Endorsed");
+        .setEndorseStatus({ gameDomain, gameScopedId }, "Endorsed");
 
       endorsedCount++;
     }

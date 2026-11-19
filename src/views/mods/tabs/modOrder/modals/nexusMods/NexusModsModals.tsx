@@ -117,7 +117,7 @@ export default function NexusModsModals() {
         );
         continue;
       }
-      const modinfo = getModinfo(gameDomain, gameScopedId);
+      const modinfo = getModinfo({ gameDomain, gameScopedId });
       if (!modinfo) continue;
       if (modinfo.version !== mod.version) {
         outdatedMods.push({

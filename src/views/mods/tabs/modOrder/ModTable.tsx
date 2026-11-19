@@ -32,7 +32,6 @@ import {
   Tooltip,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { createModinfoMap, getModInfoFromMap } from "./utils/getModInfo";
 
 const ModTableRow = memo(function ModTableRow(props: {
   mod: ManagedMod;
@@ -275,7 +274,6 @@ export default function ModTable() {
   );
 
   const { modinfos } = useModinfos();
-  const modinfoById = useMemo(() => createModinfoMap(modinfos), [modinfos]);
   const modStateByKey = useMemo(
     () => new Map(modStates.map((state) => [state.key, state])),
     [modStates],
@@ -555,7 +553,7 @@ export default function ModTable() {
               key={mod.key}
               mod={mod}
               state={modStateByKey.get(mod.key)}
-              modinfo={getModInfoFromMap(mod, modinfoById)}
+              modinfo={modinfos.get(mod)}
               selected={selectedModKey === mod.key}
               focused={mod.key === rovingModKey}
               showNexusModsTitle={showNexusModsTitle}

@@ -1,9 +1,10 @@
+import { Nullish } from "@/types";
 import { platform } from "@tauri-apps/plugin-os";
 import { t } from "i18next";
 import objectInspect from "object-inspect";
 import { CommandError, SerializableCommandResult } from "./bindings";
 
-export type AnyError = CommandError | Error | string | null | undefined;
+export type AnyError = Nullish<CommandError | Error | string>;
 
 /** Returns the "ok" value or throws the "error" value. */
 export function unwrap<T>(result: SerializableCommandResult<T>): T {

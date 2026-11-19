@@ -14,6 +14,7 @@ import { useAsync } from "@/hooks/async";
 import { useModsStore } from "@/stores/mods";
 import { useProfilesStore } from "@/stores/profiles";
 import { pathJoinSync } from "@/utils";
+import { parseNexusModsUrl } from "@/utils/nexusmods";
 import { css } from "@emotion/react";
 import {
   faArrowsRotate,
@@ -37,7 +38,6 @@ import {
   Tab,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { getModIdFromUrl } from "../../utils/getModInfo";
 import FileContents from "./FileContents";
 
 interface Props {
@@ -316,14 +316,21 @@ export default function ModInstallationDetailsModal(props: Props) {
     return tmpPath ? getReadmes(tmpPath, fileContents) : [];
   }, [useProfilesStore, fileContents]);
 
-  const modId = useMemo(() => getModIdFromUrl(mod.url), [mod.url]);
-  const matchingMods = useMemo(
-    () =>
-      modId != undefined
-        ? mods.filter((currMod) => getModIdFromUrl(currMod.url) === modId)
-        : [],
-    [mods, modId],
-  );
+  const parsedModIds = useMemo(() => parseNexusModsUrl(mod.url), [mod.url]);
+  const matchingMods = useMemo(() => {
+    const matchingMods: ManagedMod[] = [];
+    if (parsedModIds == undefined) return matchingMods;
+    for (const mod of mods) {
+      const current = parseNexusModsUrl(mod.url);
+      if (
+        current &&
+        current.gameDomain === parsedModIds.gameDomain &&
+        current.gameScopedId === parsedModIds.gameScopedId
+      )
+        matchingMods.push(mod);
+    }
+    return matchingMods;
+  }, [mods, parsedModIds]);
 
   return (
     <Modal

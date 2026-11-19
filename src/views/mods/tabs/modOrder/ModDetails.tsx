@@ -31,7 +31,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Card, CardBody, CardHeader, Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useDebouncedCallback } from "use-debounce";
-import { getModInfo } from "./utils/getModInfo";
 
 /**
  * Hook for handling mod folder renaming with debouncing and error handling
@@ -498,7 +497,7 @@ export default function ModDetails() {
 
   const mod = mods[selectedModIndex];
   const state = useMemo(() => getModState(mod.key), [mod.key]);
-  const modinfo = getModInfo(mod, modinfos);
+  const modinfo = modinfos.get(mod);
   const modImgSrc = modinfo?.pictureUrl;
 
   return (
@@ -512,7 +511,7 @@ export default function ModDetails() {
       {modImgSrc && <PreviewImage src={modImgSrc} />}
       <StickyHeader
         mod={mod}
-        modinfo={getModInfo(mod, modinfos)}
+        modinfo={modinfo}
         showNexusModsTitle={showNexusModsTitle}
         enableMod={enableMod}
         disableMod={disableMod}

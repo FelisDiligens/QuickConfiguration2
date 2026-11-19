@@ -1,3 +1,4 @@
+import { Nullish } from "@/types";
 import { family } from "@tauri-apps/plugin-os";
 
 /** Wraps `setTimeout` so it can be used like: `await sleep(500);` */
@@ -28,7 +29,7 @@ export function pathStripPrefixSync(basePath: string, path: string): string {
 }
 
 /** If the given value is null or undefined then it returns the defaultValue. */
-export function unwrapOr<T>(value: T | null | undefined, defaultValue: T): T {
+export function unwrapOr<T>(value: Nullish<T>, defaultValue: T): T {
   return value !== null && value !== undefined ? value : defaultValue;
 }
 
