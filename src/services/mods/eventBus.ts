@@ -8,6 +8,7 @@ export type UIActionEvent =
       type: "mods-install-from-file-with-path";
       path: string;
       details: Partial<ManagedMod>;
+      updateModKey?: string;
     }
   | {
       type: "mods-install-from-paths";
@@ -21,6 +22,7 @@ export type UIActionEvent =
   | { type: "mods-import-installed-archives" }
   | { type: "mods-show-conflicting-files" }
   | { type: "nexus-mods-check-for-updates" }
+  | { type: "nexus-mods-update-mod"; key: string }
   | { type: "nexus-mods-download-mods-info" }
   | { type: "nexus-mods-endorse-all-mods" }
   | { type: "nexus-mods-download-mod-info"; key: string }
@@ -122,11 +124,16 @@ export class ModsEventBus {
   }
 
   /* Starts the "install mod from file" flow and skips the file picker dialog. */
-  emitInstallModFromFileWithPath(path: string, details: Partial<ManagedMod>) {
+  emitInstallModFromFileWithPath(
+    path: string,
+    details: Partial<ManagedMod>,
+    updateModKey?: string,
+  ) {
     this.emitUIActionEvent({
       type: "mods-install-from-file-with-path",
       path,
       details,
+      updateModKey,
     });
   }
 
@@ -172,6 +179,11 @@ export class ModsEventBus {
   /* Check installed mods for updates using the NexusMods API. */
   emitNexusModsCheckForUpdates() {
     this.emitUIActionEvent({ type: "nexus-mods-check-for-updates" });
+  }
+
+  /* Update a single installed mod using the NexusMods API (or the browser as fallback). */
+  emitNexusModsUpdateMod(key: string) {
+    this.emitUIActionEvent({ type: "nexus-mods-update-mod", key });
   }
 
   /* Download mod information and preview images for all installed mods using the NexusMods API. */

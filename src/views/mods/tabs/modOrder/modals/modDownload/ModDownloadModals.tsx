@@ -2,20 +2,26 @@ import {
   commands,
   events,
   NexusModsDownloadLink,
-  NXMLinkDetails,
 } from "@/commands/bindings";
 import { AnyError, commandErrorToString } from "@/commands/errors";
 import NexusMods from "@/commands/nexusmods";
 import { modsEventBus } from "@/services/mods";
 import * as nexusmodsApi from "@/services/nexusmods";
 import { nxmLinksQueueService } from "@/services/nxm";
+import { useModsStore } from "@/stores/mods";
 import {
   nexusmodsStoreAccountSync,
   useNexusModsStore,
 } from "@/stores/nexusmods";
 import { useSettingsStore } from "@/stores/settings";
+import { useToastsStore } from "@/stores/toasts";
 import { formatBytes } from "@/utils";
+import {
+  canUserDownloadDirectly,
+  parseNexusModsUrl,
+} from "@/utils/nexusmods";
 import { UnlistenFn } from "@tauri-apps/api/event";
+import { open } from "@tauri-apps/plugin-shell";
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -24,15 +30,21 @@ import ChooseCDNLinkModal from "./ChooseCDNLinkModal";
 
 type ModDetails = Awaited<ReturnType<typeof nexusmodsApi.retrieveModinfo>>;
 
+interface DownloadSource {
+  gameDomain: string;
+  gameScopedId: number;
+  fileId: number;
+  url: string;
+}
+
 export default function ModDownloadModals() {
   const { t } = useTranslation();
   const [isCdnModalShown, setIsCdnModalShown] = useAtom(isCdnModalShownAtom);
   const isAnyModalShown = useAtomValue(isAnyModalShownAtom);
   const [cdnLinks, setCdnLinks] = useState<NexusModsDownloadLink[]>([]);
   const isPendingRef = useRef(false);
-  const nxmDetails = useRef<(NXMLinkDetails & { url: string }) | undefined>(
-    undefined,
-  );
+  const downloadSourceRef = useRef<DownloadSource | undefined>(undefined);
+  const updateModKeyRef = useRef<string | undefined>(undefined);
   const modDetailsRef = useRef<ModDetails | undefined>(undefined);
 
   function showCdnModal(cdnLinks: NexusModsDownloadLink[]) {
@@ -74,13 +86,115 @@ export default function ModDownloadModals() {
       );
 
       const resp = await NexusMods.extractDetailsFromNxmUrl(nxmLink);
-      nxmDetails.current = {
+      downloadSourceRef.current = {
         ...resp,
         url: `https://www.nexusmods.com/${resp.gameDomain}/mods/${resp.gameScopedId}`,
       };
-      const cdnLinks = await NexusMods.api.requestDownloadLinks(
+      updateModKeyRef.current = undefined;
+      const cdnLinks = await NexusMods.api.nxmRequestDownloadLinks(
         apiKey,
         nxmLink,
+      );
+
+      modsEventBus.emitProgressFinished();
+
+      if (!cdnLinks || cdnLinks.length == 0) {
+        throw new Error("Didn't get any CDN links from API");
+      } else if (cdnLinks.length > 1) {
+        showCdnModal(cdnLinks);
+      } else {
+        await downloadMod(cdnLinks[0].uri);
+      }
+    } catch (error) {
+      modsEventBus.emitProgressAborted(error as AnyError);
+      isPendingRef.current = false;
+    }
+  };
+
+  const openFilesPageInBrowser = async (
+    gameDomain: string,
+    gameScopedId: number,
+  ) => {
+    const filesUrl = `https://www.nexusmods.com/${gameDomain}/mods/${gameScopedId}?tab=files`;
+    useToastsStore
+      .getState()
+      .addToast(
+        t("mods.modOrderTab.toasts.openingFilesPage"),
+        filesUrl,
+        "secondary",
+      );
+    await open(filesUrl);
+  };
+
+  const updateMod = async (modKey: string) => {
+    if (isPendingRef.current) return;
+
+    const mod = useModsStore.getState().getMod(modKey);
+    if (!mod) {
+      modsEventBus.emitProgressAborted(
+        new Error(t("mods.modOrderTab.progress.modNotFound")),
+      );
+      return;
+    }
+
+    const parsed = parseNexusModsUrl(mod.url);
+    if (!parsed) {
+      modsEventBus.emitProgressAborted(
+        new Error(`Couldn't extract IDs from URL: '${mod.url}'`),
+      );
+      return;
+    }
+    const { gameDomain, gameScopedId } = parsed;
+
+    const modfile = useNexusModsStore.getState().modfiles.get(mod);
+    const latestFileId = modfile?.latestFile?.fileId;
+
+    let account = useNexusModsStore.getState().getAccountInfo();
+    if (!account) {
+      await nexusmodsStoreAccountSync.load();
+      account = useNexusModsStore.getState().getAccountInfo();
+    }
+
+    if (
+      !account ||
+      !canUserDownloadDirectly(account) ||
+      mod.nexusFileId == null
+    ) {
+      await openFilesPageInBrowser(gameDomain, gameScopedId);
+      return;
+    }
+
+    if (latestFileId == null) {
+      console.log(
+        `Couldn't determine latest file of mod '${mod.title}' (nexusFileId: ${mod.nexusFileId}), opening the files page in the browser instead`,
+      );
+      await openFilesPageInBrowser(gameDomain, gameScopedId);
+      return;
+    }
+
+    if (!(await checkApiKey())) return;
+    isPendingRef.current = true;
+    try {
+      const apiKey = useNexusModsStore.getState().apiKey;
+      if (!apiKey) throw new Error("API key not set");
+
+      modsEventBus.emitProgressUpdated(
+        t("mods.modOrderTab.progress.requestingCdnLinks"),
+      );
+
+      downloadSourceRef.current = {
+        gameDomain,
+        gameScopedId,
+        fileId: latestFileId,
+        url: `https://www.nexusmods.com/${gameDomain}/mods/${gameScopedId}`,
+      };
+      updateModKeyRef.current = mod.key;
+
+      const cdnLinks = await NexusMods.api.requestDownloadLinks(
+        apiKey,
+        gameDomain,
+        String(gameScopedId),
+        latestFileId,
       );
 
       modsEventBus.emitProgressFinished();
@@ -130,10 +244,10 @@ export default function ModDownloadModals() {
       console.log("Downloaded:", downloadedFile);
 
       try {
-        if (nxmDetails.current) {
+        if (downloadSourceRef.current) {
           modDetailsRef.current = await nexusmodsApi.retrieveModinfo(
-            nxmDetails.current.url,
-            nxmDetails.current.fileId,
+            downloadSourceRef.current.url,
+            downloadSourceRef.current.fileId,
           );
         }
       } catch (error) {
@@ -155,14 +269,18 @@ export default function ModDownloadModals() {
   };
 
   const installMod = (downloadedFilePath: string) => {
-    modsEventBus.emitInstallModFromFileWithPath(downloadedFilePath, {
-      title: modDetailsRef.current?.modinfo?.name || undefined,
-      version:
-        modDetailsRef.current?.modfile?.version ||
-        modDetailsRef.current?.modinfo?.version,
-      url: nxmDetails.current?.url,
-      nexusFileId: nxmDetails.current?.fileId,
-    });
+    modsEventBus.emitInstallModFromFileWithPath(
+      downloadedFilePath,
+      {
+        title: modDetailsRef.current?.modinfo?.name || undefined,
+        version:
+          modDetailsRef.current?.modfile?.version ||
+          modDetailsRef.current?.modinfo?.version,
+        url: downloadSourceRef.current?.url,
+        nexusFileId: downloadSourceRef.current?.fileId,
+      },
+      updateModKeyRef.current,
+    );
   };
 
   useEffect(() => {
@@ -178,6 +296,23 @@ export default function ModDownloadModals() {
     }, 1000);
     return () => clearInterval(interval);
   }, [isAnyModalShown]);
+
+  // React to messages:
+  useEffect(
+    () =>
+      modsEventBus.onUIActionEvent((message) => {
+        switch (message.type) {
+          case "nexus-mods-update-mod":
+            updateMod(message.key).catch((reason) => {
+              console.error(reason);
+              modsEventBus.emitProgressAborted(reason as AnyError);
+            });
+            break;
+          // no default
+        }
+      }),
+    [],
+  );
 
   return (
     <>

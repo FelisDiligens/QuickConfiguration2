@@ -1,4 +1,8 @@
-import { NexusModsModFileInfo, NexusModsModInfo } from "@/commands/bindings";
+import {
+  NexusModsAccountInfo,
+  NexusModsModFileInfo,
+  NexusModsModInfo,
+} from "@/commands/bindings";
 
 export * from "./modFiles";
 export * from "./modInfo";
@@ -62,4 +66,8 @@ export function determineLatestModVersion({
   modfile?: NexusModsModFileInfo;
 }) {
   return modfile?.latestFile?.version || modfile?.version || modinfo?.version;
+}
+
+export function canUserDownloadDirectly(user: NexusModsAccountInfo) {
+  return user.profile.membership !== "Basic";
 }

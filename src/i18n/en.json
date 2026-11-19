@@ -614,6 +614,7 @@
           "abstained": "Abstained",
           "undecided": "Undecided",
           "deleteButton": "Delete",
+          "updateButton": "Update",
           "status": {
             "enabled": "Enabled",
             "disabled": "Disabled",
@@ -774,6 +775,8 @@
           "tableHeaderMod": "Mod",
           "tableHeaderCurrentVersion": "Current version",
           "tableHeaderLatestVersion": "Latest version",
+          "tableHeaderActions": "Actions",
+          "updateButton": "Update",
           "allUpToDate": "Every mod is up-to-date."
         },
         "chooseCDNModal": {
@@ -832,7 +835,8 @@
         "archive2AutoPacked": "Created archives",
         "infoRetrieved": "Info retrieved",
         "infoRetrievedWithCount": "Info retrieved, count: {{count}}",
-        "modsEndorsed": "Mods endorsed, count: {{count}}"
+        "modsEndorsed": "Mods endorsed, count: {{count}}",
+        "openingFilesPage": "Opening the files page on NexusMods in your browser"
       }
     },
     "resourceListTab": {

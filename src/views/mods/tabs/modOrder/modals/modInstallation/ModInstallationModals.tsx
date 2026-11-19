@@ -37,12 +37,14 @@ export default function ModInstallationModals() {
             });
             break;
           case "mods-install-from-file-with-path":
-            installFromFileWithPath(message.path, message.details).catch(
-              (reason) => {
-                console.error(reason);
-                modsEventBus.emitProgressAborted(reason as AnyError);
-              },
-            );
+            installFromFileWithPath(
+              message.path,
+              message.details,
+              message.updateModKey,
+            ).catch((reason) => {
+              console.error(reason);
+              modsEventBus.emitProgressAborted(reason as AnyError);
+            });
             break;
           case "mods-install-from-paths":
             installFromPaths(message.paths, message.details).catch((reason) => {

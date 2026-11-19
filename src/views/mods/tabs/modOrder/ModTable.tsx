@@ -14,6 +14,7 @@ import { useSettingsStore } from "@/stores/settings";
 import { determineLatestModVersion } from "@/utils/nexusmods";
 import { css } from "@emotion/react";
 import {
+  faCloudArrowDown,
   faGripVertical,
   faQuestionCircle,
   faSearch,
@@ -47,6 +48,7 @@ const ModTableRow = memo(function ModTableRow(props: {
   onDisable: (modKey: string) => void;
   onSelect: (modKey: string) => void;
   onDelete: (modKey: string) => void;
+  onUpdate: (modKey: string) => void;
   onFocusRow: (modKey: string) => void;
 }) {
   const { t } = useTranslation();
@@ -243,14 +245,26 @@ const ModTableRow = memo(function ModTableRow(props: {
         )}
       </td>
       <td className="center">
-        <Button
-          variant="outline-danger"
-          size="sm"
-          onClick={() => props.onDelete(props.mod.key)}
-        >
-          <FontAwesomeIcon icon={faTrash} />
-          &nbsp;{t("mods.modOrderTab.table.rows.deleteButton")}
-        </Button>
+        <FlexRow gap="8px" css={css`justify-content: flex-end;`}>
+          {isOutdated && (
+            <Button
+              variant="outline-primary"
+              size="sm"
+              onClick={() => props.onUpdate(props.mod.key)}
+            >
+              <FontAwesomeIcon icon={faCloudArrowDown} />
+              &nbsp;{t("mods.modOrderTab.table.rows.updateButton")}
+            </Button>
+          )}
+          <Button
+            variant="outline-danger"
+            size="sm"
+            onClick={() => props.onDelete(props.mod.key)}
+          >
+            <FontAwesomeIcon icon={faTrash} />
+            &nbsp;{t("mods.modOrderTab.table.rows.deleteButton")}
+          </Button>
+        </FlexRow>
       </td>
     </tr>
   );
@@ -342,6 +356,10 @@ export default function ModTable() {
   );
   const handleDeleteMod = useCallback(
     (modKey: string) => modsEventBus.emitDeleteMod(modKey),
+    [],
+  );
+  const handleUpdateMod = useCallback(
+    (modKey: string) => modsEventBus.emitNexusModsUpdateMod(modKey),
     [],
   );
   const handleFocusRow = useCallback(
@@ -568,6 +586,7 @@ export default function ModTable() {
               onDisable={handleDisableMod}
               onSelect={handleSelectMod}
               onDelete={handleDeleteMod}
+              onUpdate={handleUpdateMod}
               onFocusRow={handleFocusRow}
             />
           ))}

@@ -10,6 +10,7 @@ const NexusMods = {
     listModFiles: commands.nexusmodsApiListModFiles,
     getModFile: commands.nexusmodsApiGetModFile,
     requestDownloadLinks: commands.nexusmodsApiRequestDownloadLinks,
+    nxmRequestDownloadLinks: commands.nexusmodsApiNxmRequestDownloadLinks,
   },
   getAccountInfo: commands.nexusmodsGetAccountInfo,
   setAccountInfo: commands.nexusmodsSetAccountInfo,

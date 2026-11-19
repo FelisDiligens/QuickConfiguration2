@@ -100,7 +100,7 @@ pub async fn nexusmods_api_get_mod_file(
 
 #[tauri::command]
 #[specta::specta]
-pub async fn nexusmods_api_request_download_links(
+pub async fn nexusmods_api_nxm_request_download_links(
     api_key: String,
     nxm_link: String,
 ) -> CommandResult<Vec<json::DownloadLink>> {
@@ -118,6 +118,31 @@ pub async fn nexusmods_api_request_download_links(
             Some(nxm_details.key),
             Some(nxm_details.expires),
         )
+        .await
+        .tap_err(|err| log::error!("Failed to call API: {err}"))
+        .map_err(CommandError::from)
+}
+
+/// NOTE: Requires NexusMods premium subscription.
+#[tauri::command]
+#[specta::specta]
+pub async fn nexusmods_api_request_download_links(
+    api_key: String,
+    game_domain: String,
+    game_scoped_id: String, // Cannot pass u64 across boundaries
+    file_id: u32,
+) -> CommandResult<Vec<json::DownloadLink>> {
+    let game_scoped_id = game_scoped_id
+        .parse::<u64>()
+        .tap_err(|err| log::error!("Invalid game_scoped_id {game_scoped_id:?}: {err:?}"))
+        .map_err(CommandError::from)?;
+
+    // Request all CDN download links from the NexusMods API:
+    log::trace!(
+        "Requesting download links from NexusMods API for game domain {game_domain:?}, game-scoped ID {game_scoped_id:?}, file ID {file_id:?}"
+    );
+    NexusModsAPI::new(api_key)
+        .request_download_links(game_domain, game_scoped_id, file_id, None, None)
         .await
         .tap_err(|err| log::error!("Failed to call API: {err}"))
         .map_err(CommandError::from)

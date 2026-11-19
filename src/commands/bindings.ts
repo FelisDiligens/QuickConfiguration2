@@ -165,8 +165,14 @@ async nexusmodsApiListModFiles(apiKey: string, gameDomain: string, gameScopedId:
 async nexusmodsApiGetModFile(apiKey: string, gameDomain: string, gameScopedId: number, fileId: number) : Promise<NexusModsModFileInfo> {
     return await TAURI_INVOKE("nexusmods_api_get_mod_file", { apiKey, gameDomain, gameScopedId, fileId });
 },
-async nexusmodsApiRequestDownloadLinks(apiKey: string, nxmLink: string) : Promise<NexusModsDownloadLink[]> {
-    return await TAURI_INVOKE("nexusmods_api_request_download_links", { apiKey, nxmLink });
+async nexusmodsApiNxmRequestDownloadLinks(apiKey: string, nxmLink: string) : Promise<NexusModsDownloadLink[]> {
+    return await TAURI_INVOKE("nexusmods_api_nxm_request_download_links", { apiKey, nxmLink });
+},
+/**
+ * NOTE: Requires NexusMods premium subscription.
+ */
+async nexusmodsApiRequestDownloadLinks(apiKey: string, gameDomain: string, gameScopedId: string, fileId: number) : Promise<NexusModsDownloadLink[]> {
+    return await TAURI_INVOKE("nexusmods_api_request_download_links", { apiKey, gameDomain, gameScopedId, fileId });
 },
 async nexusmodsGetAccountInfo() : Promise<NexusModsAccountInfo | null> {
     return await TAURI_INVOKE("nexusmods_get_account_info");
@@ -466,7 +472,7 @@ export type Archive2Format = "General" |
  */
 "DDS" | "XBoxDDS" | "GNF"
 export type Archive2Info = { compression: Archive2Compression; format: Archive2Format; numOfFiles: number }
-export type CommandError = { type: "String"; message: string } | { type: "Anyhow"; message: string } | { type: "UnsupportedPlatform"; message: string } | { type: "Io"; message: string } | { type: "PathError"; message: string; variant: string } | { type: "Utf8Error"; message: string } | { type: "SevenzipError"; message: string; variant: string } | { type: "Archive2Error"; message: string; variant: string } | { type: "Archive2ReadError"; message: string; variant: string } | { type: "MutexLock"; message: string } | { type: "TauriError"; message: string } | { type: "TokioError"; message: string } | { type: "RegexError"; message: string } | { type: "DowncastError"; message: string } | { type: "WindowsError"; message: string } | { type: "ReqwestError"; message: string } | { type: "DownloadError"; message: string; variant: string } | { type: "ModActionError"; message: string; variant: string } | { type: "IniParseError"; fileName: string | null; line: number; col: number; msg: string } | { type: "TranslationParseError"; key: string; filePath: string; fileName: string; line: number; column: number; message: string } | { type: "UrlParseError"; message: string }
+export type CommandError = { type: "String"; message: string } | { type: "Anyhow"; message: string } | { type: "UnsupportedPlatform"; message: string } | { type: "Io"; message: string } | { type: "PathError"; message: string; variant: string } | { type: "Utf8Error"; message: string } | { type: "SevenzipError"; message: string; variant: string } | { type: "Archive2Error"; message: string; variant: string } | { type: "Archive2ReadError"; message: string; variant: string } | { type: "ParseIntError"; message: string } | { type: "MutexLock"; message: string } | { type: "TauriError"; message: string } | { type: "TokioError"; message: string } | { type: "RegexError"; message: string } | { type: "DowncastError"; message: string } | { type: "WindowsError"; message: string } | { type: "ReqwestError"; message: string } | { type: "DownloadError"; message: string; variant: string } | { type: "ModActionError"; message: string; variant: string } | { type: "IniParseError"; fileName: string | null; line: number; col: number; msg: string } | { type: "TranslationParseError"; key: string; filePath: string; fileName: string; line: number; column: number; message: string } | { type: "UrlParseError"; message: string }
 export type Conflict = { 
 /**
  * ID (UUID) of the mod that overwrites files of the other mod.

@@ -1,5 +1,8 @@
 import { MessageModal } from "@/components/modals/MessageModal";
-import { Table } from "react-bootstrap";
+import { modsEventBus } from "@/services/mods";
+import { faCloudArrowDown } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Button, Table } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { OutdatedMod } from "./NexusModsModals";
 
@@ -42,6 +45,11 @@ export default function OutdatedModsModal(props: Props) {
                     "mods.modOrderTab.modals.outdatedModsModal.tableHeaderLatestVersion",
                   )}
                 </th>
+                <th>
+                  {t(
+                    "mods.modOrderTab.modals.outdatedModsModal.tableHeaderActions",
+                  )}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -50,6 +58,22 @@ export default function OutdatedModsModal(props: Props) {
                   <td>{mod.title}</td>
                   <td>{mod.currentVersion}</td>
                   <td>{mod.latestVersion}</td>
+                  <td>
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      onClick={() => {
+                        props.onHide();
+                        modsEventBus.emitNexusModsUpdateMod(mod.key);
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faCloudArrowDown} />
+                      &nbsp;
+                      {t(
+                        "mods.modOrderTab.modals.outdatedModsModal.updateButton",
+                      )}
+                    </Button>
+                  </td>
                 </tr>
               ))}
             </tbody>

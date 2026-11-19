@@ -1,4 +1,7 @@
-use std::{num::TryFromIntError, path::StripPrefixError};
+use std::{
+    num::{ParseIntError, TryFromIntError},
+    path::StripPrefixError,
+};
 
 use serde::Serialize;
 use specta::Type;
@@ -51,6 +54,8 @@ pub enum CommandError {
     Archive2Error { message: String, variant: String },
     #[error("{message}")]
     Archive2ReadError { message: String, variant: String },
+    #[error("{message}")]
+    ParseIntError { message: String },
     #[error("{message}")]
     MutexLock { message: String },
     #[error("{message}")]
@@ -129,6 +134,7 @@ impl_from_for_error!(std::io::Error, Io);
 impl_from_for_error!(tauri::Error, TauriError);
 impl_from_for_error!(tokio::task::JoinError, TokioError);
 impl_from_for_error!(regex::Error, RegexError);
+impl_from_for_error!(ParseIntError, ParseIntError);
 impl_from_for_error!(TryFromIntError, DowncastError);
 impl_from_for_error_with_variant!(Archive2Error, Archive2Error);
 impl_from_for_error_with_variant!(Archive2ReadError, Archive2ReadError);

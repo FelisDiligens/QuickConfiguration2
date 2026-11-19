@@ -13,6 +13,7 @@ import { isModInstallationDetailsModalShownAtom } from "@/views/mods/tabs/modOrd
 
 const fileContentsAtom = atom<DirEntry[]>([]);
 const modAtom = atom<ManagedMod>(createBaseManagedMod());
+const updateModKeyAtom = atom<string | undefined>(undefined);
 
 export function useModInstallation() {
   const { t } = useTranslation();
@@ -22,6 +23,7 @@ export function useModInstallation() {
   );
   const [fileContents, setFileContents] = useAtom(fileContentsAtom);
   const [mod, setMod] = useAtom(modAtom);
+  const [updateModKey, setUpdateModKey] = useAtom(updateModKeyAtom);
 
   const openInstallModal = (
     modDetails: ManagedMod,
@@ -54,6 +56,7 @@ export function useModInstallation() {
   const installFromFileWithPath = async (
     filePath: string,
     partialModDetails: Partial<ManagedMod>,
+    updateModKey?: string,
   ) => {
     try {
       const modsPath = useProfilesStore.getState().getModsPath();
@@ -80,6 +83,8 @@ export function useModInstallation() {
       const rootFolder =
         await Mods.actions.tempFolder.detectRootFolder(tmpPath);
       modDetails.options.rootFolder = rootFolder;
+
+      setUpdateModKey(updateModKey);
 
       modsEventBus.emitProgressFinished();
 
@@ -264,6 +269,7 @@ export function useModInstallation() {
       onAbort: abortInstallation,
       mod,
       show: showModal,
+      updateModKey,
       fileContents,
     },
   };
