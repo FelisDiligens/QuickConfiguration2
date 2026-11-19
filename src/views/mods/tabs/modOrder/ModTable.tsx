@@ -10,7 +10,10 @@ import { useDragAndDrop } from "@/hooks/useDragAndDrop";
 import { modsEventBus } from "@/services/mods";
 import { useModsStore } from "@/stores/mods";
 import { useSettingsStore } from "@/stores/settings";
-import { determineLatestModVersion } from "@/utils/nexusmods";
+import {
+  determineLatestModVersion,
+  isModInstallOutdated,
+} from "@/utils/nexusmods";
 import { css } from "@emotion/react";
 import {
   faCloudArrowDown,
@@ -61,7 +64,11 @@ const ModTableRow = memo(function ModTableRow(props: {
     modinfo: props.modinfo,
     modfile: props.modfile,
   });
-  const isOutdated = !!latestVersion && props.mod.version !== latestVersion;
+  const isOutdated = isModInstallOutdated({
+    mod: props.mod,
+    modinfo: props.modinfo,
+    modfile: props.modfile,
+  });
   let needsDeployment = false;
   let status = t("mods.modOrderTab.table.rows.status.enabled");
   if (props.mod.enabled && props.state) {

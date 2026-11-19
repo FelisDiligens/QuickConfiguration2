@@ -26,6 +26,7 @@ export interface OutdatedMod {
 export default function NexusModsModals() {
   const { t } = useTranslation();
   const getLatestVersion = useNexusModsStore((store) => store.getLatestVersion);
+  const isModOutdated = useNexusModsStore((store) => store.isModOutdated);
   const getMod = useModsStore((store) => store.getMod);
 
   const [showOutdatedModal, setShowOutdatedModal] = useAtom(
@@ -122,8 +123,7 @@ export default function NexusModsModals() {
         gameScopedId,
         fileId: mod.nexusFileId,
       });
-      if (!latestVersion) continue;
-      if (latestVersion !== mod.version) {
+      if (isModOutdated(mod) && latestVersion != undefined) {
         outdatedMods.push({
           key: mod.key,
           title: mod.title,

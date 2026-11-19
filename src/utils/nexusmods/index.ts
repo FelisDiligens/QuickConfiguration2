@@ -1,4 +1,5 @@
 import {
+  ManagedMod,
   NexusModsAccountInfo,
   NexusModsModFileInfo,
   NexusModsModInfo,
@@ -58,6 +59,7 @@ export function parseNexusModsUrl(url: string): NexusModsModIds | undefined {
   return { gameDomain, gameScopedId };
 }
 
+/** Prefers mod file version over the overall mod version. */
 export function determineLatestModVersion({
   modinfo,
   modfile,
@@ -66,6 +68,30 @@ export function determineLatestModVersion({
   modfile?: NexusModsModFileInfo;
 }) {
   return modfile?.latestFile?.version || modfile?.version || modinfo?.version;
+}
+
+export function isModInstallOutdated({
+  mod,
+  modinfo,
+  modfile,
+}: {
+  mod: ManagedMod;
+  modinfo?: NexusModsModInfo;
+  modfile?: NexusModsModFileInfo;
+}) {
+  if (
+    mod.nexusFileId != undefined &&
+    modfile?.fileId === mod.nexusFileId &&
+    modfile.latestFile?.fileId != undefined &&
+    modfile.fileId !== modfile.latestFile.fileId
+  ) {
+    return true;
+  }
+  if (!mod.version || mod.version.trim() === "") {
+    return false;
+  }
+  const latestVersion = determineLatestModVersion({ modinfo, modfile });
+  return latestVersion != undefined && mod.version !== latestVersion;
 }
 
 export function canUserDownloadDirectly(user: NexusModsAccountInfo) {

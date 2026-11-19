@@ -1,4 +1,5 @@
 import {
+  ManagedMod,
   NexusModsAccountInfo,
   NexusModsEndorseStatus,
   NexusModsModFileInfo,
@@ -11,10 +12,12 @@ import NexusMods from "@/commands/nexusmods";
 import { Nullish } from "@/types";
 import {
   determineLatestModVersion,
+  isModInstallOutdated,
   ModFilesMap,
   ModInfoMap,
   NexusModsModFileIds,
   NexusModsModIds,
+  parseNexusModsUrl,
 } from "@/utils/nexusmods";
 import { syncStore } from "@/utils/zustand";
 import fastDeepEqual from "fast-deep-equal/es6";
@@ -50,6 +53,7 @@ export interface NexusModsStore {
     gameScopedId: number;
     fileId?: Nullish<number>;
   }) => string | undefined;
+  isModOutdated: (mod: ManagedMod) => boolean;
 }
 
 export const useNexusModsStore = create<NexusModsStore>()((set, get) => ({
@@ -104,8 +108,21 @@ export const useNexusModsStore = create<NexusModsStore>()((set, get) => ({
     return determineLatestModVersion({
       modinfo: get().getModinfo(ids),
       modfile:
-        "fileId" in ids && ids.fileId
+        "fileId" in ids && ids.fileId != undefined
           ? get().getModfile(ids as NexusModsModFileIds)
+          : undefined,
+    });
+  },
+  isModOutdated: (mod) => {
+    if (!mod.url || mod.url.trim() === "") return false;
+    const ids = parseNexusModsUrl(mod.url);
+    if (!ids) return false;
+    return isModInstallOutdated({
+      mod,
+      modinfo: get().getModinfo(ids),
+      modfile:
+        mod.nexusFileId != undefined
+          ? get().getModfile({ ...ids, fileId: mod.nexusFileId })
           : undefined,
     });
   },
