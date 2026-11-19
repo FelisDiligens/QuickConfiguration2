@@ -1,6 +1,4 @@
-import ComboRow from "@/components/common/ComboRow";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import SwitchRow from "@/components/common/SwitchRow";
+import { ComboRow, PreferencesGroup, SwitchRow } from "@/components/common";
 import useAskOpenPerkCardPacks from "@/hooks/tweaks/general/useAskOpenPerkCardPacks";
 import useQuickHealStimpakPriority, {
   QuickHealStimpakPriority,

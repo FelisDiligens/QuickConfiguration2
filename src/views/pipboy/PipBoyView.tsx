@@ -7,13 +7,15 @@ import {
   QuickBoyPreviewScreen,
 } from "@/assets/img";
 import { IniBoundary } from "@/components/boundaries";
-import ButtonRow from "@/components/common/ButtonRow";
-import PageContainer from "@/components/common/PageContainer";
-import PageContent from "@/components/common/PageContent";
-import PageTitle from "@/components/common/PageTitle";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import RadioRow from "@/components/common/RadioRow";
-import RadioRowGroup from "@/components/common/RadioRowGroup";
+import {
+  ButtonRow,
+  PageContainer,
+  PageContent,
+  PageTitle,
+  PreferencesGroup,
+  RadioRow,
+  RadioRowGroup,
+} from "@/components/common";
 import {
   usePipBoyColor,
   usePowerArmorColor,

@@ -6,11 +6,13 @@ import { useSyncLoadState } from "@/utils/zustand";
 import { useEffect } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { PageErrorAlert } from "../common/ErrorAlert";
-import { PageLoadingAlert } from "../common/LoadingAlert";
-import PageContainer from "../common/PageContainer";
-import PagePathError from "../common/PagePathError";
-import PageTitle from "../common/PageTitle";
+import {
+  PageContainer,
+  PageErrorAlert,
+  PageLoadingAlert,
+  PagePathError,
+  PageTitle,
+} from "@/components/common";
 
 interface Props {
   title: string;

@@ -1,10 +1,15 @@
 import { Steam24Icon, Xbox24Icon } from "@/assets/img";
 import { GameEdition, Profile, commands } from "@/commands/bindings";
-import CodeSpan from "@/components/common/CodeSpan";
-import PathEntryRow from "@/components/common/PathEntryRow";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import RadioRow from "@/components/common/RadioRow";
-import RadioRowGroup from "@/components/common/RadioRowGroup";
+import {
+  CodeSpan,
+  FlexCol,
+  FlexRow,
+  LoadingAlert,
+  PathEntryRow,
+  PreferencesGroup,
+  RadioRow,
+  RadioRowGroup,
+} from "@/components/common";
 import { AppTheme } from "@/components/MyThemeProvider";
 import { useAsync } from "@/hooks/async";
 import * as profilesService from "@/services/profiles";
@@ -19,8 +24,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { FlexCol, FlexRow } from "../common/Flex";
-import LoadingAlert from "../common/LoadingAlert";
 import SelectDetectedGamePathModal from "./SelectDetectedGamePathModal";
 
 function VaultTecRepQuote() {

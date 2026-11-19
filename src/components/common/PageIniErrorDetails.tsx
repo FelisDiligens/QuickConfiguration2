@@ -4,19 +4,21 @@ import {
   commandErrorIsType,
   commandErrorToString,
 } from "@/commands/errors";
-import CodeError from "@/components/common/CodeError";
-import { PageErrorAlert } from "@/components/common/ErrorAlert";
-import PageContainer from "@/components/common/PageContainer";
-import PageContent from "@/components/common/PageContent";
-import PageTitle from "@/components/common/PageTitle";
+import {
+  ButtonRow,
+  CodeError,
+  PageContainer,
+  PageContent,
+  PageErrorAlert,
+  PageTitle,
+  PreferencesGroup,
+} from "@/components/common";
 import { useProfilesStore } from "@/stores/profiles";
 import { faFileCirclePlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as dialog from "@tauri-apps/plugin-dialog";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import ButtonRow from "./ButtonRow";
-import PreferencesGroup from "./PreferencesGroup";
 
 interface Props {
   pageTitle: string;

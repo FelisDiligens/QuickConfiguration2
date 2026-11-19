@@ -1,5 +1,5 @@
 import { commands } from "@/commands/bindings";
-import PathEntryRow from "@/components/common/PathEntryRow";
+import { PathEntryRow } from "@/components/common";
 import { useProfilesStore } from "@/stores/profiles";
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";

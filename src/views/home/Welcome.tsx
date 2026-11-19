@@ -6,8 +6,7 @@ import {
   NukesDragons16Icon,
   XTranslator16Icon,
 } from "@/assets/img";
-import { FlexCol, FlexRow } from "@/components/common/Flex";
-import Spacer from "@/components/common/Spacer";
+import { FlexCol, FlexRow, Spacer } from "@/components/common";
 import { AppTheme } from "@/components/MyThemeProvider";
 import { info, urls } from "@/info";
 import { useTranslationsStore } from "@/lib/i18n/store";

@@ -1,18 +1,21 @@
 import { commands, Theme } from "@/commands/bindings";
 import { AnyError, commandErrorToString } from "@/commands/errors";
-import AccordionRow from "@/components/common/AccordionRow";
-import ButtonRow from "@/components/common/ButtonRow";
-import ComboRow from "@/components/common/ComboRow";
-import { PageErrorAlert } from "@/components/common/ErrorAlert";
-import { FlexCol, FlexRow } from "@/components/common/Flex";
-import InfoRow from "@/components/common/InfoRow";
-import PageAlert from "@/components/common/PageAlert";
-import PageContainer from "@/components/common/PageContainer";
-import PageTitle from "@/components/common/PageTitle";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import RadioRow from "@/components/common/RadioRow";
-import RadioRowGroup from "@/components/common/RadioRowGroup";
-import SwitchRow from "@/components/common/SwitchRow";
+import {
+  AccordionRow,
+  ButtonRow,
+  ComboRow,
+  FlexCol,
+  FlexRow,
+  InfoRow,
+  PageAlert,
+  PageContainer,
+  PageErrorAlert,
+  PageTitle,
+  PreferencesGroup,
+  RadioRow,
+  RadioRowGroup,
+  SwitchRow,
+} from "@/components/common";
 import { useTranslationUpdateState } from "@/hooks/translations";
 import { useUpdateCheckState } from "@/hooks/updater";
 import { useTranslationsStore } from "@/lib/i18n/store";

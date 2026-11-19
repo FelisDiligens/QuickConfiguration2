@@ -1,8 +1,11 @@
 import { Profile } from "@/commands/bindings";
-import { FlexCol, FlexRow } from "@/components/common/Flex";
-import PageContainer from "@/components/common/PageContainer";
-import PageContent from "@/components/common/PageContent";
-import PageTitle from "@/components/common/PageTitle";
+import {
+  FlexCol,
+  FlexRow,
+  PageContainer,
+  PageContent,
+  PageTitle,
+} from "@/components/common";
 import { ConfirmModal } from "@/components/modals/ConfirmModal";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
 import * as profilesService from "@/services/profiles";

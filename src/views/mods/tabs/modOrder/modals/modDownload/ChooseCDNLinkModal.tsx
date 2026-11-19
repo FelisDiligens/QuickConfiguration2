@@ -1,6 +1,5 @@
 import { NexusModsDownloadLink } from "@/commands/bindings";
-import ActionRow from "@/components/common/ActionRow";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
+import { ActionRow, PreferencesGroup } from "@/components/common";
 import { Button, Modal } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 

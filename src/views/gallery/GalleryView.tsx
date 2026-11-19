@@ -1,11 +1,14 @@
 import { commands, Screenshot } from "@/commands/bindings";
 import { commandErrorToString } from "@/commands/errors";
-import { PageErrorAlert } from "@/components/common/ErrorAlert";
-import { Flex } from "@/components/common/Flex";
-import { PageLoadingAlert } from "@/components/common/LoadingAlert";
-import PageAlert from "@/components/common/PageAlert";
-import PageContainer from "@/components/common/PageContainer";
-import PageTitle, { Title } from "@/components/common/PageTitle";
+import {
+  Flex,
+  PageAlert,
+  PageContainer,
+  PageErrorAlert,
+  PageLoadingAlert,
+  PageTitle,
+  Title,
+} from "@/components/common";
 import { ConfirmModal } from "@/components/modals/ConfirmModal";
 import { useAsync } from "@/hooks/async";
 import { useProfilesStore } from "@/stores/profiles";

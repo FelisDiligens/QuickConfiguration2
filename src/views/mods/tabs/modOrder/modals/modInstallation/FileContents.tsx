@@ -1,5 +1,5 @@
 import { DirEntry } from "@/commands/bindings";
-import { FlexRow } from "@/components/common/Flex";
+import { FlexRow } from "@/components/common";
 import { clamp } from "@/utils/math";
 import { css } from "@emotion/react";
 import {

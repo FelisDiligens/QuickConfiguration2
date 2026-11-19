@@ -1,5 +1,4 @@
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import SwitchRow from "@/components/common/SwitchRow";
+import { PreferencesGroup, SwitchRow } from "@/components/common";
 import useFasterFadeIn from "@/hooks/tweaks/general/useFasterFadeIn";
 import usePlayIntroVideo from "@/hooks/tweaks/general/usePlayIntroVideo";
 import useSkipStartupSplash from "@/hooks/tweaks/general/useSkipStartupSplash";

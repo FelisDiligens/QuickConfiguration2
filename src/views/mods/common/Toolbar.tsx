@@ -1,4 +1,4 @@
-import { FlexCol } from "@/components/common/Flex";
+import { FlexCol } from "@/components/common";
 import { AppTheme } from "@/components/MyThemeProvider";
 import { css, useTheme as useEmotionTheme } from "@emotion/react";
 import { IconDefinition } from "@fortawesome/free-solid-svg-icons";

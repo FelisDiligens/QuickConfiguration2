@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import PageContainer from "@/components/common/PageContainer";
+import { PageContainer } from "@/components/common";
 import Hero from "./Hero";
 import Welcome from "./Welcome";
 import WhatsNew from "./WhatsNew";

@@ -4,8 +4,7 @@ import {
   NexusModsModFileInfo,
   NexusModsModInfo,
 } from "@/commands/bindings";
-import Entry from "@/components/common/Entry";
-import { FlexCol, FlexRow } from "@/components/common/Flex";
+import { Entry, FlexCol, FlexRow } from "@/components/common";
 import useModinfos from "@/hooks/nexusmods/useModinfos";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
 import { modsEventBus } from "@/services/mods";

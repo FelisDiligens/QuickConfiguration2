@@ -4,9 +4,7 @@ import { css } from "@emotion/react";
 import { useState } from "react";
 import { Alert, Button, Modal } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { ErrorAlert } from "../common/ErrorAlert";
-import LoadingAlert from "../common/LoadingAlert";
-import Select from "../common/Select";
+import { ErrorAlert, LoadingAlert, Select } from "@/components/common";
 
 interface Props {
   show: boolean;

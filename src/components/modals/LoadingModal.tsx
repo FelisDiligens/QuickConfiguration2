@@ -1,4 +1,4 @@
-import { FlexCol, FlexRow } from "@/components/common/Flex";
+import { FlexCol, FlexRow } from "@/components/common";
 import { css } from "@emotion/react";
 import { Button, Modal, ProgressBar, Spinner } from "react-bootstrap";
 import { useTranslation } from "react-i18next";

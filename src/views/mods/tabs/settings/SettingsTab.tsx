@@ -6,13 +6,15 @@ import {
 } from "@/commands/bindings";
 import { AnyError, commandErrorToString } from "@/commands/errors";
 import Mods from "@/commands/mods";
-import ComboRow from "@/components/common/ComboRow";
-import PageAlert from "@/components/common/PageAlert";
-import PathEntryRow from "@/components/common/PathEntryRow";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import RadioRow from "@/components/common/RadioRow";
-import RadioRowGroup from "@/components/common/RadioRowGroup";
-import SwitchRow from "@/components/common/SwitchRow";
+import {
+  ComboRow,
+  PageAlert,
+  PathEntryRow,
+  PreferencesGroup,
+  RadioRow,
+  RadioRowGroup,
+  SwitchRow,
+} from "@/components/common";
 import { useNxmRegistration } from "@/hooks/nxm";
 import { useProfilesStore } from "@/stores/profiles";
 import {

@@ -1,10 +1,10 @@
-import ComboRow from "@/components/common/ComboRow";
 import {
+  ComboRow,
   InfoOverlayTrigger,
+  PreferencesGroup,
+  SwitchRow,
   useOverlayContainerRef,
-} from "@/components/common/InfoOverlayTrigger";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import SwitchRow from "@/components/common/SwitchRow";
+} from "@/components/common";
 import useFixHUD4to3Ratio from "@/hooks/tweaks/interface/useFixHUD4to3Ratio";
 import useDisplayMode, {
   DisplayMode,

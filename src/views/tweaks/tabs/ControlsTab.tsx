@@ -1,7 +1,9 @@
-import { useOverlayContainerRef } from "@/components/common/InfoOverlayTrigger";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import SliderRow from "@/components/common/SliderRow";
-import SwitchRow from "@/components/common/SwitchRow";
+import {
+  PreferencesGroup,
+  SliderRow,
+  SwitchRow,
+  useOverlayContainerRef,
+} from "@/components/common";
 import useAimAssist from "@/hooks/tweaks/controls/useAimAssist";
 import useGamepadEnable from "@/hooks/tweaks/controls/useGamepadEnable";
 import useGamepadRumble from "@/hooks/tweaks/controls/useGamepadRumble";

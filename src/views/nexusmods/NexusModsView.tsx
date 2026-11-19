@@ -1,13 +1,14 @@
 import { NexusModsAccountInfo } from "@/commands/bindings";
-import ButtonRow from "@/components/common/ButtonRow";
-import EntryRow from "@/components/common/EntryRow";
-import { PageErrorAlert } from "@/components/common/ErrorAlert";
-import LoadingAlert, {
+import {
+  ButtonRow,
+  EntryRow,
+  LoadingAlert,
+  PageContainer,
+  PageErrorAlert,
   PageLoadingAlert,
-} from "@/components/common/LoadingAlert";
-import PageContainer from "@/components/common/PageContainer";
-import PageTitle from "@/components/common/PageTitle";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
+  PageTitle,
+  PreferencesGroup,
+} from "@/components/common";
 import useAccountInfo from "@/hooks/nexusmods/useAccountInfo";
 import useSsoLogin from "@/hooks/nexusmods/useSsoLogin";
 import { urls } from "@/info";

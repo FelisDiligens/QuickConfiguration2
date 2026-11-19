@@ -1,10 +1,12 @@
 import { ModsMigrationState } from "@/commands/bindings";
-import ButtonRow from "@/components/common/ButtonRow";
-import { PageErrorAlert } from "@/components/common/ErrorAlert";
-import PageAlert from "@/components/common/PageAlert";
-import PageContainer from "@/components/common/PageContainer";
-import PageTitle from "@/components/common/PageTitle";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
+import {
+  ButtonRow,
+  PageAlert,
+  PageContainer,
+  PageErrorAlert,
+  PageTitle,
+  PreferencesGroup,
+} from "@/components/common";
 import { ConfirmModal } from "@/components/modals/ConfirmModal";
 import LoadingModal from "@/components/modals/LoadingModal";
 import { AppTheme } from "@/components/MyThemeProvider";

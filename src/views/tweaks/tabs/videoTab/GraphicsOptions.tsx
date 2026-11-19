@@ -1,11 +1,11 @@
-import ComboRow from "@/components/common/ComboRow";
 import {
+  ComboRow,
   InfoOverlayTrigger,
+  PreferencesGroup,
+  SliderRow,
+  SwitchRow,
   useOverlayContainerRef,
-} from "@/components/common/InfoOverlayTrigger";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import SliderRow from "@/components/common/SliderRow";
-import SwitchRow from "@/components/common/SwitchRow";
+} from "@/components/common";
 import useAntiAliasing, {
   AntiAliasing,
 } from "@/hooks/tweaks/graphics/antialiasing/useAntiAliasing";

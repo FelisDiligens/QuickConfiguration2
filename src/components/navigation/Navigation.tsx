@@ -1,7 +1,7 @@
 import { Nexus24Icon, PipBoy24Icon } from "@/assets/img";
 import { commands } from "@/commands/bindings";
 import { commandErrorToString } from "@/commands/errors";
-import NavSpacer from "@/components/common/Spacer";
+import { Spacer as NavSpacer } from "@/components/common";
 import { useProfilesStore } from "@/stores/profiles";
 import { useSettingsStore } from "@/stores/settings";
 import { css } from "@emotion/react";

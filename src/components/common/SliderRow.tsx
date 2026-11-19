@@ -1,9 +1,7 @@
 import { css } from "@emotion/react";
 import _ from "lodash";
 import { Form } from "react-bootstrap";
-import ActionRow from "./ActionRow";
-import { FlexCol } from "./Flex";
-import Slider from "./Slider";
+import { ActionRow, FlexCol, Slider } from "@/components/common";
 
 interface Props {
   title: string;

@@ -1,9 +1,11 @@
 import { commandErrorToString } from "@/commands/errors";
 import Mods from "@/commands/mods";
-import { PageLoadingAlert } from "@/components/common/LoadingAlert";
-import PageContainer from "@/components/common/PageContainer";
-import PagePathError from "@/components/common/PagePathError";
-import PageTitle from "@/components/common/PageTitle";
+import {
+  PageContainer,
+  PageLoadingAlert,
+  PagePathError,
+  PageTitle,
+} from "@/components/common";
 import { useAsync } from "@/hooks/async";
 import useGamePathCheck from "@/hooks/useGamePathCheck";
 import usePathCheck from "@/hooks/usePathCheck";

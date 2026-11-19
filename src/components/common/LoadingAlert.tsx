@@ -3,7 +3,7 @@ import * as React from "react";
 import { Alert, Spinner } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { AppTheme } from "../MyThemeProvider";
-import { FlexCol, FlexRow } from "./Flex";
+import { FlexCol, FlexRow } from "@/components/common";
 
 interface Props {
   children: React.ReactNode;

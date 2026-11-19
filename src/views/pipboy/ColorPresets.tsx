@@ -1,4 +1,4 @@
-import PreferencesGroup from "@/components/common/PreferencesGroup";
+import { PreferencesGroup } from "@/components/common";
 import { useRef } from "react";
 import { ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";

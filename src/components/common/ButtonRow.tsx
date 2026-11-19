@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import * as React from "react";
 import { ListGroup } from "react-bootstrap";
-import { FlexCol, FlexRow } from "./Flex";
+import { FlexCol, FlexRow } from "@/components/common";
 
 interface Props {
   children?: React.ReactNode;

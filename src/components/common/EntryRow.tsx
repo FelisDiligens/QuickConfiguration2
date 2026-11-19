@@ -3,9 +3,7 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useMemo, useState } from "react";
 import { Button } from "react-bootstrap";
-import ActionRow from "./ActionRow";
-import Entry from "./Entry";
-import { FlexCol } from "./Flex";
+import { ActionRow, Entry, FlexCol } from "@/components/common";
 
 interface Props {
   title?: string;

@@ -1,5 +1,4 @@
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import SwitchRow from "@/components/common/SwitchRow";
+import { PreferencesGroup, SwitchRow } from "@/components/common";
 import useAskScrapFavorite from "@/hooks/tweaks/interface/useAskScrapFavorite";
 import useAskScrapLegendary from "@/hooks/tweaks/interface/useAskScrapLegendary";
 import useAskScrapPremium from "@/hooks/tweaks/interface/useAskScrapPremium";

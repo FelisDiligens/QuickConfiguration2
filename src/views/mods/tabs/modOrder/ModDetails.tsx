@@ -7,8 +7,7 @@ import {
 } from "@/commands/bindings";
 import { AnyError, commandErrorToString } from "@/commands/errors";
 import Mods from "@/commands/mods";
-import Entry from "@/components/common/Entry";
-import { FlexCol, FlexRow } from "@/components/common/Flex";
+import { Entry, FlexCol, FlexRow } from "@/components/common";
 import { useLazyAsync } from "@/hooks/async";
 import useModinfos from "@/hooks/nexusmods/useModinfos";
 import { modsEventBus } from "@/services/mods";

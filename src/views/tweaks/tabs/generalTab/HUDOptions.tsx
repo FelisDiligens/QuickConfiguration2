@@ -1,7 +1,9 @@
-import ComboRow from "@/components/common/ComboRow";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import SliderRow from "@/components/common/SliderRow";
-import SwitchRow from "@/components/common/SwitchRow";
+import {
+  ComboRow,
+  PreferencesGroup,
+  SliderRow,
+  SwitchRow,
+} from "@/components/common";
 import useActiveEffectsOnHUD, {
   ActiveEffectsOnHUD,
 } from "@/hooks/tweaks/interface/useActiveEffectsOnHUD";

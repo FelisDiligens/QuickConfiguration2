@@ -1,5 +1,5 @@
 import { commands } from "@/commands/bindings";
-import PathEntryRow from "@/components/common/PathEntryRow";
+import { PathEntryRow } from "@/components/common";
 import { useProfilesStore } from "@/stores/profiles";
 import * as path from "@tauri-apps/api/path";
 import { useEffect, useState } from "react";

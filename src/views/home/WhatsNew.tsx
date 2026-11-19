@@ -1,4 +1,4 @@
-import { FlexCol } from "@/components/common/Flex";
+import { FlexCol } from "@/components/common";
 import { urls } from "@/info";
 import { css } from "@emotion/react";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";

@@ -1,8 +1,10 @@
-import ColorPickerRow from "@/components/common/ColorPickerRow";
-import ComboRow from "@/components/common/ComboRow";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import SliderRow from "@/components/common/SliderRow";
-import SwitchRow from "@/components/common/SwitchRow";
+import {
+  ColorPickerRow,
+  ComboRow,
+  PreferencesGroup,
+  SliderRow,
+  SwitchRow,
+} from "@/components/common";
 import useAlternativeNodeViewBackgroundColor from "@/hooks/tweaks/accessibility/useAlternativeNoteViewBackgroundColor";
 import useAlternativeNoteViewLargeText from "@/hooks/tweaks/accessibility/useAlternativeNoteViewLargeText";
 import useAlternativeNodeViewTextColor from "@/hooks/tweaks/accessibility/useAlternativeNoteViewTextColor";

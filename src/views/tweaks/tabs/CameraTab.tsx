@@ -4,9 +4,7 @@ import {
   FovViewmodel80,
   FovViewmodelImages,
 } from "@/assets/img";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import SliderRow from "@/components/common/SliderRow";
-import SwitchRow from "@/components/common/SwitchRow";
+import { PreferencesGroup, SliderRow, SwitchRow } from "@/components/common";
 import { AppTheme } from "@/components/MyThemeProvider";
 import useFieldOfView from "@/hooks/tweaks/camera/fov/useFieldOfView";
 import useViewmodelFOV from "@/hooks/tweaks/camera/fov/useViewmodelFOV";

@@ -1,5 +1,4 @@
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import SwitchRow from "@/components/common/SwitchRow";
+import { PreferencesGroup, SwitchRow } from "@/components/common";
 import useAutoTrackQuestWhenStarted from "@/hooks/tweaks/interface/useAutoTrackQuestWhenStarted";
 import useEnableQuestTrackNotification from "@/hooks/tweaks/interface/useEnableQuestTrackNotification";
 import { useTranslation } from "react-i18next";

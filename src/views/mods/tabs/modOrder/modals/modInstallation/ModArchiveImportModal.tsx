@@ -1,5 +1,4 @@
-import EntryRow from "@/components/common/EntryRow";
-import { FlexCol, FlexRow } from "@/components/common/Flex";
+import { EntryRow, FlexCol, FlexRow } from "@/components/common";
 import { css } from "@emotion/react";
 import { faFileZipper } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

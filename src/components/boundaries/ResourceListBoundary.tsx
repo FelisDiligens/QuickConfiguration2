@@ -2,11 +2,13 @@ import { resourceListStoreSync } from "@/stores/resourceList";
 import { useSyncLoadState } from "@/utils/zustand";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { PageErrorAlert } from "../common/ErrorAlert";
-import { PageLoadingAlert } from "../common/LoadingAlert";
-import PageAlert from "../common/PageAlert";
-import PageContainer from "../common/PageContainer";
-import PageTitle from "../common/PageTitle";
+import {
+  PageAlert,
+  PageContainer,
+  PageErrorAlert,
+  PageLoadingAlert,
+  PageTitle,
+} from "@/components/common";
 
 interface Props {
   title: string;

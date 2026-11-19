@@ -1,4 +1,4 @@
-import { FlexCol } from "@/components/common/Flex";
+import { FlexCol } from "@/components/common";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
 import { modsEventBus } from "@/services/mods";
 import { formatBytes } from "@/utils";

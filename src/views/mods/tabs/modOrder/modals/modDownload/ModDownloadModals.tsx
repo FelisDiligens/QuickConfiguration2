@@ -1,8 +1,4 @@
-import {
-  commands,
-  events,
-  NexusModsDownloadLink,
-} from "@/commands/bindings";
+import { commands, events, NexusModsDownloadLink } from "@/commands/bindings";
 import { AnyError, commandErrorToString } from "@/commands/errors";
 import NexusMods from "@/commands/nexusmods";
 import { modsEventBus } from "@/services/mods";
@@ -16,10 +12,7 @@ import {
 import { useSettingsStore } from "@/stores/settings";
 import { useToastsStore } from "@/stores/toasts";
 import { formatBytes } from "@/utils";
-import {
-  canUserDownloadDirectly,
-  parseNexusModsUrl,
-} from "@/utils/nexusmods";
+import { canUserDownloadDirectly, parseNexusModsUrl } from "@/utils/nexusmods";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-shell";
 import { useAtom, useAtomValue } from "jotai";

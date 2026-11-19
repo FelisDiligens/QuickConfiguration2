@@ -1,10 +1,12 @@
 import { commands } from "@/commands/bindings";
 import { isAnyError } from "@/commands/errors";
-import ButtonRow from "@/components/common/ButtonRow";
-import { PageErrorAlert } from "@/components/common/ErrorAlert";
-import PageContainer from "@/components/common/PageContainer";
-import PageTitle from "@/components/common/PageTitle";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
+import {
+  ButtonRow,
+  PageContainer,
+  PageErrorAlert,
+  PageTitle,
+  PreferencesGroup,
+} from "@/components/common";
 import { AppTheme } from "@/components/MyThemeProvider";
 import { css } from "@emotion/react";
 import { faFileLines, faRefresh } from "@fortawesome/free-solid-svg-icons";

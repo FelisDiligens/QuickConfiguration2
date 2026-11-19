@@ -1,5 +1,5 @@
 import { AnyError } from "@/commands/errors";
-import { FlexRow } from "@/components/common/Flex";
+import { FlexRow } from "@/components/common";
 import { useModDeployment } from "@/hooks/mods";
 import { modsEventBus } from "@/services/mods";
 import { useModsStore } from "@/stores/mods";

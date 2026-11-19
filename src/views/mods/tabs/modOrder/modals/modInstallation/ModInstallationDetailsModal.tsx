@@ -6,9 +6,7 @@ import {
 } from "@/commands/bindings";
 import { AnyError, commandErrorToString } from "@/commands/errors";
 import Mods from "@/commands/mods";
-import Entry from "@/components/common/Entry";
-import { FlexCol, FlexRow } from "@/components/common/Flex";
-import Select from "@/components/common/Select";
+import { Entry, FlexCol, FlexRow, Select } from "@/components/common";
 import { AppTheme } from "@/components/MyThemeProvider";
 import { useAsync } from "@/hooks/async";
 import { useModsStore } from "@/stores/mods";

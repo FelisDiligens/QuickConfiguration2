@@ -4,10 +4,12 @@ import LoadingScreen from "@/views/loading/LoadingScreen";
 import { css } from "@emotion/react";
 import { Button } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { PageErrorAlert } from "../common/ErrorAlert";
-import PageAlert from "../common/PageAlert";
-import PageContainer from "../common/PageContainer";
-import PageTitle from "../common/PageTitle";
+import {
+  PageAlert,
+  PageContainer,
+  PageErrorAlert,
+  PageTitle,
+} from "@/components/common";
 import { AppTheme } from "../MyThemeProvider";
 
 interface Props {

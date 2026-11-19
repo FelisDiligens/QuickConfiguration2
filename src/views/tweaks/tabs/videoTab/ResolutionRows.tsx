@@ -1,6 +1,4 @@
-import ButtonRow from "@/components/common/ButtonRow";
-import ComboRow from "@/components/common/ComboRow";
-import { FlexCol, FlexRow } from "@/components/common/Flex";
+import { ButtonRow, ComboRow, FlexCol, FlexRow } from "@/components/common";
 import useDisplaySize, { Size } from "@/hooks/tweaks/video/useDisplaySize";
 import { css } from "@emotion/react";
 import {

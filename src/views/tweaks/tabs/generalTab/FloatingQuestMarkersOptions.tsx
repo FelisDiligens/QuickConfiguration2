@@ -1,6 +1,4 @@
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import SliderRow from "@/components/common/SliderRow";
-import SwitchRow from "@/components/common/SwitchRow";
+import { PreferencesGroup, SliderRow, SwitchRow } from "@/components/common";
 import useFloatingQuestMarkersDistance from "@/hooks/tweaks/interface/useFloatingQuestMarkersDistance";
 import useShowFloatingQuestMarkers from "@/hooks/tweaks/interface/useShowFloatingQuestMarkers";
 import useShowFloatingQuestText from "@/hooks/tweaks/interface/useShowFloatingQuestText";

@@ -1,5 +1,4 @@
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import SwitchRow from "@/components/common/SwitchRow";
+import { PreferencesGroup, SwitchRow } from "@/components/common";
 import useItemLockSettingAllowStashTransfer from "@/hooks/tweaks/interface/useItemLockSettingAllowStashTransfer";
 import useTransferLockSettingAllowConsumableUse from "@/hooks/tweaks/interface/useTransferLockSettingAllowConsumableUse";
 import useTransferLockSettingAllowCraftingUse from "@/hooks/tweaks/interface/useTransferLockSettingAllowCraftingUse";

@@ -3,8 +3,7 @@ import {
   Archive2Format,
   commands,
 } from "@/commands/bindings";
-import ComboRow from "@/components/common/ComboRow";
-import PathEntryRow from "@/components/common/PathEntryRow";
+import { ComboRow, PathEntryRow } from "@/components/common";
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { useTranslation } from "react-i18next";

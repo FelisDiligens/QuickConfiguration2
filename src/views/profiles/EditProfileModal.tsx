@@ -5,15 +5,16 @@ import {
   Profile,
   commands,
 } from "@/commands/bindings";
-import CodeSpan from "@/components/common/CodeSpan";
-import Entry from "@/components/common/Entry";
-import EntryRow from "@/components/common/EntryRow";
-import PathEntryRow from "@/components/common/PathEntryRow";
-import PreferencesGroup, {
+import {
+  CodeSpan,
+  Entry,
+  EntryRow,
+  PathEntryRow,
   PreferencesCard,
-} from "@/components/common/PreferencesGroup";
-import RadioRow from "@/components/common/RadioRow";
-import RadioRowGroup from "@/components/common/RadioRowGroup";
+  PreferencesGroup,
+  RadioRow,
+  RadioRowGroup,
+} from "@/components/common";
 import SelectDetectedGamePathModal from "@/components/modals/SelectDetectedGamePathModal";
 import { AppTheme } from "@/components/MyThemeProvider";
 import * as profilesService from "@/services/profiles";

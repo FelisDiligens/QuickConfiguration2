@@ -1,9 +1,7 @@
 import { css } from "@emotion/react";
 import { useContext, useRef } from "react";
 import { Form } from "react-bootstrap";
-import ActionRow from "./ActionRow";
-import { FlexCol } from "./Flex";
-import { RadioRowGroupContext } from "./RadioRowGroup";
+import { ActionRow, FlexCol, RadioRowGroupContext } from "@/components/common";
 
 interface Props {
   title: string;

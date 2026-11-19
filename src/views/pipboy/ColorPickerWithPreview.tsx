@@ -1,5 +1,4 @@
-import { FlexCol, FlexRow } from "@/components/common/Flex";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
+import { FlexCol, FlexRow, PreferencesGroup } from "@/components/common";
 import useDebouncedState from "@/hooks/useDebouncedState";
 import { css } from "@emotion/react";
 import { InputGroup, ListGroup } from "react-bootstrap";

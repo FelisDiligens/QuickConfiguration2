@@ -3,11 +3,13 @@ import usePathCheck from "@/hooks/usePathCheck";
 import { useProfilesStore } from "@/stores/profiles";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { PageLoadingAlert } from "../common/LoadingAlert";
-import PageContainer from "../common/PageContainer";
-import PageIniErrorDetails from "../common/PageIniErrorDetails";
-import PagePathError from "../common/PagePathError";
-import PageTitle from "../common/PageTitle";
+import {
+  PageContainer,
+  PageIniErrorDetails,
+  PageLoadingAlert,
+  PagePathError,
+  PageTitle,
+} from "@/components/common";
 
 interface Props {
   title: string;

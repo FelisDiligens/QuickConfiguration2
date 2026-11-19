@@ -1,6 +1,4 @@
-import PreferencesGroup from "@/components/common/PreferencesGroup";
-import SliderRow from "@/components/common/SliderRow";
-import SwitchRow from "@/components/common/SwitchRow";
+import { PreferencesGroup, SliderRow, SwitchRow } from "@/components/common";
 import useConversationHistorySize from "@/hooks/tweaks/interface/useConversationHistorySize";
 import useDialogueSubtitles from "@/hooks/tweaks/interface/useDialogueSubtitles";
 import useGeneralSubtitles from "@/hooks/tweaks/interface/useGeneralSubtitles";

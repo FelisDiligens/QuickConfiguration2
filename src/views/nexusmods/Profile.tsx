@@ -1,7 +1,10 @@
 import { NexusModsAccountInfo, NexusModsRateLimit } from "@/commands/bindings";
-import { FlexCol, FlexRow } from "@/components/common/Flex";
-import InfoRow from "@/components/common/InfoRow";
-import PreferencesGroup from "@/components/common/PreferencesGroup";
+import {
+  FlexCol,
+  FlexRow,
+  InfoRow,
+  PreferencesGroup,
+} from "@/components/common";
 import { css } from "@emotion/react";
 import { useTranslation } from "react-i18next";
 
