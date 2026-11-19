@@ -6,20 +6,25 @@ import {
 } from "@/assets/img";
 import { PreferencesGroup, SliderRow, SwitchRow } from "@/components/common";
 import { AppTheme } from "@/components/MyThemeProvider";
-import useFieldOfView from "@/hooks/tweaks/camera/fov/useFieldOfView";
-import useViewmodelFOV from "@/hooks/tweaks/camera/fov/useViewmodelFOV";
-import useWorkshopFreeCameraControlsHoldToggle from "@/hooks/tweaks/camera/freecam/useWorkshopFreeCameraControlsHoldToggle";
-import useWorkshopFreeCameraRotationSpeed from "@/hooks/tweaks/camera/freecam/useWorkshopFreeCameraRotationSpeed";
-import useWorkshopFreeCameraTranslationSpeed from "@/hooks/tweaks/camera/freecam/useWorkshopFreeCameraTranslationSpeed";
-import useWorkshopStartAtPreviousFreeCameraLocation from "@/hooks/tweaks/camera/freecam/useWorkshopStartAtPreviousFreeCameraLocation";
-import useWorkshopStartInFreeCamera from "@/hooks/tweaks/camera/freecam/useWorkshopStartInFreeCamera";
-import useSelfieCameraRotationSpeed from "@/hooks/tweaks/camera/photomode/useSelfieCameraRotationSpeed";
-import useSelfieCameraTranslationSpeed from "@/hooks/tweaks/camera/photomode/useSelfieCameraTranslationSpeed";
-import useSelfieModeRange from "@/hooks/tweaks/camera/photomode/useSelfieModeRange";
-import usePitchZoomOutMaxDist from "@/hooks/tweaks/camera/thirdperson/usePitchZoomOutMaxDist";
-import useVanityModeMaxDist from "@/hooks/tweaks/camera/thirdperson/useVanityModeMaxDist";
-import useVanityModeMinDist from "@/hooks/tweaks/camera/thirdperson/useVanityModeMinDist";
-import useEnableCameraShake from "@/hooks/tweaks/camera/useEnableCameraShake";
+import { useFieldOfView, useViewmodelFOV } from "@/hooks/tweaks/camera/fov";
+import {
+  useWorkshopFreeCameraControlsHoldToggle,
+  useWorkshopFreeCameraRotationSpeed,
+  useWorkshopFreeCameraTranslationSpeed,
+  useWorkshopStartAtPreviousFreeCameraLocation,
+  useWorkshopStartInFreeCamera,
+} from "@/hooks/tweaks/camera/freecam";
+import {
+  useSelfieCameraRotationSpeed,
+  useSelfieCameraTranslationSpeed,
+  useSelfieModeRange,
+} from "@/hooks/tweaks/camera/photomode";
+import {
+  usePitchZoomOutMaxDist,
+  useVanityModeMaxDist,
+  useVanityModeMinDist,
+} from "@/hooks/tweaks/camera/thirdperson";
+import { useEnableCameraShake } from "@/hooks/tweaks/camera";
 import { clamp } from "@/utils/math";
 import { css } from "@emotion/react";
 import _ from "lodash";

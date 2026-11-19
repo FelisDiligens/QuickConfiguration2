@@ -1,8 +1,10 @@
 import { PreferencesGroup, SliderRow, SwitchRow } from "@/components/common";
-import useConversationHistorySize from "@/hooks/tweaks/interface/useConversationHistorySize";
-import useDialogueSubtitles from "@/hooks/tweaks/interface/useDialogueSubtitles";
-import useGeneralSubtitles from "@/hooks/tweaks/interface/useGeneralSubtitles";
-import useShowDialogueHistory from "@/hooks/tweaks/interface/useShowDialogueHistory";
+import {
+  useConversationHistorySize,
+  useDialogueSubtitles,
+  useGeneralSubtitles,
+  useShowDialogueHistory,
+} from "@/hooks/tweaks/interface";
 import { useTranslation } from "react-i18next";
 
 export default function DialogueOptions() {

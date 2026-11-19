@@ -4,15 +4,16 @@ import {
   SliderRow,
   SwitchRow,
 } from "@/components/common";
-import useAudioMenuVal from "@/hooks/tweaks/audio/useAudioMenuVal";
-import useEnableAudio from "@/hooks/tweaks/audio/useEnableAudio";
-import useMasterVolume from "@/hooks/tweaks/audio/useMasterVolume";
-import usePlayMainMenuMusic from "@/hooks/tweaks/audio/usePlayMainMenuMusic";
-import useVivoxVoiceVolume from "@/hooks/tweaks/audio/useVivoxVoiceVolume";
-import useVoiceChatMode, {
+import {
+  useAudioMenuVal,
+  useEnableAudio,
+  useMasterVolume,
+  usePlayMainMenuMusic,
+  useVivoxVoiceVolume,
+  useVoiceChatMode,
+  useVoicePushToTalkEnabled,
   VoiceChatMode,
-} from "@/hooks/tweaks/audio/useVoiceChatMode";
-import useVoicePushToTalkEnabled from "@/hooks/tweaks/audio/useVoicePushToTalkEnabled";
+} from "@/hooks/tweaks/audio";
 import { useTranslation } from "react-i18next";
 
 function VolumeSliderRow(props: {

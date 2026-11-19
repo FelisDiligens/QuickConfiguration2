@@ -4,21 +4,22 @@ import {
   SliderRow,
   SwitchRow,
 } from "@/components/common";
-import useActiveEffectsOnHUD, {
+import {
   ActiveEffectsOnHUD,
-} from "@/hooks/tweaks/interface/useActiveEffectsOnHUD";
-import useAdvancedModDescriptions from "@/hooks/tweaks/interface/useAdvancedModDescriptions";
-import useAutoScrollPipboyItemStats from "@/hooks/tweaks/interface/useAutoScrollPipboyItemStats";
-import useEnablePowerArmorHUD from "@/hooks/tweaks/interface/useEnablePowerArmorHUD";
-import useHUDOpacity from "@/hooks/tweaks/interface/useHUDOpacity";
-import useShowCAMPWeather from "@/hooks/tweaks/interface/useShowCAMPWeather";
-import useShowCompass from "@/hooks/tweaks/interface/useShowCompass";
-import useShowCrosshair from "@/hooks/tweaks/interface/useShowCrosshair";
-import useShowDamageNumbersAdventure from "@/hooks/tweaks/interface/useShowDamageNumbersAdventure";
-import useShowMapRegionNames from "@/hooks/tweaks/interface/useShowMapRegionNames";
-import useShowOtherPlayersNames from "@/hooks/tweaks/interface/useShowOtherPlayersNames";
-import useShowPublicTeamNotifications from "@/hooks/tweaks/interface/useShowPublicTeamNotifications";
-import useShowOtherPlayersPings from "@/hooks/tweaks/interface/ShowOtherPlayersPings";
+  ShowOtherPlayersPings as useShowOtherPlayersPings,
+  useActiveEffectsOnHUD,
+  useAdvancedModDescriptions,
+  useAutoScrollPipboyItemStats,
+  useEnablePowerArmorHUD,
+  useHUDOpacity,
+  useShowCAMPWeather,
+  useShowCompass,
+  useShowCrosshair,
+  useShowDamageNumbersAdventure,
+  useShowMapRegionNames,
+  useShowOtherPlayersNames,
+  useShowPublicTeamNotifications,
+} from "@/hooks/tweaks/interface";
 import { useTranslation } from "react-i18next";
 
 export default function HUDOptions() {

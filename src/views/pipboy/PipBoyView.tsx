@@ -18,11 +18,11 @@ import {
 } from "@/components/common";
 import {
   usePipBoyColor,
+  usePipboyTargetResolution,
   usePowerArmorColor,
   useQuickBoyColor,
-} from "@/hooks/tweaks/pipboy/useEffectColor";
-import usePipboyTargetResolution from "@/hooks/tweaks/pipboy/usePipboyTargetResolution";
-import useQuickBoyModeEnabled from "@/hooks/tweaks/pipboy/useQuickBoyModeEnabled";
+  useQuickBoyModeEnabled,
+} from "@/hooks/tweaks/pipboy";
 import { css } from "@emotion/react";
 import { atom, useAtom } from "jotai";
 import { Form, InputGroup, ListGroup, Tab, Tabs } from "react-bootstrap";

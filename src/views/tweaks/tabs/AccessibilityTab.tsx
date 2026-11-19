@@ -5,18 +5,19 @@ import {
   SliderRow,
   SwitchRow,
 } from "@/components/common";
-import useAlternativeNodeViewBackgroundColor from "@/hooks/tweaks/accessibility/useAlternativeNoteViewBackgroundColor";
-import useAlternativeNoteViewLargeText from "@/hooks/tweaks/accessibility/useAlternativeNoteViewLargeText";
-import useAlternativeNodeViewTextColor from "@/hooks/tweaks/accessibility/useAlternativeNoteViewTextColor";
-import useMessageWindowFadeAmount from "@/hooks/tweaks/accessibility/useMessageWindowFadeAmount";
-import useMessageWindowFadeTime from "@/hooks/tweaks/accessibility/useMessageWindowFadeTime";
-import useScreenNarrationEnabled from "@/hooks/tweaks/accessibility/useScreenNarrationEnabled";
-import useScreenNarrationVoiceType, {
+import {
   ScreenNarrationVoiceType,
-} from "@/hooks/tweaks/accessibility/useScreenNarrationVoiceType";
-import useShowAccessibilityScreenOnStart from "@/hooks/tweaks/accessibility/useShowAccessibilityScreenOnStart";
-import useSingleButtonNotificationCancel from "@/hooks/tweaks/accessibility/useSingleButtonNotificationCancel";
-import useSpeechToText from "@/hooks/tweaks/accessibility/useSpeechToText";
+  useAlternativeNoteViewBackgroundColor as useAlternativeNodeViewBackgroundColor,
+  useAlternativeNoteViewLargeText,
+  useAlternativeNoteViewTextColor as useAlternativeNodeViewTextColor,
+  useMessageWindowFadeAmount,
+  useMessageWindowFadeTime,
+  useScreenNarrationEnabled,
+  useScreenNarrationVoiceType,
+  useShowAccessibilityScreenOnStart,
+  useSingleButtonNotificationCancel,
+  useSpeechToText,
+} from "@/hooks/tweaks/accessibility";
 import useDebouncedState from "@/hooks/useDebouncedState";
 import { useTranslation } from "react-i18next";
 

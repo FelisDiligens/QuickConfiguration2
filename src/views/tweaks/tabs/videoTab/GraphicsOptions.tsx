@@ -6,45 +6,55 @@ import {
   SwitchRow,
   useOverlayContainerRef,
 } from "@/components/common";
-import useAntiAliasing, {
+import {
   AntiAliasing,
-} from "@/hooks/tweaks/graphics/antialiasing/useAntiAliasing";
-import useTAAPostOverlay from "@/hooks/tweaks/graphics/antialiasing/useTAAPostOverlay";
-import useTAAPostSharpen from "@/hooks/tweaks/graphics/antialiasing/useTAAPostSharpen";
-import useVolumetricLighting from "@/hooks/tweaks/graphics/lighting/useVolumetricLighting";
-import useVolumetricLightingQuality, {
+  useAntiAliasing,
+  useTAAPostOverlay,
+  useTAAPostSharpen,
+} from "@/hooks/tweaks/graphics/antialiasing";
+import {
+  useVolumetricLighting,
+  useVolumetricLightingQuality,
   VolumetricLightingQuality,
-} from "@/hooks/tweaks/graphics/lighting/useVolumetricLightingQuality";
-import useAmbientOcclusion from "@/hooks/tweaks/graphics/postprocessing/useAmbientOcclusion";
-import useDepthOfFieldEnabled from "@/hooks/tweaks/graphics/postprocessing/useDepthOfFieldEnabled";
-import useDepthOfFieldStrength from "@/hooks/tweaks/graphics/postprocessing/useDepthOfFieldStrength";
-import useLensFlare from "@/hooks/tweaks/graphics/postprocessing/useLensFlare";
-import useRadialBlur from "@/hooks/tweaks/graphics/postprocessing/useRadialBlur";
-import useShadowBlurriness from "@/hooks/tweaks/graphics/shadows/useShadowBlurriness";
-import useShadowDistance from "@/hooks/tweaks/graphics/shadows/useShadowDistance";
-import useShadowMapResolution from "@/hooks/tweaks/graphics/shadows/useShadowMapResolution";
-import useShadowQualityPreset, {
+} from "@/hooks/tweaks/graphics/lighting";
+import {
+  useAmbientOcclusion,
+  useDepthOfFieldEnabled,
+  useDepthOfFieldStrength,
+  useLensFlare,
+  useRadialBlur,
+} from "@/hooks/tweaks/graphics/postprocessing";
+import {
   ShadowQuality,
-} from "@/hooks/tweaks/graphics/shadows/useShadowQualityPreset";
-import useAnisotropicFiltering from "@/hooks/tweaks/graphics/textures/useAnisotropicFiltering";
-import useTextureQualityPreset, {
+  useShadowBlurriness,
+  useShadowDistance,
+  useShadowMapResolution,
+  useShadowQualityPreset,
+} from "@/hooks/tweaks/graphics/shadows";
+import {
   TextureQuality,
-} from "@/hooks/tweaks/graphics/textures/useTextureQualityPreset";
-import useBloodSplatterEnabled from "@/hooks/tweaks/graphics/useBloodSplatterEnabled";
-import useDisableAllGore from "@/hooks/tweaks/graphics/useDisableAllGore";
-import useEnableIntenseWeatherEffects from "@/hooks/tweaks/graphics/useEnableIntenseWeatherEffects";
-import useEnableMuzzleFlashes from "@/hooks/tweaks/graphics/useEnableMuzzleFlashes";
-import useEnableWeaponImpactEffects from "@/hooks/tweaks/graphics/useEnableWeaponImpactEffects";
-import useGraphicsQuality from "@/hooks/tweaks/graphics/useGraphicsQuality";
-import useGrassFadeDistance from "@/hooks/tweaks/graphics/useGrassFadeDistance";
-import useLODFadeOutMultActors from "@/hooks/tweaks/graphics/useLODFadeOutMultActors";
-import useLODFadeOutMultItems from "@/hooks/tweaks/graphics/useLODFadeOutMultItems";
-import useLODFadeOutMultObjects from "@/hooks/tweaks/graphics/useLODFadeOutMultObjects";
-import useShowGrass from "@/hooks/tweaks/graphics/useShowGrass";
-import useWaterDisplacements from "@/hooks/tweaks/graphics/water/useWaterDisplacements";
-import useWaterReflections from "@/hooks/tweaks/graphics/water/useWaterReflections";
-import useWaterShadowFilter from "@/hooks/tweaks/graphics/water/useWaterShadowFilter";
-import useWaterSSRGlitchFix from "@/hooks/tweaks/graphics/water/useWaterSSRGlitchFix";
+  useAnisotropicFiltering,
+  useTextureQualityPreset,
+} from "@/hooks/tweaks/graphics/textures";
+import {
+  useBloodSplatterEnabled,
+  useDisableAllGore,
+  useEnableIntenseWeatherEffects,
+  useEnableMuzzleFlashes,
+  useEnableWeaponImpactEffects,
+  useGraphicsQuality,
+  useGrassFadeDistance,
+  useLODFadeOutMultActors,
+  useLODFadeOutMultItems,
+  useLODFadeOutMultObjects,
+  useShowGrass,
+} from "@/hooks/tweaks/graphics";
+import {
+  useWaterDisplacements,
+  useWaterReflections,
+  useWaterShadowFilter,
+  useWaterSSRGlitchFix,
+} from "@/hooks/tweaks/graphics/water";
 import { Trans, useTranslation } from "react-i18next";
 
 export default function GraphicsOptions() {

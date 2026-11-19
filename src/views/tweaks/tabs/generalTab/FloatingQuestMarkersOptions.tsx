@@ -1,7 +1,9 @@
 import { PreferencesGroup, SliderRow, SwitchRow } from "@/components/common";
-import useFloatingQuestMarkersDistance from "@/hooks/tweaks/interface/useFloatingQuestMarkersDistance";
-import useShowFloatingQuestMarkers from "@/hooks/tweaks/interface/useShowFloatingQuestMarkers";
-import useShowFloatingQuestText from "@/hooks/tweaks/interface/useShowFloatingQuestText";
+import {
+  useFloatingQuestMarkersDistance,
+  useShowFloatingQuestMarkers,
+  useShowFloatingQuestText,
+} from "@/hooks/tweaks/interface";
 import { useTranslation } from "react-i18next";
 
 export default function FloatingQuestMarkersOptions() {

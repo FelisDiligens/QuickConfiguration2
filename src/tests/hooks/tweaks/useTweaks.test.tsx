@@ -1,9 +1,10 @@
 import { commands } from "@/commands/bindings";
 import ini from "@/commands/ini";
-import useShadowBlurriness from "@/hooks/tweaks/graphics/shadows/useShadowBlurriness";
-import useShadowQualityPreset, {
+import {
   ShadowQuality,
-} from "@/hooks/tweaks/graphics/shadows/useShadowQualityPreset";
+  useShadowBlurriness,
+  useShadowQualityPreset,
+} from "@/hooks/tweaks/graphics/shadows";
 import useTweak, { errorAtom } from "@/hooks/tweaks/useTweak";
 import { useProfilesStore } from "@/stores/profiles";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";

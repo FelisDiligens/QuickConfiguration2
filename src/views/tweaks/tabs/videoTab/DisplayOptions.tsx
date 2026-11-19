@@ -5,12 +5,13 @@ import {
   SwitchRow,
   useOverlayContainerRef,
 } from "@/components/common";
-import useFixHUD4to3Ratio from "@/hooks/tweaks/interface/useFixHUD4to3Ratio";
-import useDisplayMode, {
+import { useFixHUD4to3Ratio } from "@/hooks/tweaks/interface";
+import {
   DisplayMode,
-} from "@/hooks/tweaks/video/useDisplayMode";
-import usePresentInterval from "@/hooks/tweaks/video/usePresentInterval";
-import useTopMostWindow from "@/hooks/tweaks/video/useTopMostWindow";
+  useDisplayMode,
+  usePresentInterval,
+  useTopMostWindow,
+} from "@/hooks/tweaks/video";
 import { css } from "@emotion/react";
 import { Trans, useTranslation } from "react-i18next";
 import ResolutionRows from "./ResolutionRows";

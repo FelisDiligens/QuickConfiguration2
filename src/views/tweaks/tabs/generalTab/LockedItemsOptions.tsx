@@ -1,7 +1,9 @@
 import { PreferencesGroup, SwitchRow } from "@/components/common";
-import useItemLockSettingAllowStashTransfer from "@/hooks/tweaks/interface/useItemLockSettingAllowStashTransfer";
-import useTransferLockSettingAllowConsumableUse from "@/hooks/tweaks/interface/useTransferLockSettingAllowConsumableUse";
-import useTransferLockSettingAllowCraftingUse from "@/hooks/tweaks/interface/useTransferLockSettingAllowCraftingUse";
+import {
+  useItemLockSettingAllowStashTransfer,
+  useTransferLockSettingAllowConsumableUse,
+  useTransferLockSettingAllowCraftingUse,
+} from "@/hooks/tweaks/interface";
 import { useTranslation } from "react-i18next";
 
 export default function LockedItemsOptions() {

@@ -1,7 +1,9 @@
 import { PreferencesGroup, SwitchRow } from "@/components/common";
-import useAskScrapFavorite from "@/hooks/tweaks/interface/useAskScrapFavorite";
-import useAskScrapLegendary from "@/hooks/tweaks/interface/useAskScrapLegendary";
-import useAskScrapPremium from "@/hooks/tweaks/interface/useAskScrapPremium";
+import {
+  useAskScrapFavorite,
+  useAskScrapLegendary,
+  useAskScrapPremium,
+} from "@/hooks/tweaks/interface";
 import { useTranslation } from "react-i18next";
 
 export default function ItemScrappingOptions() {

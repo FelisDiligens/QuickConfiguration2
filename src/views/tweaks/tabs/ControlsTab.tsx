@@ -4,13 +4,15 @@ import {
   SwitchRow,
   useOverlayContainerRef,
 } from "@/components/common";
-import useAimAssist from "@/hooks/tweaks/controls/useAimAssist";
-import useGamepadEnable from "@/hooks/tweaks/controls/useGamepadEnable";
-import useGamepadRumble from "@/hooks/tweaks/controls/useGamepadRumble";
-import useGamepadSensitivity from "@/hooks/tweaks/controls/useGamepadSensitivity";
-import useMouseInvert from "@/hooks/tweaks/controls/useMouseInvert";
-import useMouseSensitivity from "@/hooks/tweaks/controls/useMouseSensitivity";
-import useToggleAim from "@/hooks/tweaks/controls/useToggleAim";
+import {
+  useAimAssist,
+  useGamepadEnable,
+  useGamepadRumble,
+  useGamepadSensitivity,
+  useMouseInvert,
+  useMouseSensitivity,
+  useToggleAim,
+} from "@/hooks/tweaks/controls";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 

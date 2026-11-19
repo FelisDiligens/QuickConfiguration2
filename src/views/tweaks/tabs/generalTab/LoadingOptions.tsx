@@ -1,7 +1,9 @@
 import { PreferencesGroup, SwitchRow } from "@/components/common";
-import useFasterFadeIn from "@/hooks/tweaks/general/useFasterFadeIn";
-import usePlayIntroVideo from "@/hooks/tweaks/general/usePlayIntroVideo";
-import useSkipStartupSplash from "@/hooks/tweaks/general/useSkipStartupSplash";
+import {
+  useFasterFadeIn,
+  usePlayIntroVideo,
+  useSkipStartupSplash,
+} from "@/hooks/tweaks/general";
 import { useTranslation } from "react-i18next";
 
 export default function LoadingOptions() {

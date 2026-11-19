@@ -1,6 +1,8 @@
 import { PreferencesGroup, SwitchRow } from "@/components/common";
-import useAutoTrackQuestWhenStarted from "@/hooks/tweaks/interface/useAutoTrackQuestWhenStarted";
-import useEnableQuestTrackNotification from "@/hooks/tweaks/interface/useEnableQuestTrackNotification";
+import {
+  useAutoTrackQuestWhenStarted,
+  useEnableQuestTrackNotification,
+} from "@/hooks/tweaks/interface";
 import { useTranslation } from "react-i18next";
 
 export default function QuestsOptions() {

@@ -1,5 +1,5 @@
 import { commands } from "@/commands/bindings";
-import useEnableAudio from "@/hooks/tweaks/audio/useEnableAudio";
+import { useEnableAudio } from "@/hooks/tweaks/audio";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { vi } from "vitest";
 

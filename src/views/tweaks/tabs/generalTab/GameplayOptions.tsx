@@ -1,17 +1,18 @@
 import { ComboRow, PreferencesGroup, SwitchRow } from "@/components/common";
-import useAskOpenPerkCardPacks from "@/hooks/tweaks/general/useAskOpenPerkCardPacks";
-import useQuickHealStimpakPriority, {
+import {
   QuickHealStimpakPriority,
-} from "@/hooks/tweaks/general/useQuickHealStimpakPriority";
-import useRejectSharedPerksEnabled from "@/hooks/tweaks/general/useRejectSharedPerksEnabled";
-import useShowGrenadeTrajectory from "@/hooks/tweaks/general/useShowGrenadeTrajectory";
-import useVATSGrenadeMineTargetingMode, {
+  useAskOpenPerkCardPacks,
+  useQuickHealStimpakPriority,
+  useRejectSharedPerksEnabled,
+  useShowGrenadeTrajectory,
+  useVATSGrenadeMineTargetingMode,
   VATSGrenadeMineTargetingMode,
-} from "@/hooks/tweaks/general/useVATSGrenadeMineTargetingMode";
-import useShowBackpack from "@/hooks/tweaks/graphics/useShowBackpack";
-import useCorpseHighlighting, {
+} from "@/hooks/tweaks/general";
+import { useShowBackpack } from "@/hooks/tweaks/graphics";
+import {
   CorpseHighlighting,
-} from "@/hooks/tweaks/interface/useCorpseHighlighting";
+  useCorpseHighlighting,
+} from "@/hooks/tweaks/interface";
 import { useTranslation } from "react-i18next";
 
 export default function GameplayOptions() {
