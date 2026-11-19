@@ -29,9 +29,10 @@ export async function retrieveModinfo(url: string, fileId?: Nullish<number>) {
     // Update store:
     useNexusModsStore.getState().addOrUpdateModinfo(modinfo);
 
-    // Optionally retrieve file info:
+    // Retrieve file info if file id is given:
+    let modfile = undefined;
     if (fileId != undefined) {
-      const modfile = await NexusMods.api.getModFile(
+      modfile = await NexusMods.api.getModFile(
         apiKey,
         gameDomain,
         gameScopedId,
@@ -47,7 +48,7 @@ export async function retrieveModinfo(url: string, fileId?: Nullish<number>) {
       .getState()
       .addToast(t("mods.modOrderTab.toasts.infoRetrieved"), "", "success");
 
-    return modinfo;
+    return { modinfo, modfile };
   } catch (error) {
     modsEventBus.emitProgressAborted(error as AnyError);
     throw error;
@@ -158,20 +159,27 @@ export async function retrieveModInfoAll(mods: ManagedMod[]) {
       // Update store:
       useNexusModsStore.getState().addOrUpdateModinfo(modinfo);
 
+      retrievedCount++;
+
       // Optionally retrieve file info:
       if (mod.nexusFileId != undefined) {
-        const modfile = await NexusMods.api.getModFile(
-          apiKey,
-          gameDomain,
-          gameScopedId,
-          mod.nexusFileId,
-        );
+        try {
+          const modfile = await NexusMods.api.getModFile(
+            apiKey,
+            gameDomain,
+            gameScopedId,
+            mod.nexusFileId,
+          );
 
-        // Update store:
-        useNexusModsStore.getState().addOrUpdateModfile(modfile);
+          // Update store:
+          useNexusModsStore.getState().addOrUpdateModfile(modfile);
+        } catch (error) {
+          console.error(
+            `Couldn't retrieve files for mod '${mod.title}'. API request failed: ${commandErrorToString(error as AnyError)}`,
+          );
+          continue;
+        }
       }
-
-      retrievedCount++;
     }
 
     modsEventBus.emitProgressFinished();

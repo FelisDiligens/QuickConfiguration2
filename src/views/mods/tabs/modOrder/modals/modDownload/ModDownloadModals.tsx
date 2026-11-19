@@ -2,7 +2,6 @@ import {
   commands,
   events,
   NexusModsDownloadLink,
-  NexusModsModInfo,
   NXMLinkDetails,
 } from "@/commands/bindings";
 import { AnyError, commandErrorToString } from "@/commands/errors";
@@ -23,6 +22,8 @@ import { useTranslation } from "react-i18next";
 import { isAnyModalShownAtom, isCdnModalShownAtom } from "..";
 import ChooseCDNLinkModal from "./ChooseCDNLinkModal";
 
+type ModDetails = Awaited<ReturnType<typeof nexusmodsApi.retrieveModinfo>>;
+
 export default function ModDownloadModals() {
   const { t } = useTranslation();
   const [isCdnModalShown, setIsCdnModalShown] = useAtom(isCdnModalShownAtom);
@@ -32,7 +33,7 @@ export default function ModDownloadModals() {
   const nxmDetails = useRef<(NXMLinkDetails & { url: string }) | undefined>(
     undefined,
   );
-  const modDetailsRef = useRef<NexusModsModInfo | undefined>(undefined);
+  const modDetailsRef = useRef<ModDetails | undefined>(undefined);
 
   function showCdnModal(cdnLinks: NexusModsDownloadLink[]) {
     setIsCdnModalShown(true);
@@ -155,8 +156,10 @@ export default function ModDownloadModals() {
 
   const installMod = (downloadedFilePath: string) => {
     modsEventBus.emitInstallModFromFileWithPath(downloadedFilePath, {
-      title: modDetailsRef.current?.name || undefined,
-      version: modDetailsRef.current?.version,
+      title: modDetailsRef.current?.modinfo?.name || undefined,
+      version:
+        modDetailsRef.current?.modfile?.version ||
+        modDetailsRef.current?.modinfo?.version,
       url: nxmDetails.current?.url,
       nexusFileId: nxmDetails.current?.fileId,
     });

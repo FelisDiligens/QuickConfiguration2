@@ -507,8 +507,11 @@ export default function ModDetails() {
 
   const mod = mods[selectedModIndex];
   const state = useMemo(() => getModState(mod.key), [mod.key]);
-  const modinfo = useMemo(() => modinfos.get(mod), [mod.url]);
-  const modfile = useMemo(() => modfiles.get(mod), [mod.url, mod.nexusFileId]);
+  const modinfo = useMemo(() => modinfos.get(mod), [modinfos, mod.url]);
+  const modfile = useMemo(
+    () => modfiles.get(mod),
+    [modfiles, mod.url, mod.nexusFileId],
+  );
   const modImgSrc = modinfo?.pictureUrl;
 
   return (

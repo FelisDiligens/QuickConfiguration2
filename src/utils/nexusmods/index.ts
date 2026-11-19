@@ -1,8 +1,4 @@
-import {
-  ManagedMod,
-  NexusModsModFileInfo,
-  NexusModsModInfo,
-} from "@/commands/bindings";
+import { NexusModsModFileInfo, NexusModsModInfo } from "@/commands/bindings";
 
 export * from "./modFiles";
 export * from "./modInfo";
@@ -19,7 +15,7 @@ export interface NexusModsModFileIds {
 }
 
 const nexusmodsUrlRegex =
-  /.*?www\.nexusmods\.com\/(?<game_domain>\w+)\/mods\/(?<game_scoped_id>\d+)(\/?\?.*)?/;
+  /www\.nexusmods\.com\/(?<game_domain>\w+)\/mods\/(?<game_scoped_id>\d+)/;
 
 /**
  * Extracts the game domain and game scoped ID from a URL.
@@ -62,7 +58,6 @@ export function determineLatestModVersion({
   modinfo,
   modfile,
 }: {
-  mod?: ManagedMod;
   modinfo?: NexusModsModInfo;
   modfile?: NexusModsModFileInfo;
 }) {

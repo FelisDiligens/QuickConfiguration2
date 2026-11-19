@@ -191,16 +191,16 @@ impl ModFileInfo {
         let current_file = resp.files.iter().find(|file| file.file_id == file_id)?;
         let latest_file = get_latest_file(file_id, resp);
         Some(ModFileInfo {
-            game_scoped_id: game_scoped_id,
+            game_scoped_id,
             game_domain: game_domain.clone(),
             file_id: current_file.file_id,
             name: current_file.name.clone(),
             version: current_file.version.clone(),
             category: current_file.category.clone(),
             latest_file: latest_file.map(|f| LatestModFileInfo {
-                game_scoped_id: game_scoped_id,
-                game_domain: game_domain,
-                file_id,
+                game_scoped_id,
+                game_domain,
+                file_id: f.file_id,
                 name: f.name.clone(),
                 version: f.version.clone(),
                 category: f.category.clone(),

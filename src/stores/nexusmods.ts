@@ -76,12 +76,15 @@ export const useNexusModsStore = create<NexusModsStore>()((set, get) => ({
   getModinfo: (ids) => get().modinfos.get(ids),
   setModinfos: (modinfos) => set({ modinfos: new ModInfoMap(modinfos) }),
   setEndorseStatus: (ids, endorseStatus) => {
-    const modinfos = get().modinfos;
+    const modinfos = get().modinfos.clone();
     const mod = modinfos.get(ids);
     if (!mod) return;
-    mod.endorseStatus = endorseStatus;
-    mod.endorsementCount++;
-    set({ modinfos: modinfos.clone() });
+    modinfos.addOrUpdate({
+      ...mod,
+      endorseStatus,
+      endorsementCount: mod.endorsementCount + 1,
+    });
+    set({ modinfos });
   },
   addOrUpdateModinfo: (info) => {
     const modinfos = get().modinfos;

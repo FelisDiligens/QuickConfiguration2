@@ -3,6 +3,8 @@
 mod account;
 mod mod_info;
 
+use std::str::FromStr;
+
 pub use account::*;
 pub use mod_info::*;
 
@@ -102,7 +104,7 @@ impl From<api::ModFile> for ModFile {
             category: value
                 .category_name
                 .as_ref()
-                .and_then(|name| FileCategory::from_str(name)),
+                .and_then(|name| FileCategory::from_str(name.as_str()).ok()),
             category_id: value.category_id,
             category_name: value.category_name,
             is_primary: value.is_primary,
@@ -139,16 +141,20 @@ impl From<api::DownloadLink> for DownloadLink {
     }
 }
 
-impl FileCategory {
-    pub fn from_str<S: AsRef<str>>(name: S) -> Option<FileCategory> {
-        match name.as_ref().to_uppercase().as_str() {
-            "MAIN" => Some(FileCategory::Main),              // category_id 1
-            "UPDATE" => Some(FileCategory::Update),          // ?
-            "OPTIONAL" => Some(FileCategory::Optional),      // category_id 3
-            "OLD_VERSION" => Some(FileCategory::OldVersion), // category_id 4
-            "MISCELLANEOUS" => Some(FileCategory::Miscellaneous), // ?
-            "ARCHIVED" => Some(FileCategory::Archived),      // category_id 7
-            _ => None,                                       // category_id 6 ?
+impl FromStr for FileCategory {
+    fn from_str(name: &str) -> Result<Self, Self::Err> {
+        match name.to_uppercase().as_str() {
+            "MAIN" => Ok(FileCategory::Main),                   // category_id 1
+            "UPDATE" => Ok(FileCategory::Update),               // ?
+            "OPTIONAL" => Ok(FileCategory::Optional),           // category_id 3
+            "OLD_VERSION" => Ok(FileCategory::OldVersion),      // category_id 4
+            "MISCELLANEOUS" => Ok(FileCategory::Miscellaneous), // ?
+            "ARCHIVED" => Ok(FileCategory::Archived),           // category_id 7
+            _ => Err(anyhow::anyhow!(
+                "Couldn't determine file category from string: {name:?}"
+            )), // category_id 6 ?
         }
     }
+
+    type Err = anyhow::Error;
 }

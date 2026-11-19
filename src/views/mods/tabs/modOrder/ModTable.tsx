@@ -279,7 +279,7 @@ export default function ModTable() {
     [mods],
   );
 
-  const { modinfos } = useModinfos();
+  const { modinfos, modfiles } = useModinfos();
   const modStateByKey = useMemo(
     () => new Map(modStates.map((state) => [state.key, state])),
     [modStates],
@@ -560,6 +560,7 @@ export default function ModTable() {
               mod={mod}
               state={modStateByKey.get(mod.key)}
               modinfo={modinfos.get(mod)}
+              modfile={modfiles.get(mod)}
               selected={selectedModKey === mod.key}
               focused={mod.key === rovingModKey}
               showNexusModsTitle={showNexusModsTitle}
