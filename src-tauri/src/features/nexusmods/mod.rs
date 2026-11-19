@@ -7,6 +7,7 @@ pub mod api;
 pub mod models;
 pub mod nxm;
 pub mod sso;
+pub mod utils;
 
 use anyhow::{Result, anyhow};
 use std::fs::{self, File};

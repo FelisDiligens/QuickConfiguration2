@@ -2,6 +2,7 @@ import {
   commands,
   ManagedMod,
   ModInstallationState,
+  NexusModsModFileInfo,
   NexusModsModInfo,
 } from "@/commands/bindings";
 import { AnyError, commandErrorToString } from "@/commands/errors";
@@ -14,6 +15,7 @@ import { modsEventBus } from "@/services/mods";
 import { updateModsStore, useModsStore } from "@/stores/mods";
 import { useProfilesStore } from "@/stores/profiles";
 import { useSettingsStore } from "@/stores/settings";
+import { determineLatestModVersion } from "@/utils/nexusmods";
 import { css } from "@emotion/react";
 import {
   faArrowUpRightFromSquare,
@@ -254,6 +256,7 @@ function Options(props: {
   state?: ModInstallationState;
   setMod: React.Dispatch<React.SetStateAction<ManagedMod>>;
   modinfo?: NexusModsModInfo;
+  modfile?: NexusModsModFileInfo;
 }) {
   const { t } = useTranslation();
   const { folderName, renameError, isRenaming, handleFolderRename } =
@@ -433,7 +436,11 @@ function Options(props: {
                     onClick={(e) => {
                       props.setMod((mod) => ({
                         ...mod,
-                        version: props.modinfo?.version || mod.version,
+                        version:
+                          determineLatestModVersion({
+                            modinfo: props.modinfo,
+                            modfile: props.modfile,
+                          }) || mod.version,
                       }));
                       e.preventDefault();
                     }}
@@ -443,7 +450,10 @@ function Options(props: {
                   </a>
                 }
               >
-                {props.modinfo?.version}
+                {determineLatestModVersion({
+                  modinfo: props.modinfo,
+                  modfile: props.modfile,
+                })}
               </InfoLine>
               {props.mod.nexusFileId && (
                 <InfoLine
@@ -493,11 +503,12 @@ export default function ModDetails() {
   const showNexusModsTitle = useSettingsStore(
     (store) => store.modManager.showNexusModsTitle,
   );
-  const { modinfos } = useModinfos();
+  const { modinfos, modfiles } = useModinfos();
 
   const mod = mods[selectedModIndex];
   const state = useMemo(() => getModState(mod.key), [mod.key]);
-  const modinfo = modinfos.get(mod);
+  const modinfo = useMemo(() => modinfos.get(mod), [mod.url]);
+  const modfile = useMemo(() => modfiles.get(mod), [mod.url, mod.nexusFileId]);
   const modImgSrc = modinfo?.pictureUrl;
 
   return (
@@ -521,6 +532,7 @@ export default function ModDetails() {
         state={state}
         setMod={(value) => setMod(mod.key, value)}
         modinfo={modinfo}
+        modfile={modfile}
       />
     </FlexCol>
   );

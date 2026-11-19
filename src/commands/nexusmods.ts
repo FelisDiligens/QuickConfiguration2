@@ -8,6 +8,7 @@ const NexusMods = {
     endorse: commands.nexusmodsApiEndorse,
     abstain: commands.nexusmodsApiAbstain,
     listModFiles: commands.nexusmodsApiListModFiles,
+    getModFile: commands.nexusmodsApiGetModFile,
     requestDownloadLinks: commands.nexusmodsApiRequestDownloadLinks,
   },
   getAccountInfo: commands.nexusmodsGetAccountInfo,

@@ -1,6 +1,7 @@
 import {
   NexusModsAccountInfo,
   NexusModsEndorseStatus,
+  NexusModsModFileInfo,
   NexusModsModInfo,
   NexusModsProfile,
   NexusModsRateLimit,
@@ -8,7 +9,13 @@ import {
 import { commandErrorToString } from "@/commands/errors";
 import NexusMods from "@/commands/nexusmods";
 import { Nullish } from "@/types";
-import { ModInfoMap, NexusModsModIds } from "@/utils/nexusmods";
+import {
+  determineLatestModVersion,
+  ModFilesMap,
+  ModInfoMap,
+  NexusModsModFileIds,
+  NexusModsModIds,
+} from "@/utils/nexusmods";
 import { syncStore } from "@/utils/zustand";
 import fastDeepEqual from "fast-deep-equal/es6";
 import { create } from "zustand";
@@ -18,6 +25,7 @@ export interface NexusModsStore {
   profile?: NexusModsProfile;
   rateLimit?: NexusModsRateLimit;
   modinfos: ModInfoMap;
+  modfiles: ModFilesMap;
 
   getAccountInfo: () => NexusModsAccountInfo | undefined;
   setAccountInfo: (account: Nullish<NexusModsAccountInfo>) => void;
@@ -32,10 +40,21 @@ export interface NexusModsStore {
     endorseStatus: NexusModsEndorseStatus,
   ) => void;
   addOrUpdateModinfo: (info: NexusModsModInfo) => void;
+
+  getModfile: (ids: NexusModsModFileIds) => NexusModsModFileInfo | undefined;
+  setModfiles: (modfiles: NexusModsModFileInfo[]) => void;
+  addOrUpdateModfile: (file: NexusModsModFileInfo) => void;
+
+  getLatestVersion: (ids: {
+    gameDomain: string;
+    gameScopedId: number;
+    fileId?: Nullish<number>;
+  }) => string | undefined;
 }
 
 export const useNexusModsStore = create<NexusModsStore>()((set, get) => ({
   modinfos: new ModInfoMap(),
+  modfiles: new ModFilesMap(),
 
   getAccountInfo: () => {
     const profile = get().profile;
@@ -68,6 +87,24 @@ export const useNexusModsStore = create<NexusModsStore>()((set, get) => ({
     const modinfos = get().modinfos;
     modinfos.addOrUpdate(info);
     set({ modinfos: modinfos.clone() });
+  },
+
+  getModfile: (ids) => get().modfiles.get(ids),
+  setModfiles: (modfiles) => set({ modfiles: new ModFilesMap(modfiles) }),
+  addOrUpdateModfile: (file) => {
+    const modfiles = get().modfiles;
+    modfiles.addOrUpdate(file);
+    set({ modfiles: modfiles.clone() });
+  },
+
+  getLatestVersion: (ids) => {
+    return determineLatestModVersion({
+      modinfo: get().getModinfo(ids),
+      modfile:
+        "fileId" in ids && ids.fileId
+          ? get().getModfile(ids as NexusModsModFileIds)
+          : undefined,
+    });
   },
 }));
 
@@ -105,6 +142,22 @@ nexusmodsStoreAccountSync.onSaveRejected((error) => {
   );
 });
 
+const compareModinfo = (a: NexusModsModInfo, b: NexusModsModInfo) => {
+  const n = a.gameDomain.localeCompare(b.gameDomain);
+  return n === 0 ? a.gameScopedId - b.gameScopedId : n;
+};
+const compareModfile = (a: NexusModsModFileInfo, b: NexusModsModFileInfo) => {
+  const gameDomainCmp = a.gameDomain.localeCompare(b.gameDomain);
+  if (gameDomainCmp !== 0) return gameDomainCmp;
+  const gameScopedIdCmp = a.gameScopedId - b.gameScopedId;
+  if (gameScopedIdCmp !== 0) return gameScopedIdCmp;
+  return a.fileId - b.fileId;
+};
+interface WatchedItem {
+  mods: NexusModsModInfo[];
+  files: NexusModsModFileInfo[];
+}
+
 export const nexusmodsStoreModinfoSync = syncStore(
   useNexusModsStore,
   (_set, get) => ({
@@ -112,24 +165,31 @@ export const nexusmodsStoreModinfoSync = syncStore(
       console.log("[NexusModsStore] Loading mod info");
       const infos = await NexusMods.getModInfos();
       get().setModinfos(infos?.mods || []);
+      get().setModfiles(infos?.files || []);
     },
     save: () => {
       const mods = get().modinfos.toArray();
+      const files = get().modfiles.toArray();
       return async () => {
         console.log("[NexusModsStore] Saving mod info");
-        await NexusMods.setModInfos({ mods });
+        await NexusMods.setModInfos({ mods, files });
       };
     },
-    watch: (store) => store.modinfos.toArray(),
+    watch: (store) => ({
+      mods: store.modinfos.toArray(),
+      files: store.modfiles.toArray(),
+    }),
     equals: (a: unknown, b: unknown) => {
-      const cmp = (a: NexusModsModInfo, b: NexusModsModInfo) => {
-        const n = a.gameDomain.localeCompare(b.gameDomain);
-        return n === 0 ? a.gameScopedId - b.gameScopedId : n;
-      };
-      // Assert a and b are NexusModsModInfo[] because that's what `watch` returns.
-      return fastDeepEqual(
-        (a as NexusModsModInfo[]).sort(cmp),
-        (b as NexusModsModInfo[]).sort(cmp),
+      // Assert a and b are WatchedItem because that's what `watch` returns.
+      return (
+        fastDeepEqual(
+          (a as WatchedItem).mods.sort(compareModinfo),
+          (b as WatchedItem).mods.sort(compareModinfo),
+        ) &&
+        fastDeepEqual(
+          (a as WatchedItem).files.sort(compareModfile),
+          (b as WatchedItem).files.sort(compareModfile),
+        )
       );
     },
   }),

@@ -132,6 +132,7 @@ export default function ModDownloadModals() {
         if (nxmDetails.current) {
           modDetailsRef.current = await nexusmodsApi.retrieveModinfo(
             nxmDetails.current.url,
+            nxmDetails.current.fileId,
           );
         }
       } catch (error) {

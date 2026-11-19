@@ -4,10 +4,11 @@ import NexusMods from "@/commands/nexusmods";
 import { modsEventBus } from "@/services/mods";
 import { useNexusModsStore } from "@/stores/nexusmods";
 import { useToastsStore } from "@/stores/toasts";
+import { Nullish } from "@/types";
 import { t } from "i18next";
 
 /** Retrieve info for given mod */
-export async function retrieveModinfo(url: string) {
+export async function retrieveModinfo(url: string, fileId?: Nullish<number>) {
   try {
     const apiKey = useNexusModsStore.getState().apiKey;
     if (!apiKey) throw new Error("API key is not set");
@@ -27,6 +28,19 @@ export async function retrieveModinfo(url: string) {
 
     // Update store:
     useNexusModsStore.getState().addOrUpdateModinfo(modinfo);
+
+    // Optionally retrieve file info:
+    if (fileId != undefined) {
+      const modfile = await NexusMods.api.getModFile(
+        apiKey,
+        gameDomain,
+        gameScopedId,
+        fileId,
+      );
+
+      // Update store:
+      useNexusModsStore.getState().addOrUpdateModfile(modfile);
+    }
 
     modsEventBus.emitProgressFinished();
     useToastsStore
@@ -143,6 +157,19 @@ export async function retrieveModInfoAll(mods: ManagedMod[]) {
 
       // Update store:
       useNexusModsStore.getState().addOrUpdateModinfo(modinfo);
+
+      // Optionally retrieve file info:
+      if (mod.nexusFileId != undefined) {
+        const modfile = await NexusMods.api.getModFile(
+          apiKey,
+          gameDomain,
+          gameScopedId,
+          mod.nexusFileId,
+        );
+
+        // Update store:
+        useNexusModsStore.getState().addOrUpdateModfile(modfile);
+      }
 
       retrievedCount++;
     }

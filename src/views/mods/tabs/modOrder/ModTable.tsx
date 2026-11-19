@@ -1,6 +1,7 @@
 import {
   ManagedMod,
   ModInstallationState,
+  NexusModsModFileInfo,
   NexusModsModInfo,
 } from "@/commands/bindings";
 import Entry from "@/components/common/Entry";
@@ -10,6 +11,7 @@ import { useDragAndDrop } from "@/hooks/useDragAndDrop";
 import { modsEventBus } from "@/services/mods";
 import { useModsStore } from "@/stores/mods";
 import { useSettingsStore } from "@/stores/settings";
+import { determineLatestModVersion } from "@/utils/nexusmods";
 import { css } from "@emotion/react";
 import {
   faGripVertical,
@@ -37,6 +39,7 @@ const ModTableRow = memo(function ModTableRow(props: {
   mod: ManagedMod;
   state?: ModInstallationState;
   modinfo?: NexusModsModInfo;
+  modfile?: NexusModsModFileInfo;
   selected: boolean;
   focused: boolean;
   showNexusModsTitle: boolean;
@@ -53,8 +56,11 @@ const ModTableRow = memo(function ModTableRow(props: {
     props.showNexusModsTitle && props.modinfo?.name
       ? props.modinfo.name
       : props.mod.title;
-  const isOutdated =
-    !!props.modinfo?.version && props.mod.version !== props.modinfo?.version;
+  const latestVersion = determineLatestModVersion({
+    modinfo: props.modinfo,
+    modfile: props.modfile,
+  });
+  const isOutdated = !!latestVersion && props.mod.version !== latestVersion;
   let needsDeployment = false;
   let status = t("mods.modOrderTab.table.rows.status.enabled");
   if (props.mod.enabled && props.state) {
@@ -173,7 +179,7 @@ const ModTableRow = memo(function ModTableRow(props: {
       </td>
       <td className="center">
         <div>{props.mod.version}</div>
-        {props.modinfo?.version && isOutdated && (
+        {latestVersion && isOutdated && (
           <div
             css={css`
               font-size: 0.8em;
@@ -181,7 +187,7 @@ const ModTableRow = memo(function ModTableRow(props: {
               color: var(--bs-danger) !important;
             `}
           >
-            ({props.modinfo.version})
+            ({latestVersion})
           </div>
         )}
       </td>

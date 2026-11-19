@@ -1,3 +1,10 @@
+import {
+  ManagedMod,
+  NexusModsModFileInfo,
+  NexusModsModInfo,
+} from "@/commands/bindings";
+
+export * from "./modFiles";
 export * from "./modInfo";
 
 export interface NexusModsModIds {
@@ -49,4 +56,15 @@ export function parseNexusModsUrl(url: string): NexusModsModIds | undefined {
   }
 
   return { gameDomain, gameScopedId };
+}
+
+export function determineLatestModVersion({
+  modinfo,
+  modfile,
+}: {
+  mod?: ManagedMod;
+  modinfo?: NexusModsModInfo;
+  modfile?: NexusModsModFileInfo;
+}) {
+  return modfile?.latestFile?.version || modfile?.version || modinfo?.version;
 }

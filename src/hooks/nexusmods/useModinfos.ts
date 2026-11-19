@@ -9,6 +9,7 @@ export default function useModinfos(fetchImmediately = true) {
   const loadState = useSyncLoadState(nexusmodsStoreModinfoSync);
   const saveState = useSyncSaveState(nexusmodsStoreModinfoSync);
   const modinfos = useNexusModsStore((store) => store.modinfos);
+  const modfiles = useNexusModsStore((store) => store.modfiles);
 
   // Automatically loading mod info:
   useEffect(() => {
@@ -22,6 +23,7 @@ export default function useModinfos(fetchImmediately = true) {
 
   return {
     modinfos,
+    modfiles,
     error,
     isPending,
   };

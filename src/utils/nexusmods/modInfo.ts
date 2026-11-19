@@ -48,7 +48,7 @@ export class ModInfoMap {
     return new ModInfoMap(new Map(this.#map));
   }
 
-  static #toKey(modinfo: NexusModsModIds) {
-    return `${modinfo.gameDomain}/${modinfo.gameScopedId}`;
+  static #toKey(ids: NexusModsModIds) {
+    return `${ids.gameDomain}/${ids.gameScopedId}`;
   }
 }

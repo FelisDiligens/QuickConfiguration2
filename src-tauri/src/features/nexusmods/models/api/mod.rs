@@ -164,6 +164,7 @@ pub struct EndorseAbstainAPIResponse {
     pub message: String,
 }
 
+/// Used for API requests only
 #[derive(Serialize, Deserialize, strum::Display, Type, Debug, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 #[strum(serialize_all = "snake_case")]

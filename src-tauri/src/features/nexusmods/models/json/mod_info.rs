@@ -4,14 +4,17 @@ use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use crate::features::nexusmods::models::api;
+use crate::features::nexusmods::models::json::FileCategory;
 use crate::features::nexusmods::models::xml;
+use crate::features::nexusmods::models::{api, json};
+use crate::features::nexusmods::utils::get_latest_file;
 
-#[derive(Debug, Serialize, Deserialize, Clone, Type)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, Type)]
+#[serde(rename_all = "camelCase", default)]
 #[specta(rename = "NexusModsModInfos")]
 pub struct ModInfos {
     pub mods: Vec<ModInfo>,
+    pub files: Vec<ModFileInfo>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Type)]
@@ -44,6 +47,46 @@ pub struct ModInfo {
     pub updated_time: chrono::DateTime<chrono::Utc>,
     #[specta(type = String)] // will be formatted as RFC3339
     pub last_access_time: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Type)]
+#[serde(rename_all = "camelCase")]
+#[specta(rename = "NexusModsModFileInfo")]
+pub struct ModFileInfo {
+    /// The mod's ID, e.g. 546
+    pub game_scoped_id: u32,
+    /// The game for which the mod was uploaded, e.g. "fallout76"
+    pub game_domain: String,
+    /// The file ID, e.g. 17669
+    pub file_id: u32,
+    /// The title of the file (not the file name)
+    pub name: String,
+    /// The file's version
+    pub version: String,
+    /// The file's category
+    pub category: Option<FileCategory>,
+    /// If found through file updates, the latest version of this file
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub latest_file: Option<LatestModFileInfo>,
+}
+
+// Duplicated, because recursive structs cause stack overflow when exporting bindings:
+#[derive(Debug, Serialize, Deserialize, Clone, Type)]
+#[serde(rename_all = "camelCase")]
+#[specta(rename = "NexusModsLatestModFileInfo")]
+pub struct LatestModFileInfo {
+    /// The mod's ID, e.g. 546
+    pub game_scoped_id: u32,
+    /// The game for which the mod was uploaded, e.g. "fallout76"
+    pub game_domain: String,
+    /// The file ID, e.g. 17669
+    pub file_id: u32,
+    /// The title of the file (not the file name)
+    pub name: String,
+    /// The file's version
+    pub version: String,
+    /// The file's category
+    pub category: Option<FileCategory>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, Type)]
@@ -87,6 +130,7 @@ impl TryFrom<xml::Mods> for ModInfos {
                 .into_iter()
                 .map(|r#mod| r#mod.try_into())
                 .collect::<Result<_, _>>()?,
+            ..Default::default()
         })
     }
 }
@@ -133,6 +177,34 @@ impl TryFrom<xml::Mod> for ModInfo {
                 "Couldn't convert Unix timestamp to datetime: {}",
                 value.last_access_timestamp
             ))?,
+        })
+    }
+}
+
+impl ModFileInfo {
+    pub fn from_api_response(
+        game_domain: String,
+        game_scoped_id: u32,
+        file_id: u32,
+        resp: &json::ModFiles,
+    ) -> Option<ModFileInfo> {
+        let current_file = resp.files.iter().find(|file| file.file_id == file_id)?;
+        let latest_file = get_latest_file(file_id, resp);
+        Some(ModFileInfo {
+            game_scoped_id: game_scoped_id,
+            game_domain: game_domain.clone(),
+            file_id: current_file.file_id,
+            name: current_file.name.clone(),
+            version: current_file.version.clone(),
+            category: current_file.category.clone(),
+            latest_file: latest_file.map(|f| LatestModFileInfo {
+                game_scoped_id: game_scoped_id,
+                game_domain: game_domain,
+                file_id,
+                name: f.name.clone(),
+                version: f.version.clone(),
+                category: f.category.clone(),
+            }),
         })
     }
 }

@@ -154,8 +154,16 @@ async nexusmodsApiEndorse(apiKey: string, gameDomain: string, gameScopedId: numb
 async nexusmodsApiAbstain(apiKey: string, gameDomain: string, gameScopedId: number, modVersion: string) : Promise<null> {
     return await TAURI_INVOKE("nexusmods_api_abstain", { apiKey, gameDomain, gameScopedId, modVersion });
 },
-async nexusmodsApiListModFiles(apiKey: string, gameDomain: string, gameScopedId: number, category: FileCategory) : Promise<NexusModsModFiles> {
+async nexusmodsApiListModFiles(apiKey: string, gameDomain: string, gameScopedId: number, category: FileCategory | null) : Promise<NexusModsModFiles> {
     return await TAURI_INVOKE("nexusmods_api_list_mod_files", { apiKey, gameDomain, gameScopedId, category });
+},
+/**
+ * Requests mod files for a mod from the NexusMods API.
+ * Then attempts to find the file with the specified ID and the latest file
+ * by searching through the file updates list.
+ */
+async nexusmodsApiGetModFile(apiKey: string, gameDomain: string, gameScopedId: number, fileId: number) : Promise<NexusModsModFileInfo> {
+    return await TAURI_INVOKE("nexusmods_api_get_mod_file", { apiKey, gameDomain, gameScopedId, fileId });
 },
 async nexusmodsApiRequestDownloadLinks(apiKey: string, nxmLink: string) : Promise<NexusModsDownloadLink[]> {
     return await TAURI_INVOKE("nexusmods_api_request_download_links", { apiKey, nxmLink });
@@ -524,6 +532,9 @@ downloadedBytes: string;
  * Size of downloaded file in number of bytes formatted as a string, because the numbers might get too large for Json/IPC.
  */
 totalBytes: string; percent: number }
+/**
+ * Used for API requests only
+ */
 export type FileCategory = "main" | "update" | "optional" | "old_version" | "miscellaneous"
 export type GameEdition = "Unknown" | "Steam" | "SteamPTS" | "Xbox" | 
 /**
@@ -689,8 +700,62 @@ export type NexusModsDownloadLink = { name: string; shortName: string; uri: stri
 export type NexusModsEndorseStatus = "Endorsed" | "Abstained" | "Undecided"
 export type NexusModsFileCategory = "MAIN" | "UPDATE" | "OPTIONAL" | "OLD_VERSION" | "MISCELLANEOUS" | "ARCHIVED"
 export type NexusModsFileUpdate = { oldFileId: number; newFileId: number; oldFileName: string; newFileName: string; uploadedTime: string }
+export type NexusModsLatestModFileInfo = { 
+/**
+ * The mod's ID, e.g. 546
+ */
+gameScopedId: number; 
+/**
+ * The game for which the mod was uploaded, e.g. "fallout76"
+ */
+gameDomain: string; 
+/**
+ * The file ID, e.g. 17669
+ */
+fileId: number; 
+/**
+ * The title of the file (not the file name)
+ */
+name: string; 
+/**
+ * The file's version
+ */
+version: string; 
+/**
+ * The file's category
+ */
+category: NexusModsFileCategory | null }
 export type NexusModsMembership = "Basic" | "Supporter" | "Premium"
 export type NexusModsModFile = { id: number[]; uid: number; fileId: number; name: string; version: string; categoryId: number; categoryName: string | null; category: NexusModsFileCategory | null; isPrimary: boolean; size: number; fileName: string; uploadedTime: string; modVersion: string; externalVirusScanUrl: string | null; description: string; sizeKb: number; sizeInBytes: string | null; changelogHtml: string | null; contentPreviewLink: string | null }
+export type NexusModsModFileInfo = { 
+/**
+ * The mod's ID, e.g. 546
+ */
+gameScopedId: number; 
+/**
+ * The game for which the mod was uploaded, e.g. "fallout76"
+ */
+gameDomain: string; 
+/**
+ * The file ID, e.g. 17669
+ */
+fileId: number; 
+/**
+ * The title of the file (not the file name)
+ */
+name: string; 
+/**
+ * The file's version
+ */
+version: string; 
+/**
+ * The file's category
+ */
+category: NexusModsFileCategory | null; 
+/**
+ * If found through file updates, the latest version of this file
+ */
+latestFile?: NexusModsLatestModFileInfo | null }
 export type NexusModsModFiles = { fileUpdates: NexusModsFileUpdate[]; files: NexusModsModFile[] }
 export type NexusModsModInfo = { 
 /**
@@ -705,7 +770,7 @@ gameDomain: string; name: string | null; summary: string | null; version: string
  * A thumbnail downloaded from `picture_url`
  */
 thumbnailFilename: string | null; endorsementCount: number; endorseStatus: NexusModsEndorseStatus; containsAdultContent: boolean; available: boolean; createdTime: string; updatedTime: string; lastAccessTime: string }
-export type NexusModsModInfos = { mods: NexusModsModInfo[] }
+export type NexusModsModInfos = { mods: NexusModsModInfo[]; files: NexusModsModFileInfo[] }
 export type NexusModsProfile = { userId: number; apiKey: string; name: string; email: string; profileUrl: string; membership: NexusModsMembership }
 export type NexusModsRateLimit = { dailyLimit: number; dailyRemaining: number; dailyReset: string; hourlyLimit: number; hourlyRemaining: number; hourlyReset: string }
 export type NexusModsSSOAbort = null

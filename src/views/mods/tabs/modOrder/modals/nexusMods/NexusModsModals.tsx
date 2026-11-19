@@ -25,7 +25,7 @@ export interface OutdatedMod {
 
 export default function NexusModsModals() {
   const { t } = useTranslation();
-  const getModinfo = useNexusModsStore((store) => store.getModinfo);
+  const getLatestVersion = useNexusModsStore((store) => store.getLatestVersion);
   const getMod = useModsStore((store) => store.getMod);
 
   const [showOutdatedModal, setShowOutdatedModal] = useAtom(
@@ -63,7 +63,7 @@ export default function NexusModsModals() {
       );
       return;
     }
-    await nexusmodsApi.retrieveModinfo(mod.url);
+    await nexusmodsApi.retrieveModinfo(mod.url, mod.nexusFileId);
   }
 
   async function endorse(key: string) {
@@ -117,16 +117,20 @@ export default function NexusModsModals() {
         );
         continue;
       }
-      const modinfo = getModinfo({ gameDomain, gameScopedId });
-      if (!modinfo) continue;
-      if (modinfo.version !== mod.version) {
+      const latestVersion = getLatestVersion({
+        gameDomain,
+        gameScopedId,
+        fileId: mod.nexusFileId,
+      });
+      if (!latestVersion) continue;
+      if (latestVersion !== mod.version) {
         outdatedMods.push({
           key: mod.key,
           title: mod.title,
           gameDomain,
           gameScopedId,
           currentVersion: mod.version,
-          latestVersion: modinfo.version,
+          latestVersion,
         });
       }
     }
