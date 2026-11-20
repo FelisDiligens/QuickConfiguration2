@@ -36,7 +36,6 @@ dirs = "7.0.0"
 duplicate = "2.0.1"
 futures-util = { version = "0.3.34", features = ["sink"] }
 image = "0.25.10"
-indoc = "2"
 itertools = "0.15.0"
 log = "0.4.34"
 log-panics = { version = "2.1.0", features = ["with-backtrace"] }
@@ -72,6 +71,10 @@ content_disposition = "0.4.0"
 [dev-dependencies]
 mockall = "0.15.0"
 wiremock = "0.6.5"
+indoc = "2"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+indoc = "2"
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.54.0", features = [

@@ -13,9 +13,6 @@ use std::path::{Path, PathBuf, StripPrefixError};
 use cfg_if::cfg_if;
 use normalize_path::NormalizePath;
 
-#[cfg(target_os = "windows")]
-use windows::Win32::Foundation::{ERROR_NOT_SAME_DEVICE, WIN32_ERROR};
-
 use crate::utils::channel;
 
 pub fn get_relative_path<P1: AsRef<Path>, P2: AsRef<Path>>(
