@@ -12,6 +12,7 @@ import {
 } from "@/components/common";
 import { AppTheme } from "@/components/MyThemeProvider";
 import { useAsync } from "@/hooks/async";
+import { openModal } from "@/hooks/useModal";
 import * as profilesService from "@/services/profiles";
 import { useProfilesStore } from "@/stores/profiles";
 import { useSettingsStore } from "@/stores/settings";
@@ -84,7 +85,6 @@ export default function FirstRunModal() {
   const show = isFirstRun && !(isPrerelease && !isPrereleaseDismissed);
 
   const [loading, setLoading] = useState(false);
-  const [showDetectGamePathModal, setShowDetectGamePathModal] = useState(false);
   const [profile, setProfile] = useState<Profile>(
     profilesService.createProfileWithDefaults(),
   );
@@ -114,162 +114,159 @@ export default function FirstRunModal() {
     setSelectedIndex(0);
   }
 
+  async function onAutoDetectGamePath() {
+    const path = await openModal(SelectDetectedGamePathModal, undefined);
+    if (path) {
+      setProfile((profile) => ({
+        ...profile,
+        ...profilesService.getProfileDefaultsForGamePath(path),
+      }));
+    }
+  }
+
   return (
-    <>
-      <Modal show={show && !showDetectGamePathModal} backdrop="static" centered>
-        <Modal.Header>
-          <Modal.Title>
-            <h2
-              css={css`
+    <Modal show={show} backdrop="static" centered>
+      <Modal.Header>
+        <Modal.Title>
+          <h2
+            css={css`
                 font-weight: bold;
                 margin: 5px 0 10px 0;
               `}
-            >
-              {t("welcome.title")}
-            </h2>
-            <span>{t("welcome.subtitle")}</span>
-            <VaultTecRepQuote />
-          </Modal.Title>
-        </Modal.Header>
-        {loading ? (
-          <Modal.Body>
-            <LoadingAlert>{t("common.loading")}</LoadingAlert>
-          </Modal.Body>
-        ) : (
-          <>
-            <Modal.Body
-              css={css`
+          >
+            {t("welcome.title")}
+          </h2>
+          <span>{t("welcome.subtitle")}</span>
+          <VaultTecRepQuote />
+        </Modal.Title>
+      </Modal.Header>
+      {loading ? (
+        <Modal.Body>
+          <LoadingAlert>{t("common.loading")}</LoadingAlert>
+        </Modal.Body>
+      ) : (
+        <>
+          <Modal.Body
+            css={css`
             padding-top: 0;
           `}
+          >
+            <PreferencesGroup
+              title={t("profiles.gameEdition.title")}
+              subtitle={t("profiles.gameEdition.subtitle")}
             >
-              <PreferencesGroup
-                title={t("profiles.gameEdition.title")}
-                subtitle={t("profiles.gameEdition.subtitle")}
+              <RadioRowGroup
+                name="game-edition"
+                value={profile.gameEdition}
+                onChange={(value) => {
+                  const edition = value as GameEdition;
+                  setProfile((profile) => ({
+                    ...profile,
+                    ...profilesService.getProfileDefaultsForGameEdition(
+                      edition,
+                    ),
+                  }));
+                }}
               >
-                <RadioRowGroup
-                  name="game-edition"
-                  value={profile.gameEdition}
-                  onChange={(value) => {
-                    const edition = value as GameEdition;
-                    setProfile((profile) => ({
-                      ...profile,
-                      ...profilesService.getProfileDefaultsForGameEdition(
-                        edition,
-                      ),
-                    }));
-                  }}
-                >
-                  <RadioRow
-                    id="Steam"
-                    title={t("profiles.gameEdition.steam")}
-                    imageSrc={Steam24Icon}
-                  />
-                  <RadioRow
-                    id="SteamPTS"
-                    title={t("profiles.gameEdition.steamPTS")}
-                    imageSrc={Steam24Icon}
-                  />
-                  <RadioRow
-                    id="Xbox"
-                    title={t("profiles.gameEdition.xbox")}
-                    imageSrc={Xbox24Icon}
-                  />
-                  <RadioRow
-                    id="Unknown"
-                    title={t("profiles.gameEdition.other")}
-                  />
-                </RadioRowGroup>
-              </PreferencesGroup>
-
-              <PreferencesGroup
-                title={t("profiles.gamePath.title")}
-                subtitle={t("profiles.gamePath.subtitle")}
-              >
-                <PathEntryRow
-                  title=""
-                  value={profile.installationPath}
-                  onChange={(path) => {
-                    setProfile((profile) => ({
-                      ...profile,
-                      ...profilesService.getProfileDefaultsForGamePath(path),
-                    }));
-                  }}
-                  onValidate={(path) => commands.validateGamePath(path)}
-                  suffix={
-                    <Button
-                      variant="outline-primary"
-                      title={t("common.autoDetectPathButton")}
-                      onClick={() => setShowDetectGamePathModal(true)}
-                    >
-                      <FontAwesomeIcon icon={faMagnifyingGlass} />
-                    </Button>
-                  }
+                <RadioRow
+                  id="Steam"
+                  title={t("profiles.gameEdition.steam")}
+                  imageSrc={Steam24Icon}
                 />
-              </PreferencesGroup>
+                <RadioRow
+                  id="SteamPTS"
+                  title={t("profiles.gameEdition.steamPTS")}
+                  imageSrc={Steam24Icon}
+                />
+                <RadioRow
+                  id="Xbox"
+                  title={t("profiles.gameEdition.xbox")}
+                  imageSrc={Xbox24Icon}
+                />
+                <RadioRow
+                  id="Unknown"
+                  title={t("profiles.gameEdition.other")}
+                />
+              </RadioRowGroup>
+            </PreferencesGroup>
 
-              <details
-                css={(theme: AppTheme) => css`
+            <PreferencesGroup
+              title={t("profiles.gamePath.title")}
+              subtitle={t("profiles.gamePath.subtitle")}
+            >
+              <PathEntryRow
+                title=""
+                value={profile.installationPath}
+                onChange={(path) => {
+                  setProfile((profile) => ({
+                    ...profile,
+                    ...profilesService.getProfileDefaultsForGamePath(path),
+                  }));
+                }}
+                onValidate={(path) => commands.validateGamePath(path)}
+                suffix={
+                  <Button
+                    variant="outline-primary"
+                    title={t("common.autoDetectPathButton")}
+                    onClick={() => void onAutoDetectGamePath()}
+                  >
+                    <FontAwesomeIcon icon={faMagnifyingGlass} />
+                  </Button>
+                }
+              />
+            </PreferencesGroup>
+
+            <details
+              css={(theme: AppTheme) => css`
               max-width: ${theme.card.maxWidth};
               margin: 0 auto;
             `}
-              >
-                <summary>{t("profiles.gamePath.clickForTip")}</summary>
-                {t("profiles.gameEdition.steam")}:
-                <ul>
-                  <li>
-                    <CodeSpan>
-                      C:\Program Files (x86)\Steam\steamapps\common\Fallout76\
-                    </CodeSpan>
-                  </li>
-                  <li>
-                    <CodeSpan>
-                      X:\SteamLibrary\steamapps\common\Fallout76\
-                    </CodeSpan>
-                  </li>
-                </ul>
-                {t("profiles.gameEdition.xbox")}:
-                <ul>
-                  <li>
-                    <CodeSpan>
-                      C:\Program Files\ModifiableWindowsApps\Fallout76\
-                    </CodeSpan>
-                  </li>
-                  <li>
-                    <CodeSpan>X:\XboxGames\Fallout76\Content\</CodeSpan>
-                  </li>
-                </ul>
-              </details>
-            </Modal.Body>
-            <Modal.Footer
-              css={css`
+            >
+              <summary>{t("profiles.gamePath.clickForTip")}</summary>
+              {t("profiles.gameEdition.steam")}:
+              <ul>
+                <li>
+                  <CodeSpan>
+                    C:\Program Files (x86)\Steam\steamapps\common\Fallout76\
+                  </CodeSpan>
+                </li>
+                <li>
+                  <CodeSpan>
+                    X:\SteamLibrary\steamapps\common\Fallout76\
+                  </CodeSpan>
+                </li>
+              </ul>
+              {t("profiles.gameEdition.xbox")}:
+              <ul>
+                <li>
+                  <CodeSpan>
+                    C:\Program Files\ModifiableWindowsApps\Fallout76\
+                  </CodeSpan>
+                </li>
+                <li>
+                  <CodeSpan>X:\XboxGames\Fallout76\Content\</CodeSpan>
+                </li>
+              </ul>
+            </details>
+          </Modal.Body>
+          <Modal.Footer
+            css={css`
             justify-content: center;
           `}
-            >
-              <Button
-                variant="primary"
-                css={css`
+          >
+            <Button
+              variant="primary"
+              css={css`
               min-width: 200px;
               border-radius: 9999px;
             `}
-                onClick={getStarted}
-              >
-                {t("welcome.getStarted")}
-              </Button>
-            </Modal.Footer>
-          </>
-        )}
-      </Modal>
-      <SelectDetectedGamePathModal
-        show={showDetectGamePathModal}
-        onAccept={(path) => {
-          setProfile((profile) => ({
-            ...profile,
-            ...profilesService.getProfileDefaultsForGamePath(path),
-          }));
-          setShowDetectGamePathModal(false);
-        }}
-        onClose={() => setShowDetectGamePathModal(false)}
-      />
-    </>
+              onClick={getStarted}
+            >
+              {t("welcome.getStarted")}
+            </Button>
+          </Modal.Footer>
+        </>
+      )}
+    </Modal>
   );
 }
