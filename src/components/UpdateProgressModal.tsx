@@ -23,9 +23,10 @@ function useLoadingModal() {
     showProgress,
     hideProgress,
     modalProps: {
-      show,
-      progress,
-      label,
+      isOpen: show,
+      data: { label, progress },
+      close: hideProgress,
+      cancel: hideProgress,
     },
   };
 }
@@ -45,9 +46,10 @@ function useErrorModal() {
     showError,
     hideError,
     modalProps: {
-      show,
-      reason: error,
-      onHide: hideError,
+      isOpen: show,
+      data: { reason: error },
+      close: hideError,
+      cancel: hideError,
     },
   };
 }

@@ -1,3 +1,11 @@
+import {
+  ConfirmModal,
+  ConfirmModalData,
+} from "@/components/modals/ConfirmModal";
+import {
+  MessageModal,
+  MessageModalData,
+} from "@/components/modals/MessageModal";
 import { ModalComponent, useModalStore } from "@/stores/modals";
 
 /**
@@ -30,6 +38,30 @@ export function openModal<TData, TResult>(
   data: TData,
 ): Promise<TResult | undefined> {
   return useModalStore.getState().open(component, data);
+}
+
+/**
+ * Opens a {@link ConfirmModal} with a Yes/No choice.
+ * @returns resolves with `true` on Yes, `undefined` on No / cancel
+ *
+ * @example
+ * ```ts
+ * const ok = await confirmModal({ title: t("..."), children: t("...") });
+ * if (ok) await deleteThing();
+ * ```
+ */
+export function confirmModal(
+  data: ConfirmModalData,
+): Promise<boolean | undefined> {
+  return openModal(ConfirmModal, data);
+}
+
+/**
+ * Opens a {@link MessageModal} with a single OK button.
+ * @returns resolves when the modal is closed
+ */
+export function messageModal(data: MessageModalData): Promise<void> {
+  return openModal(MessageModal, data);
 }
 
 /**

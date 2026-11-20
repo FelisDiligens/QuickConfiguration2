@@ -1,26 +1,27 @@
-import * as React from "react";
+import { ModalComponentProps } from "@/stores/modals";
+import { ReactNode } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
-interface Props {
+export interface MessageModalData {
   title: string;
-  show: boolean;
-  onHide: () => void;
-  children: React.ReactNode;
+  children?: ReactNode;
 }
 
-export function MessageModal(props: Props) {
+export function MessageModal(
+  props: ModalComponentProps<MessageModalData, void>,
+) {
   const { t } = useTranslation();
   return (
-    <Modal show={props.show} onHide={props.onHide} backdrop="static" centered>
+    <Modal show={props.isOpen} onHide={props.cancel} backdrop="static" centered>
       <Modal.Header closeButton>
         <Modal.Title>
-          <b>{props.title}</b>
+          <b>{props.data.title}</b>
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body>{props.children}</Modal.Body>
+      <Modal.Body>{props.data.children}</Modal.Body>
       <Modal.Footer>
-        <Button variant="primary" onClick={props.onHide}>
+        <Button variant="primary" onClick={() => props.close()}>
           {t("common.ok")}
         </Button>
       </Modal.Footer>

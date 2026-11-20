@@ -101,11 +101,13 @@ export default function Archive2ErrorModal(props: Props) {
 
   return (
     <MessageModal
-      title={t("errors.anErrorOccurred")}
-      show={props.show}
-      onHide={props.onHide}
-    >
-      <p>{formatErrorMessage(props.reason)}</p>
-    </MessageModal>
+      isOpen={props.show}
+      data={{
+        title: t("errors.anErrorOccurred"),
+        children: <p>{formatErrorMessage(props.reason)}</p>,
+      }}
+      close={props.onHide}
+      cancel={props.onHide}
+    />
   );
 }

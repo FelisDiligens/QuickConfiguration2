@@ -63,15 +63,20 @@ function ConfirmDeleteDialog(props: {
   const { t } = useTranslation();
   return (
     <ConfirmModal
-      title={t("gallery.deleteScreenshot.title")}
-      show={props.show}
-      onConfirm={props.onConfirm}
-      onAbort={props.onAbort}
-    >
-      <span css={css`overflow-wrap: anywhere;`}>
-        {t("gallery.deleteScreenshot.text", { path: props.screenshotPath })}
-      </span>
-    </ConfirmModal>
+      isOpen={props.show}
+      data={{
+        title: t("gallery.deleteScreenshot.title"),
+        children: (
+          <span css={css`overflow-wrap: anywhere;`}>
+            {t("gallery.deleteScreenshot.text", { path: props.screenshotPath })}
+          </span>
+        ),
+      }}
+      close={(confirmed) => {
+        if (confirmed) props.onConfirm();
+      }}
+      cancel={props.onAbort}
+    />
   );
 }
 

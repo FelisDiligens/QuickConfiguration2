@@ -11,17 +11,21 @@ export default function LoggedOutModal(props: Props) {
   const { t } = useTranslation();
   return (
     <MessageModal
-      title={t("mods.modOrderTab.modals.loggedOutModal.title")}
-      show={props.show}
-      onHide={props.onHide}
-    >
-      <p>
-        <Trans
-          t={t}
-          i18nKey="mods.modOrderTab.modals.loggedOutModal.message"
-          components={{ a: <Link to="/nexusmods" /> }}
-        />
-      </p>
-    </MessageModal>
+      isOpen={props.show}
+      data={{
+        title: t("mods.modOrderTab.modals.loggedOutModal.title"),
+        children: (
+          <p>
+            <Trans
+              t={t}
+              i18nKey="mods.modOrderTab.modals.loggedOutModal.message"
+              components={{ a: <Link to="/nexusmods" /> }}
+            />
+          </p>
+        ),
+      }}
+      close={props.onHide}
+      cancel={props.onHide}
+    />
   );
 }

@@ -15,16 +15,20 @@ export default function PrereleaseModal() {
   const show = !!isPrerelease && !isDismissed;
   return (
     <MessageModal
-      title={t("prereleaseModal.title")}
-      show={show}
-      onHide={() => setPrereleaseDismissed(true)}
-    >
-      <Trans
-        t={t}
-        i18nKey="prereleaseModal.text"
-        values={{ version: info.version }}
-        components={{ code: <code /> }}
-      />
-    </MessageModal>
+      isOpen={show}
+      data={{
+        title: t("prereleaseModal.title"),
+        children: (
+          <Trans
+            t={t}
+            i18nKey="prereleaseModal.text"
+            values={{ version: info.version }}
+            components={{ code: <code /> }}
+          />
+        ),
+      }}
+      close={() => setPrereleaseDismissed(true)}
+      cancel={() => setPrereleaseDismissed(true)}
+    />
   );
 }

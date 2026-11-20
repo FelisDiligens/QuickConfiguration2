@@ -12,16 +12,17 @@ export default function RemoveResourceModal(props: Props) {
   const { t } = useTranslation();
   return (
     <ConfirmModal
-      title={t("mods.resourceListTab.modals.removeArchiveTitle")}
-      show={props.show}
-      onConfirm={() => {
-        if (props.archiveName) props.onConfirm(props.archiveName);
+      isOpen={props.show}
+      data={{
+        title: t("mods.resourceListTab.modals.removeArchiveTitle"),
+        children: t("mods.resourceListTab.modals.removeArchiveText", {
+          archive: props.archiveName,
+        }),
       }}
-      onAbort={props.onAbort}
-    >
-      {t("mods.resourceListTab.modals.removeArchiveText", {
-        archive: props.archiveName,
-      })}
-    </ConfirmModal>
+      close={(confirmed) => {
+        if (confirmed && props.archiveName) props.onConfirm(props.archiveName);
+      }}
+      cancel={props.onAbort}
+    />
   );
 }

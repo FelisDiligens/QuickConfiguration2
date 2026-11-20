@@ -218,19 +218,24 @@ export default function ProfilesView() {
       </PageContent>
       {selectedProfile && (
         <ConfirmModal
-          title={t("profiles.confirmDeleteModal.title", {
-            profile: selectedProfile.title,
-          })}
-          show={showDeleteModal}
-          onConfirm={onDelete}
-          onAbort={() => setShowDeleteModal(false)}
-        >
-          <p>
-            {t("profiles.confirmDeleteModal.text", {
+          isOpen={showDeleteModal}
+          data={{
+            title: t("profiles.confirmDeleteModal.title", {
               profile: selectedProfile.title,
-            })}
-          </p>
-        </ConfirmModal>
+            }),
+            children: (
+              <p>
+                {t("profiles.confirmDeleteModal.text", {
+                  profile: selectedProfile.title,
+                })}
+              </p>
+            ),
+          }}
+          close={(confirmed) => {
+            if (confirmed) onDelete();
+          }}
+          cancel={() => setShowDeleteModal(false)}
+        />
       )}
       {editedProfile && (
         <EditProfileModal
