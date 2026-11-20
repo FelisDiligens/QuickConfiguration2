@@ -1,4 +1,5 @@
 import { ModalComponentProps } from "@/stores/modals";
+import { animationsEnabled } from "@/utils";
 import { ReactNode } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
@@ -13,7 +14,13 @@ export function MessageModal(
 ) {
   const { t } = useTranslation();
   return (
-    <Modal show={props.isOpen} onHide={props.cancel} backdrop="static" centered>
+    <Modal
+      show={props.isOpen}
+      onHide={props.cancel}
+      backdrop="static"
+      centered
+      animation={animationsEnabled}
+    >
       <Modal.Header closeButton>
         <Modal.Title>
           <b>{props.data.title}</b>

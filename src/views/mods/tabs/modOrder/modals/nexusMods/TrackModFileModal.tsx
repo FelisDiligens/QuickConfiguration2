@@ -6,7 +6,7 @@ import { modsEventBus } from "@/services/mods";
 import { useModsStore } from "@/stores/mods";
 import { useNexusModsStore } from "@/stores/nexusmods";
 import { useToastsStore } from "@/stores/toasts";
-import { formatBytes } from "@/utils";
+import { animationsEnabled, formatBytes } from "@/utils";
 import { groupModFilesByCategory } from "@/utils/nexusmods";
 import { css } from "@emotion/react";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
@@ -83,6 +83,7 @@ export default function TrackModFileModal(
 
   return (
     <Modal
+      animation={animationsEnabled}
       show={props.isOpen}
       onHide={props.cancel}
       size="xl"

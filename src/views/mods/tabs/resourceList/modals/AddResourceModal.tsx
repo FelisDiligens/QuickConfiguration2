@@ -2,6 +2,7 @@ import { commands } from "@/commands/bindings";
 import { PathEntryRow } from "@/components/common";
 import { useProfilesStore } from "@/stores/profiles";
 import { ModalComponentProps } from "@/stores/modals";
+import { animationsEnabled } from "@/utils";
 import * as path from "@tauri-apps/api/path";
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
@@ -14,7 +15,13 @@ export default function AddResourceModal(
   const [resource, setResource] = useState("");
 
   return (
-    <Modal show={props.isOpen} onHide={props.cancel} backdrop="static" centered>
+    <Modal
+      show={props.isOpen}
+      onHide={props.cancel}
+      backdrop="static"
+      centered
+      animation={animationsEnabled}
+    >
       <Modal.Header>
         <Modal.Title>
           {t("mods.resourceListTab.modals.addArchiveTitle")}

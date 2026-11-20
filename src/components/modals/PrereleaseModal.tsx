@@ -1,6 +1,6 @@
 import { info } from "@/info";
-import { useSettingsStore } from "@/stores/settings";
 import { ModalComponentProps } from "@/stores/modals";
+import { useSettingsStore } from "@/stores/settings";
 import { Trans, useTranslation } from "react-i18next";
 import { MessageModal } from "./MessageModal";
 

@@ -1,4 +1,5 @@
 import { EntryRow, FlexCol, FlexRow } from "@/components/common";
+import { animationsEnabled } from "@/utils";
 import { ModalComponentProps } from "@/stores/modals";
 import { css } from "@emotion/react";
 import { faFileZipper } from "@fortawesome/free-solid-svg-icons";
@@ -45,6 +46,7 @@ export default function ModArchiveImportModal(
 
   return (
     <Modal
+      animation={animationsEnabled}
       size="xl"
       show={props.isOpen}
       onHide={props.cancel}

@@ -21,6 +21,7 @@ import { openModal } from "@/hooks/useModal";
 import * as profilesService from "@/services/profiles";
 import { useProfilesStore } from "@/stores/profiles";
 import { ModalComponentProps } from "@/stores/modals";
+import { animationsEnabled } from "@/utils";
 import { css } from "@emotion/react";
 import {
   faMagnifyingGlass,
@@ -116,6 +117,7 @@ export default function EditProfileModal(
 
   return (
     <Modal
+      animation={animationsEnabled}
       show={props.isOpen}
       onHide={props.cancel}
       size="xl"

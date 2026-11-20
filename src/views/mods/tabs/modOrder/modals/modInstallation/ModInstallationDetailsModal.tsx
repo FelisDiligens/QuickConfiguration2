@@ -12,7 +12,7 @@ import { useAsync } from "@/hooks/async";
 import { useModsStore } from "@/stores/mods";
 import { ModalComponentProps } from "@/stores/modals";
 import { useProfilesStore } from "@/stores/profiles";
-import { pathJoinSync } from "@/utils";
+import { animationsEnabled, pathJoinSync } from "@/utils";
 import { parseNexusModsUrl } from "@/utils/nexusmods";
 import { css } from "@emotion/react";
 import {
@@ -340,6 +340,7 @@ export default function ModInstallationDetailsModal(
 
   return (
     <Modal
+      animation={animationsEnabled}
       show={props.isOpen}
       onHide={props.cancel}
       css={(theme: AppTheme) => css`

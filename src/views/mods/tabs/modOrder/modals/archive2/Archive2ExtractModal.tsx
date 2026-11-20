@@ -1,6 +1,7 @@
 import { commands } from "@/commands/bindings";
 import { PathEntryRow } from "@/components/common";
 import { ModalComponentProps } from "@/stores/modals";
+import { animationsEnabled } from "@/utils";
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
@@ -42,6 +43,7 @@ export default function Archive2ExtractModal(
 
   return (
     <Modal
+      animation={animationsEnabled}
       size="xl"
       show={props.isOpen}
       onHide={props.cancel}

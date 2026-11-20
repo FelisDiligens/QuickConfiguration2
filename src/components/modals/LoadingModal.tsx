@@ -1,5 +1,6 @@
 import { FlexCol, FlexRow } from "@/components/common";
 import { ModalComponentProps } from "@/stores/modals";
+import { animationsEnabled } from "@/utils";
 import { css } from "@emotion/react";
 import { Button, Modal, ProgressBar, Spinner } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
@@ -25,7 +26,13 @@ export default function LoadingModal(
 ) {
   const { t } = useTranslation();
   return (
-    <Modal size="xl" show={props.isOpen} backdrop="static" centered>
+    <Modal
+      size="xl"
+      show={props.isOpen}
+      backdrop="static"
+      centered
+      animation={animationsEnabled}
+    >
       <Modal.Body>
         <FlexRow center gap="1rem">
           <FlexCol noGrow noShrink>

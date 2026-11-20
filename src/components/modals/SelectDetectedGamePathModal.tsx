@@ -2,6 +2,7 @@ import { commands } from "@/commands/bindings";
 import { ErrorAlert, LoadingAlert, Select } from "@/components/common";
 import { useAsync } from "@/hooks/async";
 import { ModalComponentProps } from "@/stores/modals";
+import { animationsEnabled } from "@/utils";
 import { css } from "@emotion/react";
 import { useState } from "react";
 import { Alert, Button, Modal } from "react-bootstrap";
@@ -16,7 +17,13 @@ export default function SelectDetectedGamePathModal(
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   return (
-    <Modal show={props.isOpen} onHide={props.cancel} backdrop="static" centered>
+    <Modal
+      show={props.isOpen}
+      onHide={props.cancel}
+      backdrop="static"
+      centered
+      animation={animationsEnabled}
+    >
       <Modal.Header>
         <Modal.Title>{t("profiles.autoDetectGamePathModal.title")}</Modal.Title>
       </Modal.Header>

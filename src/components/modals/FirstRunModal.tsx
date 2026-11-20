@@ -15,6 +15,7 @@ import { openModal } from "@/hooks/useModal";
 import * as profilesService from "@/services/profiles";
 import { useProfilesStore } from "@/stores/profiles";
 import { ModalComponentProps } from "@/stores/modals";
+import { animationsEnabled } from "@/utils";
 import { css } from "@emotion/react";
 import {
   faMagnifyingGlass,
@@ -120,7 +121,12 @@ export default function FirstRunModal(props: ModalComponentProps<void, void>) {
   }
 
   return (
-    <Modal show={props.isOpen} backdrop="static" centered>
+    <Modal
+      show={props.isOpen}
+      backdrop="static"
+      centered
+      animation={animationsEnabled}
+    >
       <Modal.Header>
         <Modal.Title>
           <h2

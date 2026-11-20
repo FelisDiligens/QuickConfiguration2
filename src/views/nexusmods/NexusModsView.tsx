@@ -13,6 +13,7 @@ import useAccountInfo from "@/hooks/nexusmods/useAccountInfo";
 import useSsoLogin from "@/hooks/nexusmods/useSsoLogin";
 import { urls } from "@/info";
 import { useNexusModsStore } from "@/stores/nexusmods";
+import { animationsEnabled } from "@/utils";
 import { css } from "@emotion/react";
 import {
   faRightFromBracket,
@@ -29,7 +30,12 @@ import Profile from "./Profile";
 function SSOLoginModal(props: { show: boolean; abort: () => void }) {
   const { t } = useTranslation();
   return (
-    <Modal show={props.show} backdrop="static" centered>
+    <Modal
+      show={props.show}
+      backdrop="static"
+      centered
+      animation={animationsEnabled}
+    >
       <Modal.Header>
         <Modal.Title>
           <span

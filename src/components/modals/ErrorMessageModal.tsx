@@ -1,5 +1,6 @@
 import { AnyError, commandErrorToString } from "@/commands/errors";
 import { ModalComponentProps } from "@/stores/modals";
+import { animationsEnabled } from "@/utils";
 import { Button, Modal } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
@@ -16,6 +17,7 @@ export default function ErrorMessageModal(
   const { t } = useTranslation();
   return (
     <Modal
+      animation={animationsEnabled}
       size="xl"
       show={props.isOpen}
       onHide={props.cancel}
