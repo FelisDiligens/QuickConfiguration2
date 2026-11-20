@@ -1,22 +1,21 @@
 import { commands } from "@/commands/bindings";
 import { PathEntryRow } from "@/components/common";
 import { useProfilesStore } from "@/stores/profiles";
+import { ModalComponentProps } from "@/stores/modals";
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
-interface Props {
-  show: boolean;
-  onHide: () => void;
-  onCreate: (
-    modName: string,
-    sourcePath: string,
-    destinationPath: string,
-    tempPath: string,
-  ) => void;
+export interface Archive2AutoPackResult {
+  modName: string;
+  sourcePath: string;
+  destinationPath: string;
+  tempPath: string;
 }
 
-export default function Archive2AutoPackModal(props: Props) {
+export default function Archive2AutoPackModal(
+  props: ModalComponentProps<void, Archive2AutoPackResult>,
+) {
   const { t } = useTranslation();
   const getTmpPath = useProfilesStore((s) => s.getModsTmpPath);
   const [sourcePath, setSourcePath] = useState("");
@@ -45,7 +44,12 @@ export default function Archive2AutoPackModal(props: Props) {
     }
     validateForm()
       .then(() =>
-        props.onCreate("Bundled", sourcePath, destinationPath, tmpPath),
+        props.close({
+          modName: "Bundled",
+          sourcePath,
+          destinationPath,
+          tempPath: tmpPath,
+        }),
       )
       .catch(console.error);
   }
@@ -53,8 +57,8 @@ export default function Archive2AutoPackModal(props: Props) {
   return (
     <Modal
       size="xl"
-      show={props.show}
-      onHide={props.onHide}
+      show={props.isOpen}
+      onHide={props.cancel}
       backdrop="static"
       centered
     >
@@ -80,7 +84,7 @@ export default function Archive2AutoPackModal(props: Props) {
         <Button variant="primary" onClick={onCreate}>
           {t("mods.modOrderTab.modals.archive2.autoPackButton")}
         </Button>
-        <Button variant="secondary" onClick={props.onHide}>
+        <Button variant="secondary" onClick={props.cancel}>
           {t("common.cancel")}
         </Button>
       </Modal.Footer>

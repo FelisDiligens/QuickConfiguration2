@@ -4,22 +4,21 @@ import {
   commands,
 } from "@/commands/bindings";
 import { ComboRow, PathEntryRow } from "@/components/common";
+import { ModalComponentProps } from "@/stores/modals";
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
-interface Props {
-  show: boolean;
-  onHide: () => void;
-  onCreate: (
-    archivePath: string,
-    sourcePath: string,
-    format: Archive2Format,
-    compression: Archive2Compression,
-  ) => void;
+export interface Archive2CreateResult {
+  archivePath: string;
+  sourcePath: string;
+  format: Archive2Format;
+  compression: Archive2Compression;
 }
 
-export default function Archive2CreateModal(props: Props) {
+export default function Archive2CreateModal(
+  props: ModalComponentProps<void, Archive2CreateResult>,
+) {
   const { t } = useTranslation();
   const [archivePath, setArchivePath] = useState("");
   const [sourcePath, setSourcePath] = useState("");
@@ -45,15 +44,15 @@ export default function Archive2CreateModal(props: Props) {
 
   function onCreate() {
     validateForm()
-      .then(() => props.onCreate(archivePath, sourcePath, format, compression))
+      .then(() => props.close({ archivePath, sourcePath, format, compression }))
       .catch(console.error);
   }
 
   return (
     <Modal
       size="xl"
-      show={props.show}
-      onHide={props.onHide}
+      show={props.isOpen}
+      onHide={props.cancel}
       backdrop="static"
       centered
     >
@@ -120,7 +119,7 @@ export default function Archive2CreateModal(props: Props) {
         <Button variant="primary" onClick={onCreate}>
           {t("mods.modOrderTab.modals.archive2.createButton")}
         </Button>
-        <Button variant="secondary" onClick={props.onHide}>
+        <Button variant="secondary" onClick={props.cancel}>
           {t("common.cancel")}
         </Button>
       </Modal.Footer>

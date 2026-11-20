@@ -1,9 +1,10 @@
 import { EntryRow, FlexCol, FlexRow } from "@/components/common";
+import { ModalComponentProps } from "@/stores/modals";
 import { css } from "@emotion/react";
 import { faFileZipper } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import {
   Button,
   Card,
@@ -14,23 +15,24 @@ import {
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
-interface Props {
-  show: boolean;
+export interface ModArchiveImportModalData {
   archives: string[];
-  onCreate: (modName: string, archiveNames: string[]) => void;
-  onAbort: () => void;
 }
 
-export default function ModArchiveImportModal(props: Props) {
+export interface ModArchiveImportModalResult {
+  modName: string;
+  archiveNames: string[];
+}
+
+export default function ModArchiveImportModal(
+  props: ModalComponentProps<
+    ModArchiveImportModalData,
+    ModArchiveImportModalResult
+  >,
+) {
   const { t } = useTranslation();
   const [modName, setModName] = useState("");
   const [selectedArchives, setSelectedArchives] = useState<string[]>([]);
-
-  // Set values when props change:
-  useEffect(() => {
-    setModName("");
-    setSelectedArchives([]);
-  }, [props.show]);
 
   function validateForm() {
     return !!modName.trim() && selectedArchives.length > 0;
@@ -38,14 +40,14 @@ export default function ModArchiveImportModal(props: Props) {
 
   function onCreate() {
     if (!validateForm()) return;
-    props.onCreate(modName, selectedArchives);
+    props.close({ modName, archiveNames: selectedArchives });
   }
 
   return (
     <Modal
       size="xl"
-      show={props.show}
-      onHide={props.onAbort}
+      show={props.isOpen}
+      onHide={props.cancel}
       backdrop="static"
       centered
     >
@@ -68,10 +70,10 @@ export default function ModArchiveImportModal(props: Props) {
               {t("mods.modOrderTab.modals.importModal.selectArchives")}
             </CardHeader>
             <CardBody>
-              {props.archives.length == 0 && (
+              {props.data.archives.length == 0 && (
                 <p>{t("mods.modOrderTab.modals.importModal.noArchives")}</p>
               )}
-              {props.archives.map((archive) => (
+              {props.data.archives.map((archive) => (
                 <FileCheckbox
                   key={archive}
                   name={archive}
@@ -97,7 +99,7 @@ export default function ModArchiveImportModal(props: Props) {
         <Button variant="primary" onClick={onCreate} disabled={!validateForm()}>
           {t("mods.modOrderTab.modals.importModal.importButton")}
         </Button>
-        <Button variant="secondary" onClick={props.onAbort}>
+        <Button variant="secondary" onClick={props.cancel}>
           {t("common.cancel")}
         </Button>
       </Modal.Footer>

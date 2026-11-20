@@ -1,30 +1,31 @@
 import { MessageModal } from "@/components/modals/MessageModal";
 import { modsEventBus } from "@/services/mods";
+import { ModalComponentProps } from "@/stores/modals";
 import { faCloudArrowDown } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Table } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { OutdatedMod } from "./NexusModsModals";
+import type { OutdatedMod } from "./types";
 
-interface Props {
-  show: boolean;
-  onHide: () => void;
+export interface OutdatedModsModalData {
   outdatedMods?: OutdatedMod[] | null;
 }
 
-export default function OutdatedModsModal(props: Props) {
+export default function OutdatedModsModal(
+  props: ModalComponentProps<OutdatedModsModalData, void>,
+) {
   const { t } = useTranslation();
   return (
     <MessageModal
-      isOpen={props.show}
+      isOpen={props.isOpen}
       data={{
         title: t("mods.modOrderTab.modals.outdatedModsModal.title"),
         children:
-          props.outdatedMods && props.outdatedMods.length > 0 ? (
+          props.data.outdatedMods && props.data.outdatedMods.length > 0 ? (
             <>
               <p>
                 {t("mods.modOrderTab.modals.outdatedModsModal.modsOutdated", {
-                  count: props.outdatedMods.length,
+                  count: props.data.outdatedMods.length,
                 })}
               </p>
               <Table>
@@ -53,7 +54,7 @@ export default function OutdatedModsModal(props: Props) {
                   </tr>
                 </thead>
                 <tbody>
-                  {(props.outdatedMods || []).map((mod) => (
+                  {(props.data.outdatedMods || []).map((mod) => (
                     <tr key={mod.key}>
                       <td>{mod.title}</td>
                       <td>{mod.currentVersion}</td>
@@ -63,7 +64,7 @@ export default function OutdatedModsModal(props: Props) {
                           variant="outline-primary"
                           size="sm"
                           onClick={() => {
-                            props.onHide();
+                            props.cancel();
                             modsEventBus.emitNexusModsUpdateMod(mod.key);
                           }}
                         >
@@ -83,8 +84,8 @@ export default function OutdatedModsModal(props: Props) {
             <p>{t("mods.modOrderTab.modals.outdatedModsModal.allUpToDate")}</p>
           ),
       }}
-      close={props.onHide}
-      cancel={props.onHide}
+      close={props.cancel}
+      cancel={props.cancel}
     />
   );
 }

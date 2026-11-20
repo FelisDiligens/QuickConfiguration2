@@ -10,6 +10,7 @@ import { Entry, FlexCol, FlexRow, Select } from "@/components/common";
 import { AppTheme } from "@/components/MyThemeProvider";
 import { useAsync } from "@/hooks/async";
 import { useModsStore } from "@/stores/mods";
+import { ModalComponentProps } from "@/stores/modals";
 import { useProfilesStore } from "@/stores/profiles";
 import { pathJoinSync } from "@/utils";
 import { parseNexusModsUrl } from "@/utils/nexusmods";
@@ -38,13 +39,15 @@ import {
 import { useTranslation } from "react-i18next";
 import FileContents from "./FileContents";
 
-interface Props {
-  show: boolean;
-  onInstall: (mod: ManagedMod, paths: string[]) => void;
-  onAbort: () => void;
+export interface ModInstallationDetailsModalData {
   mod: ManagedMod;
   updateModKey?: string;
   fileContents: DirEntry[];
+}
+
+export interface ModInstallationDetailsModalResult {
+  mod: ManagedMod;
+  paths: string[];
 }
 
 const textFileExtensions = ["txt", "md", "rst", "html", "rtf"];
@@ -112,19 +115,24 @@ function DiagnosticIssueAlert(props: {
   );
 }
 
-export default function ModInstallationDetailsModal(props: Props) {
+export default function ModInstallationDetailsModal(
+  props: ModalComponentProps<
+    ModInstallationDetailsModalData,
+    ModInstallationDetailsModalResult
+  >,
+) {
   const { t } = useTranslation();
   const mods = useModsStore((store) => store.mods);
   const getMod = useModsStore((store) => store.getMod);
   const tmpPath = useProfilesStore.getState().getModsTmpPath();
-  const [mod, setMod] = useState(props.mod);
+  const [mod, setMod] = useState(props.data.mod);
   const [updateModOption, setUpdateModOption] = useState<"new" | "update">(
     "new",
   );
   const [updateModKey, setUpdateModKey] = useState(
-    props.updateModKey ?? "none",
+    props.data.updateModKey ?? "none",
   );
-  const [fileContents, setFileContents] = useState(props.fileContents);
+  const [fileContents, setFileContents] = useState(props.data.fileContents);
   const [expandedPaths, setExpandedPaths] = useState(new Set<string>());
   const [enabledPaths, setEnabledPaths] = useState(new Set<string>());
   const [issues, setIssues] = useState<DiagnosticIssue[]>([]);
@@ -195,7 +203,7 @@ export default function ModInstallationDetailsModal(props: Props) {
       if (!modsPath) throw new Error("Mods path is null");
       if (!tmpPath) throw new Error("Temp path is null");
       const fileContents = await Mods.actions.tempFolder.listContent(modsPath);
-      const fileCount = getFilePaths(props.fileContents).length;
+      const fileCount = getFilePaths(props.data.fileContents).length;
       const enabledPaths =
         await Mods.actions.tempFolder.uncheckUnneededEntries(fileContents);
       const issues = await Mods.actions.tempFolder.diagnoseIssues(mod, tmpPath);
@@ -244,7 +252,7 @@ export default function ModInstallationDetailsModal(props: Props) {
       setError(error);
     },
     watch: [mod.options.rootFolder, tmpPath],
-    enabled: props.show,
+    enabled: props.isOpen,
   });
 
   useAsync({
@@ -255,41 +263,41 @@ export default function ModInstallationDetailsModal(props: Props) {
       setValidFolderName(false);
     },
     watch: [mod.folderName],
-    enabled: props.show,
+    enabled: props.isOpen,
   });
 
   // Set values when props change:
   useEffect(() => {
-    const filePaths = getFilePaths(props.fileContents);
-    setMod(props.mod);
-    setUpdateModKey(props.updateModKey ?? "none");
-    if (props.updateModKey && props.updateModKey !== "none") {
+    const filePaths = getFilePaths(props.data.fileContents);
+    setMod(props.data.mod);
+    setUpdateModKey(props.data.updateModKey ?? "none");
+    if (props.data.updateModKey && props.data.updateModKey !== "none") {
       setUpdateModOption("update");
     } else {
       setUpdateModOption("new");
     }
-    setFileContents(props.fileContents);
+    setFileContents(props.data.fileContents);
     setEnabledPaths(new Set(filePaths));
     if (filePaths.length <= maxFileCountExpandedFolders)
-      setExpandedPaths(new Set(getFolderPaths(props.fileContents)));
+      setExpandedPaths(new Set(getFolderPaths(props.data.fileContents)));
     else setExpandedPaths(new Set());
     setIssues([]);
 
     // Uncheck unneeded entries or print error:
-    if (props.show)
+    if (props.isOpen)
       Mods.actions.tempFolder
-        .uncheckUnneededEntries(props.fileContents)
+        .uncheckUnneededEntries(props.data.fileContents)
         .then((enabledPaths) => setEnabledPaths(new Set(enabledPaths)))
         .catch((error) => {
           console.error(error);
           setError(error);
         });
-  }, [props.mod, props.updateModKey, props.fileContents]);
+  }, [props.data.mod, props.data.updateModKey, props.data.fileContents]);
 
   // Update mod details if `updateModKey` changes:
   useEffect(() => {
     const updateMod =
-      updateModKey === "none" ? props.mod : getMod(updateModKey);
+      updateModKey === "none" ? props.data.mod : getMod(updateModKey);
     if (!updateMod) return;
     setMod((mod) => ({
       ...mod,
@@ -332,8 +340,8 @@ export default function ModInstallationDetailsModal(props: Props) {
 
   return (
     <Modal
-      show={props.show}
-      onHide={props.onAbort}
+      show={props.isOpen}
+      onHide={props.cancel}
       css={(theme: AppTheme) => css`
         & .modal-dialog {
           max-width: calc(${theme.card.maxWidth} + 40px);
@@ -601,12 +609,12 @@ export default function ModInstallationDetailsModal(props: Props) {
       <Modal.Footer>
         <Button
           variant="primary"
-          onClick={() => props.onInstall(mod, [...enabledPaths])}
+          onClick={() => props.close({ mod, paths: [...enabledPaths] })}
           disabled={disableInstallButton}
         >
           {t("mods.modOrderTab.modals.installationModal.installButton")}
         </Button>
-        <Button variant="secondary" onClick={props.onAbort}>
+        <Button variant="secondary" onClick={props.cancel}>
           {t("mods.modOrderTab.modals.installationModal.cancelButton")}
         </Button>
       </Modal.Footer>

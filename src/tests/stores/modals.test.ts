@@ -86,6 +86,17 @@ describe("useModalStore", () => {
     expect(useModalStore.getState().stack).toHaveLength(0);
   });
 
+  it("updateById replaces the data of an open modal (no-op for unknown ids)", () => {
+    void useModalStore.getState().open(StubModal, "initial");
+    const id = useModalStore.getState().stack[0].id;
+
+    useModalStore.getState().updateById(id, "updated");
+    expect(useModalStore.getState().stack[0].data).toBe("updated");
+
+    useModalStore.getState().updateById("unknown-id", "x");
+    expect(useModalStore.getState().stack[0].data).toBe("updated");
+  });
+
   it("close on an empty stack is a no-op", () => {
     expect(() => useModalStore.getState().close("x")).not.toThrow();
     expect(useModalStore.getState().stack).toHaveLength(0);

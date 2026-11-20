@@ -57,9 +57,12 @@ export interface ModalRenderHelpers {
 /**
  * One entry of the modal stack. Created by `open`, rendered by the
  * {@link ModalPortal}; `resolve` settles the promise returned by `open`.
+ * `data` can be replaced via `updateById` (the portal re-renders the modal
+ * with the new `data`).
  */
 export interface ModalEntry {
   id: string;
+  data: unknown;
   render: (helpers: ModalRenderHelpers) => ReactNode;
   resolve: (result: unknown) => void;
 }
@@ -104,6 +107,11 @@ export interface ModalsStore {
    * retract a queued confirmation). No-op for unknown ids.
    */
   closeById: (id: string, result?: unknown) => void;
+  /**
+   * Replaces the `data` of an open modal (e.g. to update a progress label).
+   * The modal component re-renders with the new `data`. No-op for unknown ids.
+   */
+  updateById: (id: string, data: unknown) => void;
   /** Closes all modals, resolving all pending promises with `undefined`. */
   closeAll: () => void;
 }
@@ -126,8 +134,14 @@ export const useModalStore = create<ModalsStore>()((set, get) => ({
     });
     const entry: ModalEntry = {
       id: crypto.randomUUID(),
+      data,
       render: ({ isOpen, close, cancel }) =>
-        createElement(component, { isOpen, data, close, cancel }),
+        createElement(component, {
+          isOpen,
+          data: entry.data as TData,
+          close,
+          cancel,
+        }),
       resolve: (result) => resolvePromise(result as TResult | undefined),
     };
     set({ stack: [...get().stack, entry] });
@@ -142,6 +156,11 @@ export const useModalStore = create<ModalsStore>()((set, get) => ({
     if (!entry) return;
     set({ stack: get().stack.filter((e) => e.id !== id) });
     entry.resolve(result);
+  },
+  updateById: (id, data) => {
+    set({
+      stack: get().stack.map((e) => (e.id === id ? { ...e, data } : e)),
+    });
   },
   closeAll: () => {
     const entries = get().stack;

@@ -5,8 +5,6 @@ import { modsEventBus } from "@/services/mods";
 import { TauriEvent } from "@tauri-apps/api/event";
 import { PhysicalPosition } from "@tauri-apps/api/window";
 import { useEffect } from "react";
-import ModArchiveImportModal from "./ModArchiveImportModal";
-import ModInstallationDetailsModal from "./ModInstallationDetailsModal";
 import { useModArchiveImportModal } from "./useModArchiveImportModal";
 
 interface TauriDragDropEvent {
@@ -14,16 +12,14 @@ interface TauriDragDropEvent {
   position?: PhysicalPosition;
 }
 
-export default function ModInstallationModals() {
+export function useModInstallationModals() {
   const {
     installFromFile,
     installFromFileWithPath,
     installFromPaths,
     installFromFolder,
-    modalProps,
   } = useModInstallation();
-  const { getArchives, modalProps: importModalProps } =
-    useModArchiveImportModal();
+  const { getArchives } = useModArchiveImportModal();
 
   // React to messages:
   useEffect(
@@ -77,11 +73,4 @@ export default function ModInstallationModals() {
       modsEventBus.emitInstallModFromPaths(paths, {});
     }
   });
-
-  return (
-    <>
-      <ModInstallationDetailsModal {...modalProps} />
-      <ModArchiveImportModal {...importModalProps} />
-    </>
-  );
 }
