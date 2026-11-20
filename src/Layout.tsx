@@ -11,6 +11,7 @@ import { useBlockFileDragAndDrop } from "@/hooks/useBlockFileDragAndDrop";
 import useSyncTranslation from "@/hooks/useSyncTranslation";
 import { css } from "@emotion/react";
 import { Outlet } from "react-router-dom";
+import { ModalPortal } from "./components/ModalPortal";
 
 function Globals() {
   useSyncTranslation();
@@ -25,6 +26,7 @@ function Globals() {
       <PrereleaseModal />
       <UpdateProgressModal />
       <Toasts />
+      <ModalPortal />
     </>
   );
 }
