@@ -1,27 +1,20 @@
 import { commands } from "@/commands/bindings";
 import { PathEntryRow } from "@/components/common";
 import { useProfilesStore } from "@/stores/profiles";
+import { ModalComponentProps } from "@/stores/modals";
 import * as path from "@tauri-apps/api/path";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
-interface Props {
-  show: boolean;
-  onConfirm: (archiveName: string) => void;
-  onAbort: () => void;
-}
-
-export default function AddResourceModal(props: Props) {
+export default function AddResourceModal(
+  props: ModalComponentProps<void, string>,
+) {
   const { t } = useTranslation();
   const [resource, setResource] = useState("");
 
-  useEffect(() => {
-    setResource("");
-  }, [props.show]);
-
   return (
-    <Modal show={props.show} backdrop="static" centered>
+    <Modal show={props.isOpen} onHide={props.cancel} backdrop="static" centered>
       <Modal.Header>
         <Modal.Title>
           {t("mods.resourceListTab.modals.addArchiveTitle")}
@@ -50,10 +43,10 @@ export default function AddResourceModal(props: Props) {
         />
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="primary" onClick={() => props.onConfirm(resource)}>
+        <Button variant="primary" onClick={() => props.close(resource)}>
           {t("common.saveButton")}
         </Button>
-        <Button variant="secondary" onClick={props.onAbort}>
+        <Button variant="secondary" onClick={props.cancel}>
           {t("common.abort")}
         </Button>
       </Modal.Footer>

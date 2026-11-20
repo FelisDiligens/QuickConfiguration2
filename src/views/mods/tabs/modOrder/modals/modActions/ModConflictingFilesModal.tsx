@@ -1,30 +1,31 @@
 import { Conflict } from "@/commands/bindings";
 import { MessageModal } from "@/components/modals/MessageModal";
 import { useModsStore } from "@/stores/mods";
+import { ModalComponentProps } from "@/stores/modals";
 import { useTranslation } from "react-i18next";
 
-interface Props {
-  show: boolean;
+export interface ModConflictingFilesModalData {
   conflicts: Conflict[];
-  onHide: () => void;
 }
 
-export default function ModConflictingFilesModal(props: Props) {
+export default function ModConflictingFilesModal(
+  props: ModalComponentProps<ModConflictingFilesModalData, void>,
+) {
   const { t } = useTranslation();
   const getMod = useModsStore((s) => s.getMod);
   return (
     <MessageModal
-      isOpen={props.show}
+      isOpen={props.isOpen}
       data={{
         title: t("mods.modOrderTab.modals.conflictsModal.title"),
         children: (
           <>
-            {props.conflicts.length == 0 && (
+            {props.data.conflicts.length == 0 && (
               <p>
                 {t("mods.modOrderTab.modals.conflictsModal.noConflictsFound")}
               </p>
             )}
-            {props.conflicts.map((conflict) => {
+            {props.data.conflicts.map((conflict) => {
               const lowerMod =
                 getMod(conflict.lower_mod_id)?.title || conflict.lower_mod_id;
               const upperMod =
@@ -50,8 +51,8 @@ export default function ModConflictingFilesModal(props: Props) {
           </>
         ),
       }}
-      close={props.onHide}
-      cancel={props.onHide}
+      close={props.close}
+      cancel={props.cancel}
     />
   );
 }

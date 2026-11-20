@@ -9,8 +9,8 @@ import {
   PageTitle,
   Title,
 } from "@/components/common";
-import { ConfirmModal } from "@/components/modals/ConfirmModal";
 import { useAsync } from "@/hooks/async";
+import { confirmModal } from "@/hooks/useModal";
 import { useProfilesStore } from "@/stores/profiles";
 import { css } from "@emotion/react";
 import {
@@ -25,7 +25,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import * as path from "@tauri-apps/api/path";
 import * as dialog from "@tauri-apps/plugin-dialog";
-import { useState } from "react";
 import { Button } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { PhotoProvider, PhotoView } from "react-photo-view";
@@ -54,38 +53,8 @@ function ToolBarButton(props: {
   );
 }
 
-function ConfirmDeleteDialog(props: {
-  screenshotPath: string;
-  show: boolean;
-  onConfirm: () => void;
-  onAbort: () => void;
-}) {
-  const { t } = useTranslation();
-  return (
-    <ConfirmModal
-      isOpen={props.show}
-      data={{
-        title: t("gallery.deleteScreenshot.title"),
-        children: (
-          <span css={css`overflow-wrap: anywhere;`}>
-            {t("gallery.deleteScreenshot.text", { path: props.screenshotPath })}
-          </span>
-        ),
-      }}
-      close={(confirmed) => {
-        if (confirmed) props.onConfirm();
-      }}
-      cancel={props.onAbort}
-    />
-  );
-}
-
 export default function GalleryView() {
   const { t } = useTranslation();
-
-  const [screenshotToDelete, setScreenshotToDelete] = useState<
-    Screenshot | undefined
-  >(undefined);
 
   // Get the game installation path and ini parent path from the profile:
   const gamePath =
@@ -142,7 +111,7 @@ export default function GalleryView() {
     commands.openPathInFileExplorer(screenshotPath).catch(showErrorMessage);
   }
 
-  function showDeleteScreenshotConfirmDialog(index: number) {
+  async function showDeleteScreenshotConfirmDialog(index: number) {
     const screenshot = screenshots?.at(index);
     if (!screenshot) {
       console.warn(
@@ -150,7 +119,15 @@ export default function GalleryView() {
       );
       return;
     }
-    setScreenshotToDelete(screenshot);
+    const confirmed = await confirmModal({
+      title: t("gallery.deleteScreenshot.title"),
+      children: (
+        <span css={css`overflow-wrap: anywhere;`}>
+          {t("gallery.deleteScreenshot.text", { path: screenshot.path })}
+        </span>
+      ),
+    });
+    if (confirmed) deleteScreenshot(screenshot);
   }
 
   function deleteScreenshot(screenshot: Screenshot) {
@@ -167,18 +144,6 @@ export default function GalleryView() {
         reload();
       })
       .catch(showErrorMessage);
-  }
-
-  function confirmDeleteScreenshot() {
-    const screenshot = screenshotToDelete;
-    setScreenshotToDelete(undefined);
-    if (!screenshot) {
-      console.warn(
-        "GalleryView -> confirmDeleteScreenshot: couldn't determine screenshot to delete",
-      );
-      return;
-    }
-    deleteScreenshot(screenshot);
   }
 
   if (error) {
@@ -230,7 +195,7 @@ export default function GalleryView() {
                   icon={faTrash}
                   onClick={() => {
                     onClose();
-                    showDeleteScreenshotConfirmDialog(index);
+                    void showDeleteScreenshotConfirmDialog(index);
                   }}
                 />
                 <ToolBarButton
@@ -264,13 +229,6 @@ export default function GalleryView() {
           ))}
         </PhotoProvider>
       </Flex>
-
-      <ConfirmDeleteDialog
-        screenshotPath={screenshotToDelete?.path || ""}
-        show={screenshotToDelete != undefined}
-        onConfirm={confirmDeleteScreenshot}
-        onAbort={() => setScreenshotToDelete(undefined)}
-      />
     </PageContainer>
   );
 }

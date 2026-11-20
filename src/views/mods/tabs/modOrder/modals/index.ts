@@ -4,10 +4,6 @@ import { atom } from "jotai";
 export const isLoadingModalShownAtom = atom(false);
 export const isErrorModalShownAtom = atom(false);
 
-// Mod actions modals
-export const isModDeletionModalShownAtom = atom(false);
-export const isModConflictingFilesModalShownAtom = atom(false);
-
 // Mod download modals
 export const isCdnModalShownAtom = atom(false);
 
@@ -32,8 +28,6 @@ export const isAnyModalShownAtom = atom(
     get(isLoadingModalShownAtom) ||
     get(isErrorModalShownAtom) ||
     get(isCdnModalShownAtom) ||
-    get(isModDeletionModalShownAtom) ||
-    get(isModConflictingFilesModalShownAtom) ||
     get(isModInstallationDetailsModalShownAtom) ||
     get(isModArchiveImportModalShownAtom) ||
     get(isOutdatedModsModalShownAtom) ||

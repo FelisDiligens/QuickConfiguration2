@@ -9,7 +9,7 @@ import _ from "lodash";
 import { useEffect, useState } from "react";
 import ResourceTable from "./ResourceTable";
 import ToolRow from "./ToolRow";
-import ResourceListModals from "./modals/ResourceListModals";
+import { useResourceListModals } from "./modals/useResourceListModals";
 
 export interface Resource {
   name: string;
@@ -21,6 +21,7 @@ export interface Resource {
 export default function ResourceListTab() {
   const resources = useResourceListStore((store) => store.resources);
   const setResources = useResourceListStore((store) => store.setResources);
+  useResourceListModals();
 
   const [mappedResources, setMappedResources] = useState<Resource[]>([]);
   useEffect(() => {
@@ -107,7 +108,6 @@ export default function ResourceListTab() {
           setResources(newResources);
         }}
       />
-      <ResourceListModals />
     </>
   );
 }

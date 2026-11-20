@@ -1,6 +1,6 @@
 import { AnyError } from "@/commands/errors";
 import { FlexRow } from "@/components/common";
-import { useModDeployment } from "@/hooks/mods";
+import { useModDeployment, useModManagement } from "@/hooks/mods";
 import { modsEventBus } from "@/services/mods";
 import { useModsStore } from "@/stores/mods";
 import { css } from "@emotion/react";
@@ -12,7 +12,7 @@ import { Button } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Archive2Modals from "./modals/archive2/Archive2Modals";
 import CommonModals from "./modals/common/CommonModals";
-import ModActionModals from "./modals/modActions/ModActionModals";
+import { useModConflictingFilesModal } from "./modals/modActions/useModConflictingFilesModal";
 import ModDownloadModals from "./modals/modDownload/ModDownloadModals";
 import ModInstallationModals from "./modals/modInstallation/ModInstallationModals";
 import NexusModsModals from "./modals/nexusMods/NexusModsModals";
@@ -32,6 +32,8 @@ export default function ModOrderTab() {
   const [showDetails, setShowDetails] = useAtom(showDetailsAtom);
 
   const { deployMods } = useModDeployment();
+  useModManagement();
+  useModConflictingFilesModal();
 
   // React to messages:
   useEffect(
@@ -84,7 +86,6 @@ export default function ModOrderTab() {
       {/* Modals */}
       <CommonModals />
       <ModInstallationModals />
-      <ModActionModals />
       <ModDownloadModals />
       <Archive2Modals />
       <NexusModsModals />
