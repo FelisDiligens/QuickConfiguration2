@@ -11,11 +11,10 @@ import {
   RadioRowGroup,
 } from "@/components/common";
 import { AppTheme } from "@/components/MyThemeProvider";
-import { useAsync } from "@/hooks/async";
 import { openModal } from "@/hooks/useModal";
 import * as profilesService from "@/services/profiles";
 import { useProfilesStore } from "@/stores/profiles";
-import { useSettingsStore } from "@/stores/settings";
+import { ModalComponentProps } from "@/stores/modals";
 import { css } from "@emotion/react";
 import {
   faMagnifyingGlass,
@@ -70,7 +69,7 @@ function VaultTecRepQuote() {
   );
 }
 
-export default function FirstRunModal() {
+export default function FirstRunModal(props: ModalComponentProps<void, void>) {
   const { t } = useTranslation();
 
   const profiles = useProfilesStore((store) => store.profiles);
@@ -78,11 +77,6 @@ export default function FirstRunModal() {
   const setSelectedIndex = useProfilesStore((store) => store.setSelectedIndex);
 
   const isFirstRun = profiles.length == 0;
-  const { data: isPrerelease } = useAsync(commands.isPrerelease);
-  const isPrereleaseDismissed = useSettingsStore((s) => s.prereleaseDismissed);
-
-  // Show the first run modal if no profiles are available and the prerelease modal isn't shown:
-  const show = isFirstRun && !(isPrerelease && !isPrereleaseDismissed);
 
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<Profile>(
@@ -112,6 +106,7 @@ export default function FirstRunModal() {
   function getStarted() {
     setProfiles([profile]);
     setSelectedIndex(0);
+    props.close();
   }
 
   async function onAutoDetectGamePath() {
@@ -125,7 +120,7 @@ export default function FirstRunModal() {
   }
 
   return (
-    <Modal show={show} backdrop="static" centered>
+    <Modal show={props.isOpen} backdrop="static" centered>
       <Modal.Header>
         <Modal.Title>
           <h2
