@@ -173,9 +173,10 @@ export const useModalStore = create<ModalsStore>()((set, get) => ({
     entry.resolve(result);
   },
   updateById: (id, data) => {
-    set({
-      stack: get().stack.map((e) => (e.id === id ? { ...e, data } : e)),
-    });
+    const entry = get().getById(id);
+    if (!entry) return;
+    entry.data = data;
+    set({ stack: [...get().stack] });
   },
   closeAll: () => {
     const entries = get().stack;

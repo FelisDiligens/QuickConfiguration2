@@ -13,6 +13,9 @@ function StubModal(props: ModalComponentProps<StubData, string>) {
   const [value, setValue] = useState(props.data.initialValue ?? "");
   return (
     <div data-testid={props.data.testId} data-open={props.isOpen}>
+      <span data-testid={`${props.data.testId}-label`}>
+        {props.data.initialValue}
+      </span>
       <input
         data-testid={`${props.data.testId}-input`}
         value={value}
@@ -92,6 +95,27 @@ describe("<ModalPortal />", () => {
 
     await expect(promise).resolves.toBeUndefined();
     expect(useModalStore.getState().stack).toHaveLength(0);
+  });
+
+  it("updateById re-renders an open modal with the new data", () => {
+    render(<ModalPortal />);
+    act(() => {
+      void useModalStore.getState().open(StubModal, {
+        testId: "modal-a",
+        initialValue: "A",
+      });
+    });
+    expect(screen.getByTestId("modal-a-label")).toHaveTextContent("A");
+
+    const id = useModalStore.getState().stack[0].id;
+    act(() => {
+      useModalStore
+        .getState()
+        .updateById(id, { testId: "modal-a", initialValue: "B" });
+    });
+
+    expect(screen.getByTestId("modal-a-label")).toHaveTextContent("B");
+    expect(screen.getByTestId("modal-a")).toHaveAttribute("data-open", "true");
   });
 
   it("keeps a closed modal rendered with isOpen=false for MODAL_EXIT_ANIMATION_MS, then removes it", () => {

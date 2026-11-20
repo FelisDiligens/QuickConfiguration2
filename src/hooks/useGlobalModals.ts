@@ -23,10 +23,12 @@ function useFirstRunModal() {
   const isOpenRef = useRef(false);
 
   // Open the first run modal if no profiles are available and the prerelease
-  // modal isn't shown:
+  // modal isn't shown (wait until the prerelease check has resolved, so the
+  // first run modal doesn't flash before the prerelease modal):
   useEffect(() => {
     if (
       isFirstRun &&
+      isPrerelease !== undefined &&
       !(isPrerelease && !isPrereleaseDismissed) &&
       !isOpenRef.current
     ) {
