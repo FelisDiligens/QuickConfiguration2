@@ -32,7 +32,7 @@ interface DownloadSource {
 
 export function useModDownloadModals() {
   const { t } = useTranslation();
-  const isAnyModalShown = useModalStore((store) => store.stack.length > 0);
+  const isAnyModalShown = useModalStore((store) => store.isAnyOpen());
   const isPendingRef = useRef(false);
   const downloadSourceRef = useRef<DownloadSource | undefined>(undefined);
   const updateModKeyRef = useRef<string | undefined>(undefined);

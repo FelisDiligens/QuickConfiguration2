@@ -42,16 +42,13 @@ export function useCommonModals() {
                   : undefined,
             };
             const id = loadingModalIdRef.current;
-            if (
-              id &&
-              useModalStore.getState().stack.some((entry) => entry.id === id)
-            ) {
+            if (id && useModalStore.getState().has(id)) {
               useModalStore.getState().updateById(id, data);
             } else {
               void openModal(LoadingModal, data);
               loadingModalIdRef.current = useModalStore
                 .getState()
-                .stack.at(-1)?.id;
+                .getCurrentId();
             }
             break;
           }
@@ -62,7 +59,7 @@ export function useCommonModals() {
           case "error":
             closeLoadingModal();
             void openModal(ErrorMessageModal, { reason: message.error });
-            errorModalIdRef.current = useModalStore.getState().stack.at(-1)?.id;
+            errorModalIdRef.current = useModalStore.getState().getCurrentId();
             break;
           // no default
         }

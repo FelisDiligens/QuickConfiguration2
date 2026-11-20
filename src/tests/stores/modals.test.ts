@@ -86,6 +86,32 @@ describe("useModalStore", () => {
     expect(useModalStore.getState().stack).toHaveLength(0);
   });
 
+  it("query helpers: has/getById/getCurrent/getCurrentId/isAnyOpen", () => {
+    const store = useModalStore.getState();
+    expect(store.isAnyOpen()).toBe(false);
+    expect(store.getCurrent()).toBeUndefined();
+    expect(store.getCurrentId()).toBeUndefined();
+    expect(store.has("nope")).toBe(false);
+    expect(store.getById("nope")).toBeUndefined();
+
+    void store.open(StubModal, "first");
+    const firstId = useModalStore.getState().stack[0].id;
+    void store.open(OtherStubModal, 42);
+    const secondId = useModalStore.getState().stack[1].id;
+
+    const updated = useModalStore.getState();
+    expect(updated.isAnyOpen()).toBe(true);
+    expect(updated.has(firstId)).toBe(true);
+    expect(updated.getById(firstId)).toBeDefined();
+    expect(updated.getCurrentId()).toBe(secondId);
+    expect(updated.getCurrent()?.id).toBe(secondId);
+    expect(updated.getCurrentId()).not.toBe(firstId);
+
+    useModalStore.getState().close();
+    expect(useModalStore.getState().getCurrentId()).toBe(firstId);
+    expect(useModalStore.getState().has(secondId)).toBe(false);
+  });
+
   it("updateById replaces the data of an open modal (no-op for unknown ids)", () => {
     void useModalStore.getState().open(StubModal, "initial");
     const id = useModalStore.getState().stack[0].id;

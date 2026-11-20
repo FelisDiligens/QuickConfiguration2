@@ -81,6 +81,16 @@ export interface ModalEntry {
 export interface ModalsStore {
   /** The modal stack; the last element is the currently visible modal. */
   stack: ModalEntry[];
+  /** Returns whether a modal with the given `id` is currently on the stack. */
+  has: (id: string) => boolean;
+  /** Returns the stack entry with the given `id`, or `undefined` if not found. */
+  getById: (id: string) => ModalEntry | undefined;
+  /** Returns the top (currently visible) stack entry, or `undefined` when the stack is empty. */
+  getCurrent: () => ModalEntry | undefined;
+  /** Returns the id of the top (currently visible) modal, or `undefined` when the stack is empty. */
+  getCurrentId: () => string | undefined;
+  /** Returns whether any modal is currently on the stack. */
+  isAnyOpen: () => boolean;
   /**
    * Pushes a modal onto the stack and returns a promise for its result.
    * @param component the modal component (receives {@link ModalComponentProps})
@@ -124,6 +134,11 @@ export interface ModalsStore {
  */
 export const useModalStore = create<ModalsStore>()((set, get) => ({
   stack: [],
+  has: (id) => get().getById(id) !== undefined,
+  getById: (id) => get().stack.find((e) => e.id === id),
+  getCurrent: () => get().stack.at(-1),
+  getCurrentId: () => get().getCurrent()?.id,
+  isAnyOpen: () => get().stack.length > 0,
   open: <TData, TResult>(
     component: ModalComponent<TData, TResult>,
     data: TData,
@@ -148,11 +163,11 @@ export const useModalStore = create<ModalsStore>()((set, get) => ({
     return promise;
   },
   close: (result) => {
-    const { stack } = get();
-    if (stack.length > 0) get().closeById(stack[stack.length - 1].id, result);
+    const id = get().getCurrentId();
+    if (id != undefined) get().closeById(id, result);
   },
   closeById: (id, result) => {
-    const entry = get().stack.find((e) => e.id === id);
+    const entry = get().getById(id);
     if (!entry) return;
     set({ stack: get().stack.filter((e) => e.id !== id) });
     entry.resolve(result);

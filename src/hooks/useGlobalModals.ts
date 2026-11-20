@@ -91,21 +91,16 @@ function useUpdateProgressModal() {
             progress: (percent || 0) * 100,
           };
           const id = loadingModalIdRef.current;
-          if (
-            id &&
-            useModalStore.getState().stack.some((entry) => entry.id === id)
-          ) {
+          if (id && useModalStore.getState().has(id)) {
             useModalStore.getState().updateById(id, data);
           } else {
             void openModal(LoadingModal, data);
-            loadingModalIdRef.current = useModalStore
-              .getState()
-              .stack.at(-1)?.id;
+            loadingModalIdRef.current = useModalStore.getState().getCurrentId();
           }
         } else if (error) {
           closeLoadingModal();
           void openModal(ErrorMessageModal, { reason: error });
-          errorModalIdRef.current = useModalStore.getState().stack.at(-1)?.id;
+          errorModalIdRef.current = useModalStore.getState().getCurrentId();
         } else {
           closeLoadingModal();
           closeErrorModal();

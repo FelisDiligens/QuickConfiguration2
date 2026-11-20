@@ -51,7 +51,7 @@ export function ModalPortal() {
     [],
   );
 
-  const activeId = stack.length > 0 ? stack[stack.length - 1].id : undefined;
+  const activeId = useModalStore((store) => store.getCurrentId());
 
   function renderEntry(entry: ModalEntry) {
     return (

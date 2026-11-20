@@ -70,7 +70,7 @@ export function messageModal(data: MessageModalData): Promise<void> {
  *          (whether at least one modal is currently on the stack)
  */
 export function useModal() {
-  const isAnyOpen = useModalStore((store) => store.stack.length > 0);
+  const isAnyOpen = useModalStore((store) => store.isAnyOpen());
   const close = useModalStore((store) => store.close);
   const closeAll = useModalStore((store) => store.closeAll);
   return { openModal, close, closeAll, isAnyOpen };
