@@ -98,6 +98,24 @@ pub async fn nexusmods_api_get_mod_file(
         })
 }
 
+/// Converts a single file from a previously retrieved `ModFiles` API response
+/// into a `ModFileInfo`, including the latest file found through file updates.
+#[tauri::command]
+#[specta::specta]
+pub async fn nexusmods_api_get_mod_file_info_from_mod_files(
+    game_domain: String,
+    game_scoped_id: u32,
+    file_id: u32,
+    mod_files: json::ModFiles,
+) -> CommandResult<json::ModFileInfo> {
+    log::trace!("Extracting mod file info for file id {file_id:?} from given mod files");
+    json::ModFileInfo::from_api_response(game_domain, game_scoped_id, file_id, &mod_files)
+        .tap_none(|| log::error!("Couldn't find file with id {file_id:?} in the given mod files"))
+        .ok_or(CommandError::String {
+            message: format!("Couldn't find file with id {file_id:?} in the given mod files"),
+        })
+}
+
 #[tauri::command]
 #[specta::specta]
 pub async fn nexusmods_api_nxm_request_download_links(

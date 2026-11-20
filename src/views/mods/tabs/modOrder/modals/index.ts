@@ -18,6 +18,7 @@ export const isModArchiveImportModalShownAtom = atom(false);
 // NexusMods modals
 export const isOutdatedModsModalShownAtom = atom(false);
 export const isLoggedOutModalShownAtom = atom(false);
+export const isTrackModFileModalShownAtom = atom(false);
 
 // Archive2 modals
 export const isArchive2InfoModalShownAtom = atom(false);
@@ -37,6 +38,7 @@ export const isAnyModalShownAtom = atom(
     get(isModArchiveImportModalShownAtom) ||
     get(isOutdatedModsModalShownAtom) ||
     get(isLoggedOutModalShownAtom) ||
+    get(isTrackModFileModalShownAtom) ||
     get(isArchive2InfoModalShownAtom) ||
     get(isArchive2CreateModalShownAtom) ||
     get(isArchive2ExtractModalShownAtom) ||

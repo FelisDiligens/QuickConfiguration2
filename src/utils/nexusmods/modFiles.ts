@@ -1,6 +1,45 @@
-import { ManagedMod, NexusModsModFileInfo } from "@/commands/bindings";
+import {
+  ManagedMod,
+  NexusModsFileCategory,
+  NexusModsModFile,
+  NexusModsModFileInfo,
+} from "@/commands/bindings";
 import { Nullish } from "@/types";
 import { NexusModsModFileIds, parseNexusModsUrl } from ".";
+
+export interface ModFileGroup {
+  category: NexusModsFileCategory | null;
+  files: NexusModsModFile[];
+}
+
+const categoryOrder: (NexusModsFileCategory | null)[] = [
+  "MAIN",
+  "UPDATE",
+  "OPTIONAL",
+  "MISCELLANEOUS",
+  "OLD_VERSION",
+  null,
+];
+
+/**
+ * Groups mod files by their category for display purposes.
+ * Archived files are filtered out. The groups are ordered by `categoryOrder`;
+ * files without a category come last.
+ */
+export function groupModFilesByCategory(
+  modFiles: NexusModsModFile[],
+): ModFileGroup[] {
+  const groups = new Map<NexusModsFileCategory | null, NexusModsModFile[]>();
+  for (const file of modFiles) {
+    if (file.category === "ARCHIVED") continue;
+    const group = groups.get(file.category);
+    if (group) group.push(file);
+    else groups.set(file.category, [file]);
+  }
+  return categoryOrder
+    .filter((category) => groups.has(category))
+    .map((category) => ({ category, files: groups.get(category) ?? [] }));
+}
 
 export class ModFilesMap {
   #map: Map<string, NexusModsModFileInfo>;

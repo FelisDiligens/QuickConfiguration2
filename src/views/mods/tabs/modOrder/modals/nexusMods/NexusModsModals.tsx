@@ -1,3 +1,4 @@
+import { NexusModsModFiles } from "@/commands/bindings";
 import { AnyError, commandErrorToString } from "@/commands/errors";
 import NexusMods from "@/commands/nexusmods";
 import { modsEventBus } from "@/services/mods";
@@ -10,9 +11,14 @@ import {
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { isLoggedOutModalShownAtom, isOutdatedModsModalShownAtom } from "..";
+import {
+  isLoggedOutModalShownAtom,
+  isOutdatedModsModalShownAtom,
+  isTrackModFileModalShownAtom,
+} from "..";
 import LoggedOutModal from "./LoggedOutModal";
 import OutdatedModsModal from "./OutdatedModsModal";
+import TrackModFileModal from "./TrackModFileModal";
 
 export interface OutdatedMod {
   key: string;
@@ -21,6 +27,13 @@ export interface OutdatedMod {
   gameScopedId: number;
   currentVersion: string;
   latestVersion: string;
+}
+
+export interface TrackModFileState {
+  key: string;
+  gameDomain: string;
+  gameScopedId: number;
+  modFiles: NexusModsModFiles;
 }
 
 export default function NexusModsModals() {
@@ -36,6 +49,12 @@ export default function NexusModsModals() {
   const [showLoggedOutModal, setShowLoggedOutModal] = useAtom(
     isLoggedOutModalShownAtom,
   );
+  const [showTrackModFileModal, setShowTrackModFileModal] = useAtom(
+    isTrackModFileModalShownAtom,
+  );
+  const [trackModFileState, setTrackModFileState] = useState<
+    TrackModFileState | undefined
+  >(undefined);
 
   async function checkApiKey() {
     const apiKey = useNexusModsStore.getState().apiKey;
@@ -103,6 +122,27 @@ export default function NexusModsModals() {
     await nexusmodsApi.endorseAll(mods);
   }
 
+  async function trackModFile(key: string) {
+    if (!(await checkApiKey())) return;
+    const mod = getMod(key);
+    if (!mod) {
+      modsEventBus.emitProgressAborted(
+        t("mods.modOrderTab.progress.modNotFound"),
+      );
+      return;
+    }
+    try {
+      const { gameDomain, gameScopedId, modFiles } =
+        await nexusmodsApi.listModFiles(mod.url);
+      setTrackModFileState({ key, gameDomain, gameScopedId, modFiles });
+      setShowTrackModFileModal(true);
+    } catch (error) {
+      console.error(
+        `Failed to list mod files for mod '${mod.title}': ${commandErrorToString(error as AnyError)}`,
+      );
+    }
+  }
+
   async function checkForUpdates() {
     await retrieveModInfoAll();
     const outdatedMods = [];
@@ -164,6 +204,9 @@ export default function NexusModsModals() {
           case "nexus-mods-not-logged-in":
             setShowLoggedOutModal(true);
             break;
+          case "nexus-mods-track-mod-file":
+            trackModFile(message.key).catch(console.error);
+            break;
           // no default
         }
       }),
@@ -180,6 +223,11 @@ export default function NexusModsModals() {
         show={showOutdatedModal}
         onHide={() => setShowOutdatedModal(false)}
         outdatedMods={outdatedMods}
+      />
+      <TrackModFileModal
+        show={showTrackModFileModal}
+        onHide={() => setShowTrackModFileModal(false)}
+        state={trackModFileState}
       />
     </>
   );

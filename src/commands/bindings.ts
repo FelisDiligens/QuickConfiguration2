@@ -165,6 +165,13 @@ async nexusmodsApiListModFiles(apiKey: string, gameDomain: string, gameScopedId:
 async nexusmodsApiGetModFile(apiKey: string, gameDomain: string, gameScopedId: number, fileId: number) : Promise<NexusModsModFileInfo> {
     return await TAURI_INVOKE("nexusmods_api_get_mod_file", { apiKey, gameDomain, gameScopedId, fileId });
 },
+/**
+ * Converts a single file from a previously retrieved `ModFiles` API response
+ * into a `ModFileInfo`, including the latest file found through file updates.
+ */
+async nexusmodsApiGetModFileInfoFromModFiles(gameDomain: string, gameScopedId: number, fileId: number, modFiles: NexusModsModFiles) : Promise<NexusModsModFileInfo> {
+    return await TAURI_INVOKE("nexusmods_api_get_mod_file_info_from_mod_files", { gameDomain, gameScopedId, fileId, modFiles });
+},
 async nexusmodsApiNxmRequestDownloadLinks(apiKey: string, nxmLink: string) : Promise<NexusModsDownloadLink[]> {
     return await TAURI_INVOKE("nexusmods_api_nxm_request_download_links", { apiKey, nxmLink });
 },

@@ -657,6 +657,7 @@
         "untrackFile": "Untrack",
         "author": "Author",
         "downloadModInfo": "Download mod information",
+        "trackFile": "Track a file",
         "renameFailed": "Couldn't rename folder: {{error}}"
       },
       "statusbar": {
@@ -785,6 +786,27 @@
           "description": "Pick a CDN server to download the mod.",
           "pickButton": "Pick",
           "cancelButton": "Cancel"
+        },
+        "trackModFileModal": {
+          "title": "Track a file",
+          "question": "Which file did you download from NexusMods?",
+          "noFiles": "No files found for this mod.",
+          "categories": {
+            "main": "Main files",
+            "update": "Updates",
+            "optional": "Optional files",
+            "miscellaneous": "Miscellaneous",
+            "oldVersion": "Old files",
+            "archived": "Archived files",
+            "other": "Other files"
+          },
+          "tableHeaderFile": "File",
+          "tableHeaderVersion": "File version",
+          "tableHeaderUploaded": "Date uploaded",
+          "tableHeaderSize": "File size",
+          "tableHeaderActions": "Actions",
+          "trackButton": "Track",
+          "primaryFile": "Primary file"
         }
       },
       "progress": {
@@ -810,6 +832,7 @@
         "endorsingMods": "Endorsing mods",
         "endorsingModXofY": "Endorsing mod {{currentMod}} of {{totalMods}}: {{modTitle}}",
         "retrievingModInfo": "Retrieving mod info",
+        "listingModFiles": "Listing mod files",
         "endorsingMod": "Endorsing mod",
         "abstainingFromEndorsingMod": "Abstaining from endorsing mod",
         "removingModStatusText": "Removing mod {{removedMods}} of {{totalMods}}: {{modTitle}}, file {{removedFiles}} of {{totalFiles}}: {{fileName}}",
@@ -837,6 +860,7 @@
         "infoRetrieved": "Info retrieved",
         "infoRetrievedWithCount": "Info retrieved, count: {{count}}",
         "modsEndorsed": "Mods endorsed, count: {{count}}",
+        "fileTracked": "File tracked",
         "openingFilesPage": "Opening the files page on NexusMods in your browser"
       }
     },

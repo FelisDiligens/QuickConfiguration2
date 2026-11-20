@@ -539,17 +539,28 @@ function Options(props: {
                   {props.mod.nexusFileId}
                 </InfoLine>
               )}
-              <Button
-                variant="secondary"
-                onClick={() =>
-                  modsEventBus.emitNexusModsDownloadModInfo(props.mod.key)
-                }
-                css={css`margin-top: 8px;`}
-              >
-                <FontAwesomeIcon icon={faDownload} />
-                &nbsp;
-                {t("mods.modOrderTab.detailsPane.downloadModInfo")}
-              </Button>
+              <FlexCol gap="8px" css={css`margin-top: 8px;`}>
+                <Button
+                  variant="secondary"
+                  onClick={() =>
+                    modsEventBus.emitNexusModsDownloadModInfo(props.mod.key)
+                  }
+                >
+                  <FontAwesomeIcon icon={faDownload} />
+                  &nbsp;
+                  {t("mods.modOrderTab.detailsPane.downloadModInfo")}
+                </Button>
+                {!props.mod.nexusFileId && (
+                  <Button
+                    variant="secondary"
+                    onClick={() =>
+                      modsEventBus.emitNexusModsTrackModFile(props.mod.key)
+                    }
+                  >
+                    {t("mods.modOrderTab.detailsPane.trackFile")}
+                  </Button>
+                )}
+              </FlexCol>
             </FlexCol>
           </CardBody>
         </Card>

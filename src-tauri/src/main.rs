@@ -61,6 +61,7 @@ fn main() {
             commands::nexusmods::nexusmods_api_abstain,
             commands::nexusmods::nexusmods_api_list_mod_files,
             commands::nexusmods::nexusmods_api_get_mod_file,
+            commands::nexusmods::nexusmods_api_get_mod_file_info_from_mod_files,
             commands::nexusmods::nexusmods_api_nxm_request_download_links,
             commands::nexusmods::nexusmods_api_request_download_links,
             commands::nexusmods::nexusmods_get_account_info,

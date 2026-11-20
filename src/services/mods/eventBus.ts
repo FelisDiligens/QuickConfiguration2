@@ -29,6 +29,7 @@ export type UIActionEvent =
   | { type: "nexus-mods-endorse-mod"; key: string }
   | { type: "nexus-mods-abstain-mod"; key: string }
   | { type: "nexus-mods-not-logged-in" }
+  | { type: "nexus-mods-track-mod-file"; key: string }
   | { type: "archive2-open" }
   | { type: "archive2-pick-file-explore-ba2-archive" }
   | { type: "archive2-pick-file-extract-ba2-archive" }
@@ -209,6 +210,11 @@ export class ModsEventBus {
   /* Abstain from endorsing a mod using the NexusMods API. */
   emitNexusModsAbstainMod(key: string) {
     this.emitUIActionEvent({ type: "nexus-mods-abstain-mod", key });
+  }
+
+  /* Start the flow to track a NexusMods file for a mod. */
+  emitNexusModsTrackModFile(key: string) {
+    this.emitUIActionEvent({ type: "nexus-mods-track-mod-file", key });
   }
 
   /* Open Archive2. */

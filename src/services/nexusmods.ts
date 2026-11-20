@@ -55,6 +55,38 @@ export async function retrieveModinfo(url: string, fileId?: Nullish<number>) {
   }
 }
 
+/**
+ * Lists all files of the mod behind the given NexusMods URL.
+ * Shows the loading modal while the API request is running.
+ */
+export async function listModFiles(url: string) {
+  try {
+    const apiKey = useNexusModsStore.getState().apiKey;
+    if (!apiKey) throw new Error("API key is not set");
+
+    console.log("Listing mod files for", url);
+    modsEventBus.emitProgressUpdated(
+      t("mods.modOrderTab.progress.listingModFiles"),
+    );
+
+    // List all files of the mod:
+    const [gameDomain, gameScopedId] = await NexusMods.extractIdsFromUrl(url);
+    const modFiles = await NexusMods.api.listModFiles(
+      apiKey,
+      gameDomain,
+      gameScopedId,
+      null,
+    );
+
+    modsEventBus.emitProgressFinished();
+
+    return { gameDomain, gameScopedId, modFiles };
+  } catch (error) {
+    modsEventBus.emitProgressAborted(error as AnyError);
+    throw error;
+  }
+}
+
 /** Endorse mod */
 export async function endorse(url: string, modVersion: string) {
   try {

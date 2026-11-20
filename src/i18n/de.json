@@ -657,6 +657,7 @@
         "untrackFile": "Nicht mehr verfolgen",
         "author": "Autor",
         "downloadModInfo": "Modinformationen herunterladen",
+        "trackFile": "Eine Datei verfolgen",
         "renameFailed": "Konnte Ordner nicht umbenennen: {{error}}"
       },
       "statusbar": {
@@ -785,6 +786,27 @@
           "description": "Wähle einen CDN-Server zum Herunterladen der Mod aus.",
           "pickButton": "Auswählen",
           "cancelButton": "Abbrechen"
+        },
+        "trackModFileModal": {
+          "title": "Eine Datei verfolgen",
+          "question": "Welche Datei hast du von NexusMods heruntergeladen?",
+          "noFiles": "Für diesen Mod wurden keine Dateien gefunden.",
+          "categories": {
+            "main": "Hauptdateien",
+            "update": "Updates",
+            "optional": "Optionale Dateien",
+            "miscellaneous": "Sonstiges",
+            "oldVersion": "Alte Dateien",
+            "archived": "Archivierte Dateien",
+            "other": "Andere Dateien"
+          },
+          "tableHeaderFile": "Datei",
+          "tableHeaderVersion": "Dateiversion",
+          "tableHeaderUploaded": "Hochgeladen am",
+          "tableHeaderSize": "Dateigröße",
+          "tableHeaderActions": "Aktionen",
+          "trackButton": "Verfolgen",
+          "primaryFile": "Primäre Datei"
         }
       },
       "progress": {
@@ -811,6 +833,7 @@
         "endorsingMods": "Empfehle Mods",
         "endorsingModXofY": "Empfehle Mod {{currentMod}} von {{totalMods}}: {{modTitle}}",
         "retrievingModInfo": "Lade Modinformationen",
+        "listingModFiles": "Mod-Dateien werden aufgelistet",
         "endorsingMod": "Empfehle Mod",
         "abstainingFromEndorsingMod": "Verzichte auf Mod-Empfehlung",
         "modNotFound": "Mod nicht gefunden",
@@ -837,6 +860,7 @@
         "infoRetrieved": "Informationen abgerufen",
         "infoRetrievedWithCount": "Informationen abgerufen, Anzahl: {{count}}",
         "modsEndorsed": "Mods empfohlen, Anzahl: {{count}}",
+        "fileTracked": "Datei wird verfolgt",
         "openingFilesPage": "Die Dateiansicht auf NexusMods wird im Browser geöffnet"
       }
     },

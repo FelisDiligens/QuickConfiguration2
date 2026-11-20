@@ -1,11 +1,14 @@
 import type {
   ManagedMod,
+  NexusModsFileCategory,
   NexusModsLatestModFileInfo,
+  NexusModsModFile,
   NexusModsModFileInfo,
   NexusModsModInfo,
 } from "@/commands/bindings";
 import {
   determineLatestModVersion,
+  groupModFilesByCategory,
   isModInstallOutdated,
   ModInfoMap,
   parseNexusModsUrl,
@@ -303,5 +306,74 @@ describe("isModInstallOutdated", () => {
         }),
       ).toBe(false);
     });
+  });
+});
+
+function createModFile(
+  fileId: number,
+  category: NexusModsFileCategory | null = "MAIN",
+): NexusModsModFile {
+  return {
+    id: [],
+    uid: fileId,
+    fileId,
+    name: `file-${fileId}`,
+    version: "1.0",
+    categoryId: 1,
+    categoryName: category,
+    category,
+    isPrimary: false,
+    size: 0,
+    fileName: `file-${fileId}.zip`,
+    uploadedTime: "2026-10-25T14:51:00.000+00:00",
+    modVersion: "1.0",
+    externalVirusScanUrl: null,
+    description: "",
+    sizeKb: 0,
+    sizeInBytes: null,
+    changelogHtml: null,
+    contentPreviewLink: null,
+  };
+}
+
+describe("groupModFilesByCategory", () => {
+  it("filters out archived files", () => {
+    const groups = groupModFilesByCategory([
+      createModFile(1, "MAIN"),
+      createModFile(2, "ARCHIVED"),
+    ]);
+    expect(groups).toHaveLength(1);
+    expect(groups[0]?.files.map((f) => f.fileId)).toEqual([1]);
+  });
+
+  it("groups files by category and orders the groups", () => {
+    const groups = groupModFilesByCategory([
+      createModFile(1, "OLD_VERSION"),
+      createModFile(2, "MAIN"),
+      createModFile(3, "OPTIONAL"),
+      createModFile(4, "MAIN"),
+      createModFile(5, null),
+    ]);
+    expect(groups.map((g) => g.category)).toEqual([
+      "MAIN",
+      "OPTIONAL",
+      "OLD_VERSION",
+      null,
+    ]);
+    expect(groups[0]?.files.map((f) => f.fileId)).toEqual([2, 4]);
+    expect(groups[3]?.files.map((f) => f.fileId)).toEqual([5]);
+  });
+
+  it("returns an empty array when there are no files", () => {
+    expect(groupModFilesByCategory([])).toEqual([]);
+  });
+
+  it("returns an empty array when all files are archived", () => {
+    expect(
+      groupModFilesByCategory([
+        createModFile(1, "ARCHIVED"),
+        createModFile(2, "ARCHIVED"),
+      ]),
+    ).toEqual([]);
   });
 });
