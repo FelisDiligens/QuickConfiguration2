@@ -93,7 +93,7 @@ export default function TrackModFileModal(
     >
       <Modal.Header closeButton>
         <Modal.Title>
-          <b>{t("mods.modOrderTab.modals.trackModFileModal.title")}</b>
+          {t("mods.modOrderTab.modals.trackModFileModal.title")}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>

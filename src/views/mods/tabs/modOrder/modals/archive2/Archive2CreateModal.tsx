@@ -59,7 +59,9 @@ export default function Archive2CreateModal(
       centered
     >
       <Modal.Header>
-        <b>{t("mods.modOrderTab.modals.archive2.createTitle")}</b>
+        <Modal.Title>
+          {t("mods.modOrderTab.modals.archive2.createTitle")}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <PathEntryRow

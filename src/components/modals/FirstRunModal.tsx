@@ -32,9 +32,11 @@ function VaultTecRepQuote() {
   return (
     <div
       css={css`
+        font-weight: normal;
+        font-size: 1rem;
+        font-style: italic;
         margin-top: 10px;
         opacity: 0.7;
-        font-style: italic;
       `}
     >
       <FlexRow gap="0.5rem">
@@ -131,13 +133,20 @@ export default function FirstRunModal(props: ModalComponentProps<void, void>) {
         <Modal.Title>
           <h2
             css={css`
-                font-weight: bold;
-                margin: 5px 0 10px 0;
-              `}
+              font-weight: bold;
+              margin: 5px 0 10px 0;
+            `}
           >
             {t("welcome.title")}
           </h2>
-          <span>{t("welcome.subtitle")}</span>
+          <span
+            css={css`
+              font-weight: normal;
+              font-size: 1rem;
+            `}
+          >
+            {t("welcome.subtitle")}
+          </span>
           <VaultTecRepQuote />
         </Modal.Title>
       </Modal.Header>

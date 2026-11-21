@@ -22,9 +22,7 @@ export function MessageModal(
       centered
     >
       <Modal.Header closeButton>
-        <Modal.Title>
-          <b>{props.data.title}</b>
-        </Modal.Title>
+        <Modal.Title>{props.data.title}</Modal.Title>
       </Modal.Header>
       <Modal.Body>{props.data.children}</Modal.Body>
       <Modal.Footer>

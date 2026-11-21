@@ -129,16 +129,7 @@ export default function EditProfileModal(
       `}
     >
       <Modal.Header closeButton>
-        <Modal.Title>
-          <h2
-            css={css`
-                font-weight: bold;
-                margin: 0;
-              `}
-          >
-            {t("profiles.editProfile")}
-          </h2>
-        </Modal.Title>
+        <Modal.Title>{t("profiles.editProfile")}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Entry

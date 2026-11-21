@@ -244,6 +244,14 @@ button.btn-outline-danger:not(:hover) {
     box-shadow: #f3d175d8 0 0 2px 2px;
 }
 
+/*
+ * Bootstrap modals
+ */
+.modal-header > .modal-title {
+    font-weight: 600;
+    font-size: 1.15rem;
+}
+
 /* ===== Scrollbar CSS ===== */
 /* Source: https://codepen.io/stephenpaton-tech/full/JjRvGmY */
 /* Firefox */

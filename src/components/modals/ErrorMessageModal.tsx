@@ -25,7 +25,7 @@ export default function ErrorMessageModal(
       centered
     >
       <Modal.Header>
-        <b>{t("errors.anErrorOccurred")}</b>
+        <Modal.Title>{t("errors.anErrorOccurred")}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <span>{commandErrorToString(props.data.reason)}</span>

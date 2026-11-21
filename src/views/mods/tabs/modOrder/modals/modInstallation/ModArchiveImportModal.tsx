@@ -54,7 +54,9 @@ export default function ModArchiveImportModal(
       centered
     >
       <Modal.Header>
-        <b>{t("mods.modOrderTab.modals.importModal.title")}</b>
+        <Modal.Title>
+          {t("mods.modOrderTab.modals.importModal.title")}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <p>{t("mods.modOrderTab.modals.importModal.description")}</p>

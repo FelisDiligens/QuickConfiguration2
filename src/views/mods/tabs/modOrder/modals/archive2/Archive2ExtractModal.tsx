@@ -51,7 +51,9 @@ export default function Archive2ExtractModal(
       centered
     >
       <Modal.Header>
-        <b>{t("mods.modOrderTab.modals.archive2.extractTitle")}</b>
+        <Modal.Title>
+          {t("mods.modOrderTab.modals.archive2.extractTitle")}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <PathEntryRow

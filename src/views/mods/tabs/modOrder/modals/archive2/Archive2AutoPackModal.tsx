@@ -65,7 +65,9 @@ export default function Archive2AutoPackModal(
       centered
     >
       <Modal.Header>
-        <b>{t("mods.modOrderTab.modals.archive2.autoPackTitle")}</b>
+        <Modal.Title>
+          {t("mods.modOrderTab.modals.archive2.autoPackTitle")}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <p>{t("mods.modOrderTab.modals.archive2.autoPackDescription")}</p>
