@@ -3,6 +3,7 @@ import { AnyError, commandErrorToString } from "@/commands/errors";
 import NexusMods from "@/commands/nexusmods";
 import { FlexCol } from "@/components/common";
 import { modsEventBus } from "@/services/mods";
+import { ModalComponentProps } from "@/stores/modals";
 import { useModsStore } from "@/stores/mods";
 import { useNexusModsStore } from "@/stores/nexusmods";
 import { useToastsStore } from "@/stores/toasts";
@@ -13,7 +14,6 @@ import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useMemo } from "react";
 import { Button, Modal, OverlayTrigger, Table, Tooltip } from "react-bootstrap";
-import { ModalComponentProps } from "@/stores/modals";
 import { useTranslation } from "react-i18next";
 import type { TrackModFileState } from "./types";
 
@@ -83,13 +83,13 @@ export default function TrackModFileModal(
 
   return (
     <Modal
-      animation={animationsEnabled}
+      size="xl"
       show={props.isOpen}
       onHide={props.cancel}
-      size="xl"
+      animation={animationsEnabled}
+      backdrop="static"
       scrollable
       centered
-      backdrop="static"
     >
       <Modal.Header closeButton>
         <Modal.Title>

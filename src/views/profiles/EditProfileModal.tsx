@@ -19,8 +19,8 @@ import SelectDetectedGamePathModal from "@/components/modals/SelectDetectedGameP
 import { AppTheme } from "@/components/MyThemeProvider";
 import { openModal } from "@/hooks/useModal";
 import * as profilesService from "@/services/profiles";
-import { useProfilesStore } from "@/stores/profiles";
 import { ModalComponentProps } from "@/stores/modals";
+import { useProfilesStore } from "@/stores/profiles";
 import { animationsEnabled } from "@/utils";
 import { css } from "@emotion/react";
 import {
@@ -117,16 +117,16 @@ export default function EditProfileModal(
 
   return (
     <Modal
-      animation={animationsEnabled}
+      size="xl"
       show={props.isOpen}
       onHide={props.cancel}
-      size="xl"
+      animation={animationsEnabled}
       backdrop="static"
       css={(theme: AppTheme) => css`
-          & .modal-dialog {
-            max-width: calc(${theme.card.maxWidth} + 40px);
-          }
-        `}
+        & .modal-dialog {
+          max-width: calc(${theme.card.maxWidth} + 40px);
+        }
+      `}
     >
       <Modal.Header closeButton>
         <Modal.Title>

@@ -20,9 +20,9 @@ export default function SelectDetectedGamePathModal(
     <Modal
       show={props.isOpen}
       onHide={props.cancel}
+      animation={animationsEnabled}
       backdrop="static"
       centered
-      animation={animationsEnabled}
     >
       <Modal.Header>
         <Modal.Title>{t("profiles.autoDetectGamePathModal.title")}</Modal.Title>

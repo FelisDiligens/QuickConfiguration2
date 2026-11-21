@@ -1,7 +1,7 @@
 import { commands } from "@/commands/bindings";
 import { PathEntryRow } from "@/components/common";
-import { useProfilesStore } from "@/stores/profiles";
 import { ModalComponentProps } from "@/stores/modals";
+import { useProfilesStore } from "@/stores/profiles";
 import { animationsEnabled } from "@/utils";
 import * as path from "@tauri-apps/api/path";
 import { useState } from "react";
@@ -18,9 +18,9 @@ export default function AddResourceModal(
     <Modal
       show={props.isOpen}
       onHide={props.cancel}
+      animation={animationsEnabled}
       backdrop="static"
       centered
-      animation={animationsEnabled}
     >
       <Modal.Header>
         <Modal.Title>

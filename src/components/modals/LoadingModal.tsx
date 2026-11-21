@@ -29,9 +29,9 @@ export default function LoadingModal(
     <Modal
       size="xl"
       show={props.isOpen}
+      animation={animationsEnabled}
       backdrop="static"
       centered
-      animation={animationsEnabled}
     >
       <Modal.Body>
         <FlexRow center gap="1rem">

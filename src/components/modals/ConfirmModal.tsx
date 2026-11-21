@@ -17,9 +17,9 @@ export function ConfirmModal(
     <Modal
       show={props.isOpen}
       onHide={props.cancel}
+      animation={animationsEnabled}
       backdrop="static"
       centered
-      animation={animationsEnabled}
     >
       <Modal.Header>
         <Modal.Title>{props.data.title}</Modal.Title>

@@ -1,7 +1,7 @@
 import { commands } from "@/commands/bindings";
 import { PathEntryRow } from "@/components/common";
-import { useProfilesStore } from "@/stores/profiles";
 import { ModalComponentProps } from "@/stores/modals";
+import { useProfilesStore } from "@/stores/profiles";
 import { animationsEnabled } from "@/utils";
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
@@ -57,10 +57,10 @@ export default function Archive2AutoPackModal(
 
   return (
     <Modal
-      animation={animationsEnabled}
       size="xl"
       show={props.isOpen}
       onHide={props.cancel}
+      animation={animationsEnabled}
       backdrop="static"
       centered
     >

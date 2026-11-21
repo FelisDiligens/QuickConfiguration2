@@ -17,10 +17,10 @@ export default function ErrorMessageModal(
   const { t } = useTranslation();
   return (
     <Modal
-      animation={animationsEnabled}
       size="xl"
       show={props.isOpen}
       onHide={props.cancel}
+      animation={animationsEnabled}
       backdrop="static"
       centered
     >

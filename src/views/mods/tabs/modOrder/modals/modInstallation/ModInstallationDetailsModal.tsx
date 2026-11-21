@@ -9,8 +9,8 @@ import Mods from "@/commands/mods";
 import { Entry, FlexCol, FlexRow, Select } from "@/components/common";
 import { AppTheme } from "@/components/MyThemeProvider";
 import { useAsync } from "@/hooks/async";
-import { useModsStore } from "@/stores/mods";
 import { ModalComponentProps } from "@/stores/modals";
+import { useModsStore } from "@/stores/mods";
 import { useProfilesStore } from "@/stores/profiles";
 import { animationsEnabled, pathJoinSync } from "@/utils";
 import { parseNexusModsUrl } from "@/utils/nexusmods";
@@ -340,9 +340,9 @@ export default function ModInstallationDetailsModal(
 
   return (
     <Modal
-      animation={animationsEnabled}
       show={props.isOpen}
       onHide={props.cancel}
+      animation={animationsEnabled}
       css={(theme: AppTheme) => css`
         & .modal-dialog {
           max-width: calc(${theme.card.maxWidth} + 40px);

@@ -32,9 +32,9 @@ function SSOLoginModal(props: { show: boolean; abort: () => void }) {
   return (
     <Modal
       show={props.show}
+      animation={animationsEnabled}
       backdrop="static"
       centered
-      animation={animationsEnabled}
     >
       <Modal.Header>
         <Modal.Title>

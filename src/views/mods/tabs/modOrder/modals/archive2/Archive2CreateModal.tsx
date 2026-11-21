@@ -51,10 +51,10 @@ export default function Archive2CreateModal(
 
   return (
     <Modal
-      animation={animationsEnabled}
       size="xl"
       show={props.isOpen}
       onHide={props.cancel}
+      animation={animationsEnabled}
       backdrop="static"
       centered
     >

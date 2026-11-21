@@ -13,8 +13,8 @@ import {
 import { AppTheme } from "@/components/MyThemeProvider";
 import { openModal } from "@/hooks/useModal";
 import * as profilesService from "@/services/profiles";
-import { useProfilesStore } from "@/stores/profiles";
 import { ModalComponentProps } from "@/stores/modals";
+import { useProfilesStore } from "@/stores/profiles";
 import { animationsEnabled } from "@/utils";
 import { css } from "@emotion/react";
 import {
@@ -123,9 +123,9 @@ export default function FirstRunModal(props: ModalComponentProps<void, void>) {
   return (
     <Modal
       show={props.isOpen}
+      animation={animationsEnabled}
       backdrop="static"
       centered
-      animation={animationsEnabled}
     >
       <Modal.Header>
         <Modal.Title>

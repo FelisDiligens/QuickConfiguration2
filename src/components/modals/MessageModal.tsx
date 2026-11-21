@@ -17,9 +17,9 @@ export function MessageModal(
     <Modal
       show={props.isOpen}
       onHide={props.cancel}
+      animation={animationsEnabled}
       backdrop="static"
       centered
-      animation={animationsEnabled}
     >
       <Modal.Header closeButton>
         <Modal.Title>
