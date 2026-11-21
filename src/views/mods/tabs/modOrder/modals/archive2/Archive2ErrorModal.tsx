@@ -4,17 +4,18 @@ import {
   commandErrorToString,
 } from "@/commands/errors";
 import { MessageModal } from "@/components/modals/MessageModal";
+import { ModalComponentProps } from "@/stores/modals";
 import { urls } from "@/info";
 import { open } from "@tauri-apps/plugin-shell";
 import { Trans, useTranslation } from "react-i18next";
 
-interface Props {
-  show: boolean;
-  onHide: () => void;
+export interface Archive2ErrorModalData {
   reason: AnyError;
 }
 
-export default function Archive2ErrorModal(props: Props) {
+export default function Archive2ErrorModal(
+  props: ModalComponentProps<Archive2ErrorModalData, void>,
+) {
   const { t } = useTranslation();
 
   const formatErrorMessage = (error: AnyError) => {
@@ -101,11 +102,13 @@ export default function Archive2ErrorModal(props: Props) {
 
   return (
     <MessageModal
-      title={t("errors.anErrorOccurred")}
-      show={props.show}
-      onHide={props.onHide}
-    >
-      <p>{formatErrorMessage(props.reason)}</p>
-    </MessageModal>
+      isOpen={props.isOpen}
+      data={{
+        title: t("errors.anErrorOccurred"),
+        children: <p>{formatErrorMessage(props.data.reason)}</p>,
+      }}
+      close={props.cancel}
+      cancel={props.cancel}
+    />
   );
 }

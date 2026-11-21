@@ -1,6 +1,6 @@
 import { AnyError } from "@/commands/errors";
 import { FlexRow } from "@/components/common";
-import { useModDeployment } from "@/hooks/mods";
+import { useModDeployment, useModManagement } from "@/hooks/mods";
 import { modsEventBus } from "@/services/mods";
 import { useModsStore } from "@/stores/mods";
 import { css } from "@emotion/react";
@@ -10,12 +10,12 @@ import { atom, useAtom } from "jotai";
 import { useEffect } from "react";
 import { Button } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import Archive2Modals from "./modals/archive2/Archive2Modals";
-import CommonModals from "./modals/common/CommonModals";
-import ModActionModals from "./modals/modActions/ModActionModals";
-import ModDownloadModals from "./modals/modDownload/ModDownloadModals";
-import ModInstallationModals from "./modals/modInstallation/ModInstallationModals";
-import NexusModsModals from "./modals/nexusMods/NexusModsModals";
+import { useArchive2Modals } from "./modals/archive2/useArchive2Modals";
+import { useCommonModals } from "./modals/common/useCommonModals";
+import { useModConflictingFilesModal } from "./modals/modActions/useModConflictingFilesModal";
+import { useModDownloadModals } from "./modals/modDownload/useModDownloadModals";
+import { useModInstallationModals } from "./modals/modInstallation/useModInstallationModals";
+import { useNexusModsModals } from "./modals/nexusMods/useNexusModsModals";
 import ModDetails from "./ModDetails";
 import ModTable from "./ModTable";
 import StatusRow from "./StatusRow";
@@ -32,6 +32,13 @@ export default function ModOrderTab() {
   const [showDetails, setShowDetails] = useAtom(showDetailsAtom);
 
   const { deployMods } = useModDeployment();
+  useModManagement();
+  useModConflictingFilesModal();
+  useNexusModsModals();
+  useArchive2Modals();
+  useModDownloadModals();
+  useModInstallationModals();
+  useCommonModals();
 
   // React to messages:
   useEffect(
@@ -81,13 +88,6 @@ export default function ModOrderTab() {
         {showDetails && mods[selectedModIndex] && <ModDetails />}
       </FlexRow>
       <StatusRow />
-      {/* Modals */}
-      <CommonModals />
-      <ModInstallationModals />
-      <ModActionModals />
-      <ModDownloadModals />
-      <Archive2Modals />
-      <NexusModsModals />
     </>
   );
 }

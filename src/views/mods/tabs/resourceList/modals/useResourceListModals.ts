@@ -1,10 +1,12 @@
+import { confirmModal, openModal } from "@/hooks/useModal";
 import { useResourceListActions } from "@/hooks/mods/useResourceListActions";
 import { modsEventBus } from "@/services/mods";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import AddResourceModal from "./AddResourceModal";
-import RemoveResourceModal from "./RemoveResourceModal";
 
-export default function ResourceListModals() {
+export function useResourceListModals() {
+  const { t } = useTranslation();
   const {
     addArchive,
     removeArchive,
@@ -13,10 +15,20 @@ export default function ResourceListModals() {
     removeGameArchives,
   } = useResourceListActions();
 
-  const [showAddModal, setShowAddModal] = useState(false);
+  const showAddArchiveModal = async () => {
+    const name = await openModal(AddResourceModal, undefined);
+    if (name) addArchive(name);
+  };
 
-  const [showRemoveModal, setShowRemoveModal] = useState(false);
-  const [removeModalArchiveName, setRemoveModalArchiveName] = useState("");
+  const confirmRemoveArchive = async (name: string) => {
+    const confirmed = await confirmModal({
+      title: t("mods.resourceListTab.modals.removeArchiveTitle"),
+      children: t("mods.resourceListTab.modals.removeArchiveText", {
+        archive: name,
+      }),
+    });
+    if (confirmed) removeArchive(name);
+  };
 
   // React to messages:
   useEffect(
@@ -24,7 +36,7 @@ export default function ResourceListModals() {
       modsEventBus.onUIActionEvent((message) => {
         switch (message.type) {
           case "resourcelist-add-archive":
-            setShowAddModal(true);
+            showAddArchiveModal().catch(console.error);
             break;
           case "resourcelist-add-unlisted-archives":
             addUnlistedArchives().catch(console.error);
@@ -36,34 +48,11 @@ export default function ResourceListModals() {
             removeGameArchives().catch(console.error);
             break;
           case "resourcelist-remove-archive":
-            setShowRemoveModal(true);
-            setRemoveModalArchiveName(message.name);
+            confirmRemoveArchive(message.name).catch(console.error);
             break;
           // no default
         }
       }),
     [],
-  );
-
-  return (
-    <>
-      <AddResourceModal
-        show={showAddModal}
-        onConfirm={(name) => {
-          addArchive(name);
-          setShowAddModal(false);
-        }}
-        onAbort={() => setShowAddModal(false)}
-      />
-      <RemoveResourceModal
-        show={showRemoveModal}
-        archiveName={removeModalArchiveName}
-        onConfirm={(name) => {
-          removeArchive(name);
-          setShowRemoveModal(false);
-        }}
-        onAbort={() => setShowRemoveModal(false)}
-      />
-    </>
   );
 }

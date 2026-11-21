@@ -7,6 +7,14 @@ export function sleep(ms: number): Promise<void> {
 }
 
 /**
+ * Whether UI animations (e.g. the modal fade) are enabled. Disabled under
+ * vitest (`import.meta.env.MODE === "test"`), where jsdom reports empty
+ * transition durations and react-bootstrap ends up calling `setTimeout`
+ * with `NaN`. Enabled in dev and production builds.
+ */
+export const animationsEnabled = import.meta.env.MODE !== "test";
+
+/**
  * @param startAt Inclusive
  * @param endAt Exclusive
  * @returns {number[]} an array with numbers from `startAt` to `endAt` (excluding `endAt`).

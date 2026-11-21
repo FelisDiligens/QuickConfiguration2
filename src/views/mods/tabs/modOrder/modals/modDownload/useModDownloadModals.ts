@@ -13,12 +13,12 @@ import { useSettingsStore } from "@/stores/settings";
 import { useToastsStore } from "@/stores/toasts";
 import { formatBytes } from "@/utils";
 import { canUserDownloadDirectly, parseNexusModsUrl } from "@/utils/nexusmods";
+import { openModal } from "@/hooks/useModal";
+import { useModalStore } from "@/stores/modals";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-shell";
-import { useAtom, useAtomValue } from "jotai";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { isAnyModalShownAtom, isCdnModalShownAtom } from "..";
 import ChooseCDNLinkModal from "./ChooseCDNLinkModal";
 
 type ModDetails = Awaited<ReturnType<typeof nexusmodsApi.retrieveModinfo>>;
@@ -30,24 +30,21 @@ interface DownloadSource {
   url: string;
 }
 
-export default function ModDownloadModals() {
+export function useModDownloadModals() {
   const { t } = useTranslation();
-  const [isCdnModalShown, setIsCdnModalShown] = useAtom(isCdnModalShownAtom);
-  const isAnyModalShown = useAtomValue(isAnyModalShownAtom);
-  const [cdnLinks, setCdnLinks] = useState<NexusModsDownloadLink[]>([]);
+  const isAnyModalShown = useModalStore((store) => store.isAnyOpen());
   const isPendingRef = useRef(false);
   const downloadSourceRef = useRef<DownloadSource | undefined>(undefined);
   const updateModKeyRef = useRef<string | undefined>(undefined);
   const modDetailsRef = useRef<ModDetails | undefined>(undefined);
 
-  function showCdnModal(cdnLinks: NexusModsDownloadLink[]) {
-    setIsCdnModalShown(true);
-    setCdnLinks(cdnLinks);
-  }
-
-  function hideCdnModal() {
-    setIsCdnModalShown(false);
-    setCdnLinks([]);
+  async function chooseCdnLink(cdnLinks: NexusModsDownloadLink[]) {
+    const cdnLink = await openModal(ChooseCDNLinkModal, { links: cdnLinks });
+    if (cdnLink) {
+      await downloadMod(cdnLink.uri);
+    } else {
+      isPendingRef.current = false;
+    }
   }
 
   async function checkApiKey() {
@@ -94,7 +91,7 @@ export default function ModDownloadModals() {
       if (!cdnLinks || cdnLinks.length == 0) {
         throw new Error("Didn't get any CDN links from API");
       } else if (cdnLinks.length > 1) {
-        showCdnModal(cdnLinks);
+        await chooseCdnLink(cdnLinks);
       } else {
         await downloadMod(cdnLinks[0].uri);
       }
@@ -195,7 +192,7 @@ export default function ModDownloadModals() {
       if (!cdnLinks || cdnLinks.length == 0) {
         throw new Error("Didn't get any CDN links from API");
       } else if (cdnLinks.length > 1) {
-        showCdnModal(cdnLinks);
+        await chooseCdnLink(cdnLinks);
       } else {
         await downloadMod(cdnLinks[0].uri);
       }
@@ -305,25 +302,5 @@ export default function ModDownloadModals() {
         }
       }),
     [],
-  );
-
-  return (
-    <>
-      <ChooseCDNLinkModal
-        show={isCdnModalShown}
-        onAccept={(cdnLink) => {
-          hideCdnModal();
-          downloadMod(cdnLink.uri).catch((reason) => {
-            console.error(reason);
-            modsEventBus.emitProgressAborted(reason as AnyError);
-          });
-        }}
-        onAbort={() => {
-          hideCdnModal();
-          isPendingRef.current = false;
-        }}
-        links={cdnLinks}
-      />
-    </>
   );
 }

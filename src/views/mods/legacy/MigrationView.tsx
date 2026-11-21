@@ -7,10 +7,10 @@ import {
   PageTitle,
   PreferencesGroup,
 } from "@/components/common";
-import { ConfirmModal } from "@/components/modals/ConfirmModal";
 import LoadingModal from "@/components/modals/LoadingModal";
 import { AppTheme } from "@/components/MyThemeProvider";
 import { useModMigration } from "@/hooks/mods";
+import { confirmModal } from "@/hooks/useModal";
 import { css } from "@emotion/react";
 import {
   faRightLeft,
@@ -18,7 +18,6 @@ import {
   faTriangleExclamation,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -30,8 +29,48 @@ export default function MigrationView(props: Props) {
   const { t } = useTranslation();
   const { isPending, error, statusText, progress, migrateMods, deleteMods } =
     useModMigration(props.reloadMigrationBoundary);
-  const [showMigrationModal, setShowMigrationModal] = useState(false);
-  const [showDeletionModal, setShowDeletionModal] = useState(false);
+
+  async function confirmMigrateMods() {
+    const confirmed = await confirmModal({
+      title: t("mods.migration.migrateModal.title"),
+      children: (
+        <>
+          <p>{t("mods.migration.migrateModal.description")}</p>
+          <ul>
+            <li>{t("mods.migration.migrateModal.bundledArchives")}</li>
+            <li>{t("mods.migration.migrateModal.separateArchives")}</li>
+            <li>{t("mods.migration.migrateModal.looseFiles")}</li>
+          </ul>
+          <p>{t("mods.migration.migrateModal.archive2Note")}</p>
+          <p css={css`color: var(--bs-danger);`}>
+            {t("mods.migration.migrateModal.cannotBeUndone")}
+          </p>
+        </>
+      ),
+    });
+    if (confirmed) migrateMods().catch(console.error);
+  }
+
+  async function confirmDeleteMods() {
+    const confirmed = await confirmModal({
+      title: t("mods.migration.deleteModal.title"),
+      children: (
+        <>
+          <p>{t("mods.migration.deleteModal.description")}</p>
+          <ul>
+            <li>{t("mods.migration.deleteModal.bundledArchivesDetail")}</li>
+            <li>{t("mods.migration.deleteModal.deployedFiles")}</li>
+            <li>{t("mods.migration.deleteModal.folders")}</li>
+          </ul>
+          <p css={css`color: var(--bs-danger);`}>
+            {t("mods.migration.deleteModal.cannotBeUndone")}
+          </p>
+        </>
+      ),
+    });
+    if (confirmed) deleteMods().catch(console.error);
+  }
+
   return (
     <>
       <PageContainer>
@@ -58,9 +97,7 @@ export default function MigrationView(props: Props) {
             <ButtonRow
               center
               variant="danger"
-              onClick={() => {
-                setShowMigrationModal(true);
-              }}
+              onClick={() => void confirmMigrateMods()}
             >
               <FontAwesomeIcon icon={faRightLeft} />
               &nbsp; {t("mods.migration.migrateOldModsButton")}
@@ -68,9 +105,7 @@ export default function MigrationView(props: Props) {
             <ButtonRow
               center
               variant="danger"
-              onClick={() => {
-                setShowDeletionModal(true);
-              }}
+              onClick={() => void confirmDeleteMods()}
             >
               <FontAwesomeIcon icon={faSackXmark} />
               &nbsp; {t("mods.migration.deleteOldModsButton")}
@@ -78,50 +113,12 @@ export default function MigrationView(props: Props) {
           </PreferencesGroup>
         </div>
       </PageContainer>
-      <LoadingModal show={isPending} label={statusText} progress={progress} />
-      <ConfirmModal
-        title={t("mods.migration.migrateModal.title")}
-        show={showMigrationModal}
-        onConfirm={() => {
-          setShowMigrationModal(false);
-          migrateMods().catch(console.error);
-        }}
-        onAbort={() => {
-          setShowMigrationModal(false);
-        }}
-      >
-        <p>{t("mods.migration.migrateModal.description")}</p>
-        <ul>
-          <li>{t("mods.migration.migrateModal.bundledArchives")}</li>
-          <li>{t("mods.migration.migrateModal.separateArchives")}</li>
-          <li>{t("mods.migration.migrateModal.looseFiles")}</li>
-        </ul>
-        <p>{t("mods.migration.migrateModal.archive2Note")}</p>
-        <p css={css`color: var(--bs-danger);`}>
-          {t("mods.migration.migrateModal.cannotBeUndone")}
-        </p>
-      </ConfirmModal>
-      <ConfirmModal
-        title={t("mods.migration.deleteModal.title")}
-        show={showDeletionModal}
-        onConfirm={() => {
-          setShowDeletionModal(false);
-          deleteMods().catch(console.error);
-        }}
-        onAbort={() => {
-          setShowDeletionModal(false);
-        }}
-      >
-        <p>{t("mods.migration.deleteModal.description")}</p>
-        <ul>
-          <li>{t("mods.migration.deleteModal.bundledArchivesDetail")}</li>
-          <li>{t("mods.migration.deleteModal.deployedFiles")}</li>
-          <li>{t("mods.migration.deleteModal.folders")}</li>
-        </ul>
-        <p css={css`color: var(--bs-danger);`}>
-          {t("mods.migration.deleteModal.cannotBeUndone")}
-        </p>
-      </ConfirmModal>
+      <LoadingModal
+        isOpen={isPending}
+        data={{ label: statusText, progress }}
+        close={() => undefined}
+        cancel={() => undefined}
+      />
     </>
   );
 }

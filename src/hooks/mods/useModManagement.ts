@@ -1,21 +1,16 @@
-import { ManagedMod } from "@/commands/bindings";
 import { AnyError, commandErrorToString } from "@/commands/errors";
 import Mods from "@/commands/mods";
+import { confirmModal } from "@/hooks/useModal";
 import { modsEventBus } from "@/services/mods";
 import { updateModsStore, useModsStore } from "@/stores/mods";
 import { useProfilesStore } from "@/stores/profiles";
 import { useToastsStore } from "@/stores/toasts";
-import { useAtom } from "jotai";
-import { useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { isModDeletionModalShownAtom } from "@/views/mods/tabs/modOrder/modals";
 
-function useModDeletionModal() {
+export function useModManagement() {
   const { t } = useTranslation();
-
-  const [show, setShow] = useAtom(isModDeletionModalShownAtom);
   const getMod = useModsStore((store) => store.getMod);
-  const [mod, setMod] = useState<ManagedMod | undefined>(undefined);
 
   const uninstallMod = async (key: string) => {
     try {
@@ -52,26 +47,34 @@ function useModDeletionModal() {
     }
   };
 
-  return {
-    deleteMod: (key: string) => {
-      setShow(true);
-      setMod(getMod(key));
-    },
-    modalProps: {
-      mod,
-      show,
-      onConfirm: (key: string) => {
-        setShow(false);
-        uninstallMod(key).catch(console.error);
-      },
-      onAbort: () => {
-        setShow(false);
-      },
-    },
+  const deleteMod = async (key: string) => {
+    const mod = getMod(key);
+    if (!mod) return;
+    const confirmed = await confirmModal({
+      title: t("mods.modOrderTab.modals.deleteModTitle"),
+      children: t("mods.modOrderTab.modals.deleteModText", {
+        mod: mod.title || "",
+      }),
+    });
+    if (confirmed) await uninstallMod(key);
   };
-}
 
-export function useModManagement() {
-  const { deleteMod, modalProps: deleteModModalProps } = useModDeletionModal();
-  return { deleteMod, deleteModModalProps };
+  // React to messages:
+  useEffect(
+    () =>
+      modsEventBus.onUIActionEvent((message) => {
+        switch (message.type) {
+          case "mods-delete-mod":
+            deleteMod(message.key).catch((reason) => {
+              console.error(reason);
+              modsEventBus.emitProgressAborted(reason as AnyError);
+            });
+            break;
+          // no default
+        }
+      }),
+    [],
+  );
+
+  return { deleteMod };
 }

@@ -1,41 +1,34 @@
 import { commands, DirEntry, ManagedMod } from "@/commands/bindings";
 import { AnyError, commandErrorToString } from "@/commands/errors";
 import Mods from "@/commands/mods";
+import { openModal } from "@/hooks/useModal";
 import { createBaseManagedMod, modsEventBus } from "@/services/mods";
 import { updateModsStore, useModsStore } from "@/stores/mods";
 import { useProfilesStore } from "@/stores/profiles";
 import { useToastsStore } from "@/stores/toasts";
 import { path } from "@tauri-apps/api";
 import * as dialog from "@tauri-apps/plugin-dialog";
-import { atom, useAtom } from "jotai";
 import { useTranslation } from "react-i18next";
-import { isModInstallationDetailsModalShownAtom } from "@/views/mods/tabs/modOrder/modals";
-
-const fileContentsAtom = atom<DirEntry[]>([]);
-const modAtom = atom<ManagedMod>(createBaseManagedMod());
-const updateModKeyAtom = atom<string | undefined>(undefined);
+import ModInstallationDetailsModal from "@/views/mods/tabs/modOrder/modals/modInstallation/ModInstallationDetailsModal";
 
 export function useModInstallation() {
   const { t } = useTranslation();
 
-  const [showModal, setShowModal] = useAtom(
-    isModInstallationDetailsModalShownAtom,
-  );
-  const [fileContents, setFileContents] = useAtom(fileContentsAtom);
-  const [mod, setMod] = useAtom(modAtom);
-  const [updateModKey, setUpdateModKey] = useAtom(updateModKeyAtom);
-
-  const openInstallModal = (
+  const openInstallModal = async (
     modDetails: ManagedMod,
     fileContents: DirEntry[],
+    updateModKey?: string,
   ) => {
-    setMod(modDetails);
-    setFileContents(fileContents);
-    setShowModal(true);
-  };
-
-  const closeInstallModal = () => {
-    setShowModal(false);
+    const result = await openModal(ModInstallationDetailsModal, {
+      mod: modDetails,
+      updateModKey,
+      fileContents,
+    });
+    if (result) {
+      await installMod(result.mod, result.paths);
+    } else {
+      await abortInstallation();
+    }
   };
 
   /** Copy file (or extract archive) into temporary directory */
@@ -84,11 +77,9 @@ export function useModInstallation() {
         await Mods.actions.tempFolder.detectRootFolder(tmpPath);
       modDetails.options.rootFolder = rootFolder;
 
-      setUpdateModKey(updateModKey);
-
       modsEventBus.emitProgressFinished();
 
-      openInstallModal(modDetails, fileContents);
+      await openInstallModal(modDetails, fileContents, updateModKey);
     } catch (error) {
       modsEventBus.emitProgressAborted(error as AnyError);
     }
@@ -154,7 +145,7 @@ export function useModInstallation() {
 
       modsEventBus.emitProgressFinished();
 
-      openInstallModal(modDetails, fileContents);
+      await openInstallModal(modDetails, fileContents);
     } catch (error) {
       modsEventBus.emitProgressAborted(error as AnyError);
     }
@@ -192,7 +183,7 @@ export function useModInstallation() {
 
       modsEventBus.emitProgressFinished();
 
-      openInstallModal(modDetails, fileContents);
+      await openInstallModal(modDetails, fileContents);
     } catch (error) {
       modsEventBus.emitProgressAborted(error as AnyError);
     }
@@ -204,8 +195,6 @@ export function useModInstallation() {
     selectedPaths: string[],
   ) => {
     try {
-      closeInstallModal();
-
       const modsPath = useProfilesStore.getState().getModsPath();
       if (!modsPath) throw new Error(t("mods.errors.unsetModsPath"));
 
@@ -241,8 +230,6 @@ export function useModInstallation() {
   /** Delete the temporary directory to clean up */
   const abortInstallation = async () => {
     try {
-      closeInstallModal();
-
       const modsPath = useProfilesStore.getState().getModsPath();
       if (!modsPath) throw new Error(t("mods.errors.unsetModsPath"));
 
@@ -264,13 +251,6 @@ export function useModInstallation() {
     installFromPaths,
     installFromFolder,
     installMod,
-    modalProps: {
-      onInstall: installMod,
-      onAbort: abortInstallation,
-      mod,
-      show: showModal,
-      updateModKey,
-      fileContents,
-    },
+    abortInstallation,
   };
 }

@@ -1,28 +1,35 @@
-import * as React from "react";
+import { ModalComponentProps } from "@/stores/modals";
+import { animationsEnabled } from "@/utils";
+import { ReactNode } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
-interface Props {
+export interface ConfirmModalData {
   title: string;
-  show: boolean;
-  onConfirm: () => void;
-  onAbort: () => void;
-  children: React.ReactNode;
+  children?: ReactNode;
 }
 
-export function ConfirmModal(props: Props) {
+export function ConfirmModal(
+  props: ModalComponentProps<ConfirmModalData, boolean>,
+) {
   const { t } = useTranslation();
   return (
-    <Modal show={props.show} backdrop="static" centered>
+    <Modal
+      show={props.isOpen}
+      onHide={props.cancel}
+      animation={animationsEnabled}
+      backdrop="static"
+      centered
+    >
       <Modal.Header>
-        <Modal.Title>{props.title}</Modal.Title>
+        <Modal.Title>{props.data.title}</Modal.Title>
       </Modal.Header>
-      <Modal.Body>{props.children}</Modal.Body>
+      <Modal.Body>{props.data.children}</Modal.Body>
       <Modal.Footer>
-        <Button variant="primary" onClick={props.onConfirm}>
+        <Button variant="primary" onClick={() => props.close(true)}>
           {t("common.yes")}
         </Button>
-        <Button variant="secondary" onClick={props.onAbort}>
+        <Button variant="secondary" onClick={props.cancel}>
           {t("common.no")}
         </Button>
       </Modal.Footer>

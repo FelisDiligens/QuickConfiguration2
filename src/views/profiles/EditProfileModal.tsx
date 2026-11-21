@@ -17,8 +17,11 @@ import {
 } from "@/components/common";
 import SelectDetectedGamePathModal from "@/components/modals/SelectDetectedGamePathModal";
 import { AppTheme } from "@/components/MyThemeProvider";
+import { openModal } from "@/hooks/useModal";
 import * as profilesService from "@/services/profiles";
+import { ModalComponentProps } from "@/stores/modals";
 import { useProfilesStore } from "@/stores/profiles";
+import { animationsEnabled } from "@/utils";
 import { css } from "@emotion/react";
 import {
   faMagnifyingGlass,
@@ -29,32 +32,26 @@ import { useState } from "react";
 import { Accordion, Button, Modal } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
-interface Props {
+export interface EditProfileModalData {
   profile: Profile;
-  show: boolean;
-  onHide: () => void;
-  onSave: (profile: Profile) => void;
 }
 
-export default function EditProfileModal(props: Props) {
+export default function EditProfileModal(
+  props: ModalComponentProps<EditProfileModalData, Profile>,
+) {
   const { t } = useTranslation();
+  const profile = props.data.profile;
 
-  const [title, setTitle] = useState(props.profile.title);
-  const [gameEdition, setGameEdition] = useState(props.profile.gameEdition);
-  const [gamePath, setGamePath] = useState(props.profile.installationPath);
-  const [modsPath, setModsPath] = useState(props.profile.modsPath);
-  const [iniPrefix, setIniPrefix] = useState(props.profile.iniPrefix);
-  const [iniPath, setIniPath] = useState(props.profile.iniPath);
-  const [launchOption, setLaunchOption] = useState(props.profile.launchOption);
-  const [executableName, setExecutableName] = useState(
-    props.profile.executableName,
-  );
-  const [execParameters, setExecParameters] = useState(
-    props.profile.execParameters,
-  );
-  const [launcherURL, setLauncherURL] = useState(props.profile.launcherURL);
-
-  const [showDetectGamePathModal, setShowDetectGamePathModal] = useState(false);
+  const [title, setTitle] = useState(profile.title);
+  const [gameEdition, setGameEdition] = useState(profile.gameEdition);
+  const [gamePath, setGamePath] = useState(profile.installationPath);
+  const [modsPath, setModsPath] = useState(profile.modsPath);
+  const [iniPrefix, setIniPrefix] = useState(profile.iniPrefix);
+  const [iniPath, setIniPath] = useState(profile.iniPath);
+  const [launchOption, setLaunchOption] = useState(profile.launchOption);
+  const [executableName, setExecutableName] = useState(profile.executableName);
+  const [execParameters, setExecParameters] = useState(profile.execParameters);
+  const [launcherURL, setLauncherURL] = useState(profile.launcherURL);
 
   function onChangeGameEdition(value: GameEdition) {
     const newGameEdition = value;
@@ -96,9 +93,14 @@ export default function EditProfileModal(props: Props) {
     });
   }
 
+  async function onAutoDetectGamePath() {
+    const path = await openModal(SelectDetectedGamePathModal, undefined);
+    if (path) onChangeGamePath(path);
+  }
+
   function onSave() {
     const newProfile: Profile = {
-      key: props.profile.key || crypto.randomUUID(),
+      key: profile.key || crypto.randomUUID(),
       title,
       installationPath: gamePath,
       modsPath,
@@ -110,278 +112,269 @@ export default function EditProfileModal(props: Props) {
       gameEdition,
       launchOption,
     };
-    props.onSave(newProfile);
+    props.close(newProfile);
   }
 
   return (
-    <>
-      <Modal
-        show={props.show && !showDetectGamePathModal}
-        onHide={props.onHide}
-        size="xl"
-        backdrop="static"
-        css={(theme: AppTheme) => css`
-          & .modal-dialog {
-            max-width: calc(${theme.card.maxWidth} + 40px);
-          }
-        `}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>
-            <h2
-              css={css`
+    <Modal
+      size="xl"
+      show={props.isOpen}
+      onHide={props.cancel}
+      animation={animationsEnabled}
+      backdrop="static"
+      css={(theme: AppTheme) => css`
+        & .modal-dialog {
+          max-width: calc(${theme.card.maxWidth} + 40px);
+        }
+      `}
+    >
+      <Modal.Header closeButton>
+        <Modal.Title>
+          <h2
+            css={css`
                 font-weight: bold;
                 margin: 0;
               `}
-            >
-              {t("profiles.editProfile")}
-            </h2>
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Entry
-            label={t("profiles.profileName")}
-            value={title}
-            onChange={setTitle}
-          />
-
-          <PreferencesGroup
-            title={t("profiles.gameEdition.title")}
-            subtitle={t("profiles.gameEdition.subtitle")}
           >
-            <RadioRowGroup
-              name="game-edition"
-              value={gameEdition}
-              onChange={(value) => onChangeGameEdition(value as GameEdition)}
-            >
-              <RadioRow
-                id="Steam"
-                title={t("profiles.gameEdition.steam")}
-                imageSrc={Steam24Icon}
-              />
-              <RadioRow
-                id="SteamPTS"
-                title={t("profiles.gameEdition.steamPTS")}
-                imageSrc={Steam24Icon}
-              />
-              <RadioRow
-                id="Xbox"
-                title={t("profiles.gameEdition.xbox")}
-                imageSrc={Xbox24Icon}
-              />
-              <RadioRow id="Unknown" title={t("profiles.gameEdition.other")} />
-            </RadioRowGroup>
-          </PreferencesGroup>
+            {t("profiles.editProfile")}
+          </h2>
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Entry
+          label={t("profiles.profileName")}
+          value={title}
+          onChange={setTitle}
+        />
 
-          <PreferencesGroup
-            title={t("profiles.gamePath.title")}
-            subtitle={t("profiles.gamePath.subtitle")}
+        <PreferencesGroup
+          title={t("profiles.gameEdition.title")}
+          subtitle={t("profiles.gameEdition.subtitle")}
+        >
+          <RadioRowGroup
+            name="game-edition"
+            value={gameEdition}
+            onChange={(value) => onChangeGameEdition(value as GameEdition)}
           >
-            <PathEntryRow
-              title=""
-              value={gamePath}
-              onChange={onChangeGamePath}
-              onValidate={(path) => commands.validateGamePath(path)}
-              suffix={
-                <Button
-                  variant="outline-primary"
-                  title={t("common.autoDetectPathButton")}
-                  onClick={() => setShowDetectGamePathModal(true)}
-                >
-                  <FontAwesomeIcon icon={faMagnifyingGlass} />
-                </Button>
-              }
+            <RadioRow
+              id="Steam"
+              title={t("profiles.gameEdition.steam")}
+              imageSrc={Steam24Icon}
             />
-          </PreferencesGroup>
+            <RadioRow
+              id="SteamPTS"
+              title={t("profiles.gameEdition.steamPTS")}
+              imageSrc={Steam24Icon}
+            />
+            <RadioRow
+              id="Xbox"
+              title={t("profiles.gameEdition.xbox")}
+              imageSrc={Xbox24Icon}
+            />
+            <RadioRow id="Unknown" title={t("profiles.gameEdition.other")} />
+          </RadioRowGroup>
+        </PreferencesGroup>
 
-          <details
-            css={(theme: AppTheme) => css`
+        <PreferencesGroup
+          title={t("profiles.gamePath.title")}
+          subtitle={t("profiles.gamePath.subtitle")}
+        >
+          <PathEntryRow
+            title=""
+            value={gamePath}
+            onChange={onChangeGamePath}
+            onValidate={(path) => commands.validateGamePath(path)}
+            suffix={
+              <Button
+                variant="outline-primary"
+                title={t("common.autoDetectPathButton")}
+                onClick={() => void onAutoDetectGamePath()}
+              >
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
+              </Button>
+            }
+          />
+        </PreferencesGroup>
+
+        <details
+          css={(theme: AppTheme) => css`
               max-width: ${theme.card.maxWidth};
               margin: 0 auto;
             `}
-          >
-            <summary>{t("profiles.gamePath.clickForTip")}</summary>
-            <p>{t("profiles.gameEdition.steam")}:</p>
-            <ul>
-              <li>
-                <CodeSpan>
-                  C:\Program Files (x86)\Steam\steamapps\common\Fallout76\
-                </CodeSpan>
-              </li>
-              <li>
-                <CodeSpan>X:\SteamLibrary\steamapps\common\Fallout76\</CodeSpan>
-              </li>
-            </ul>
-            <p>{t("profiles.gameEdition.xbox")}:</p>
-            <ul>
-              <li>
-                <CodeSpan>
-                  C:\Program Files\ModifiableWindowsApps\Fallout76\
-                </CodeSpan>
-              </li>
-              <li>
-                <CodeSpan>X:\XboxGames\Fallout76\Content\</CodeSpan>
-              </li>
-            </ul>
-          </details>
+        >
+          <summary>{t("profiles.gamePath.clickForTip")}</summary>
+          <p>{t("profiles.gameEdition.steam")}:</p>
+          <ul>
+            <li>
+              <CodeSpan>
+                C:\Program Files (x86)\Steam\steamapps\common\Fallout76\
+              </CodeSpan>
+            </li>
+            <li>
+              <CodeSpan>X:\SteamLibrary\steamapps\common\Fallout76\</CodeSpan>
+            </li>
+          </ul>
+          <p>{t("profiles.gameEdition.xbox")}:</p>
+          <ul>
+            <li>
+              <CodeSpan>
+                C:\Program Files\ModifiableWindowsApps\Fallout76\
+              </CodeSpan>
+            </li>
+            <li>
+              <CodeSpan>X:\XboxGames\Fallout76\Content\</CodeSpan>
+            </li>
+          </ul>
+        </details>
 
-          <Accordion
-            css={(theme: AppTheme) => css`
+        <Accordion
+          css={(theme: AppTheme) => css`
               margin: 0 auto;
               margin-top: 20px;
               max-width: ${theme.card.maxWidth};
             `}
-          >
-            <Accordion.Item eventKey="0">
-              <Accordion.Header
-                css={css`
+        >
+          <Accordion.Item eventKey="0">
+            <Accordion.Header
+              css={css`
                   margin: 0;
                 `}
-              >
-                {t("profiles.advancedOptions")}
-              </Accordion.Header>
-              <Accordion.Body
-                css={css`
+            >
+              {t("profiles.advancedOptions")}
+            </Accordion.Header>
+            <Accordion.Body
+              css={css`
                   padding: 0 20px;
                 `}
+            >
+              <PreferencesGroup
+                title={t("profiles.modsPath.title")}
+                subtitle={t("profiles.modsPath.subtitle")}
               >
-                <PreferencesGroup
-                  title={t("profiles.modsPath.title")}
-                  subtitle={t("profiles.modsPath.subtitle")}
-                >
-                  <PathEntryRow
-                    title=""
-                    value={modsPath}
-                    onChange={setModsPath}
-                    onValidate={(path) => commands.isDirectory(path)}
-                    suffix={
-                      <Button
-                        variant="outline-danger"
-                        title={t("common.resetButton")}
-                        onClick={() =>
-                          setModsPath(
-                            useProfilesStore
-                              .getState()
-                              .getDefaultModsPath(gamePath) || "",
-                          )
-                        }
-                      >
-                        <FontAwesomeIcon icon={faRefresh} />
-                      </Button>
-                    }
-                  />
-                </PreferencesGroup>
+                <PathEntryRow
+                  title=""
+                  value={modsPath}
+                  onChange={setModsPath}
+                  onValidate={(path) => commands.isDirectory(path)}
+                  suffix={
+                    <Button
+                      variant="outline-danger"
+                      title={t("common.resetButton")}
+                      onClick={() =>
+                        setModsPath(
+                          useProfilesStore
+                            .getState()
+                            .getDefaultModsPath(gamePath) || "",
+                        )
+                      }
+                    >
+                      <FontAwesomeIcon icon={faRefresh} />
+                    </Button>
+                  }
+                />
+              </PreferencesGroup>
 
-                <PreferencesGroup
-                  title={t("profiles.configFiles.title")}
-                  subtitle={t("profiles.configFiles.subtitle")}
-                >
-                  <EntryRow
-                    floatingLabel={t("profiles.configFiles.iniPrefix")}
-                    value={iniPrefix}
-                    onChange={setIniPrefix}
-                  />
-                  <PathEntryRow
-                    floatingLabel={t("profiles.configFiles.iniParentPath")}
-                    value={iniPath}
-                    onChange={setIniPath}
-                    onValidate={(path) => commands.isDirectory(path)}
-                    suffix={
-                      <Button
-                        variant="outline-danger"
-                        title={t("common.resetButton")}
-                        onClick={async () => {
-                          const detectedIniPath =
-                            await commands.detectIniPath(gamePath);
-                          setIniPath(
-                            (oldValue) => detectedIniPath || oldValue || "",
-                          );
-                        }}
-                      >
-                        <FontAwesomeIcon icon={faRefresh} />
-                      </Button>
-                    }
-                  />
-                </PreferencesGroup>
+              <PreferencesGroup
+                title={t("profiles.configFiles.title")}
+                subtitle={t("profiles.configFiles.subtitle")}
+              >
+                <EntryRow
+                  floatingLabel={t("profiles.configFiles.iniPrefix")}
+                  value={iniPrefix}
+                  onChange={setIniPrefix}
+                />
+                <PathEntryRow
+                  floatingLabel={t("profiles.configFiles.iniParentPath")}
+                  value={iniPath}
+                  onChange={setIniPath}
+                  onValidate={(path) => commands.isDirectory(path)}
+                  suffix={
+                    <Button
+                      variant="outline-danger"
+                      title={t("common.resetButton")}
+                      onClick={async () => {
+                        const detectedIniPath =
+                          await commands.detectIniPath(gamePath);
+                        setIniPath(
+                          (oldValue) => detectedIniPath || oldValue || "",
+                        );
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faRefresh} />
+                    </Button>
+                  }
+                />
+              </PreferencesGroup>
 
-                <PreferencesGroup
-                  title={t("profiles.launchOptions.title")}
-                  subtitle={t("profiles.launchOptions.subtitle")}
+              <PreferencesGroup
+                title={t("profiles.launchOptions.title")}
+                subtitle={t("profiles.launchOptions.subtitle")}
+              >
+                <RadioRowGroup
+                  name="start-option"
+                  value={launchOption}
+                  onChange={(value) => setLaunchOption(value as LaunchOption)}
                 >
-                  <RadioRowGroup
-                    name="start-option"
-                    value={launchOption}
-                    onChange={(value) => setLaunchOption(value as LaunchOption)}
-                  >
-                    <RadioRow
-                      title={t("profiles.launchOptions.launchWithLauncher")}
-                      id="OpenURL"
-                    />
-                    <RadioRow
-                      title={t("profiles.launchOptions.runExecutableDirectly")}
-                      id="RunExec"
-                    />
-                  </RadioRowGroup>
-                </PreferencesGroup>
+                  <RadioRow
+                    title={t("profiles.launchOptions.launchWithLauncher")}
+                    id="OpenURL"
+                  />
+                  <RadioRow
+                    title={t("profiles.launchOptions.runExecutableDirectly")}
+                    id="RunExec"
+                  />
+                </RadioRowGroup>
+              </PreferencesGroup>
 
-                <PreferencesCard>
-                  <Entry
-                    label={t("profiles.launchOptions.executableFile")}
-                    value={executableName}
-                    onChange={setExecutableName}
-                  />
-                  <Entry
-                    label={t("profiles.launchOptions.parameters")}
-                    value={execParameters}
-                    onChange={setExecParameters}
-                  />
-                  <Entry
-                    label={t("profiles.launchOptions.launchUrl")}
-                    value={launcherURL}
-                    onChange={setLauncherURL}
-                  />
-                </PreferencesCard>
-              </Accordion.Body>
-            </Accordion.Item>
-          </Accordion>
-        </Modal.Body>
-        <Modal.Footer
-          css={css`
+              <PreferencesCard>
+                <Entry
+                  label={t("profiles.launchOptions.executableFile")}
+                  value={executableName}
+                  onChange={setExecutableName}
+                />
+                <Entry
+                  label={t("profiles.launchOptions.parameters")}
+                  value={execParameters}
+                  onChange={setExecParameters}
+                />
+                <Entry
+                  label={t("profiles.launchOptions.launchUrl")}
+                  value={launcherURL}
+                  onChange={setLauncherURL}
+                />
+              </PreferencesCard>
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
+      </Modal.Body>
+      <Modal.Footer
+        css={css`
             justify-content: center;
           `}
+      >
+        <Button
+          variant="primary"
+          onClick={onSave}
+          css={css`
+              min-width: 200px;
+              padding: 10px;
+              border-radius: 9999px;
+            `}
         >
-          <Button
-            variant="primary"
-            onClick={onSave}
-            css={css`
+          {t("common.saveButton")}
+        </Button>
+        <Button
+          variant="danger"
+          onClick={props.cancel}
+          css={css`
               min-width: 200px;
               padding: 10px;
               border-radius: 9999px;
             `}
-          >
-            {t("common.saveButton")}
-          </Button>
-          <Button
-            variant="danger"
-            onClick={props.onHide}
-            css={css`
-              min-width: 200px;
-              padding: 10px;
-              border-radius: 9999px;
-            `}
-          >
-            {t("common.cancel")}
-          </Button>
-        </Modal.Footer>
-      </Modal>
-      <SelectDetectedGamePathModal
-        show={showDetectGamePathModal}
-        onAccept={(path) => {
-          onChangeGamePath(path);
-          setShowDetectGamePathModal(false);
-        }}
-        onClose={() => setShowDetectGamePathModal(false)}
-      />
-    </>
+        >
+          {t("common.cancel")}
+        </Button>
+      </Modal.Footer>
+    </Modal>
   );
 }

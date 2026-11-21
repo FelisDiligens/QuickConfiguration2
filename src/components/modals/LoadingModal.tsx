@@ -1,27 +1,38 @@
 import { FlexCol, FlexRow } from "@/components/common";
+import { ModalComponentProps } from "@/stores/modals";
+import { animationsEnabled } from "@/utils";
 import { css } from "@emotion/react";
 import { Button, Modal, ProgressBar, Spinner } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
-interface Props {
-  show: boolean;
-  onAbort?: () => void;
-  progress?: number;
+/**
+ * Data for the {@link LoadingModal}:
+ * - `progress`, if given, displays a progress bar with a percentage (0-100).
+ *   If `undefined`, the progress bar is hidden.
+ * - `onAbort`, if given, displays an "Abort" button that triggers the callback.
+ *   If `undefined`, the button is hidden.
+ */
+export interface LoadingModalData {
   label: string;
+  progress?: number;
+  onAbort?: () => void;
 }
 
 /**
  * A fullscreen modal that prevents interactions with the app.
- *
- * - The `progress` prop, if given, will display a progress bar with a percentage.
- *   It should be between 0 and 100. If `undefined`, the progress bar is hidden.
- * - The `onAbort` prop, if given, will display an "Abort" button that triggers
- *   the callback. If `undefined`, the button is hidden.
  */
-export default function LoadingModal(props: Props) {
+export default function LoadingModal(
+  props: ModalComponentProps<LoadingModalData, void>,
+) {
   const { t } = useTranslation();
   return (
-    <Modal size="xl" show={props.show} backdrop="static" centered>
+    <Modal
+      size="xl"
+      show={props.isOpen}
+      animation={animationsEnabled}
+      backdrop="static"
+      centered
+    >
       <Modal.Body>
         <FlexRow center gap="1rem">
           <FlexCol noGrow noShrink>
@@ -36,17 +47,17 @@ export default function LoadingModal(props: Props) {
               text-overflow: ellipsis;
             `}
           >
-            {props.label}
+            {props.data.label}
           </FlexCol>
-          {props.onAbort !== undefined && (
+          {props.data.onAbort !== undefined && (
             <FlexCol>
-              <Button variant="outline-danger" onClick={props.onAbort}>
+              <Button variant="outline-danger" onClick={props.data.onAbort}>
                 {t("common.abort")}
               </Button>
             </FlexCol>
           )}
         </FlexRow>
-        {props.progress !== undefined && (
+        {props.data.progress !== undefined && (
           <FlexRow
             css={css`
             margin-top: 20px;
@@ -57,8 +68,8 @@ export default function LoadingModal(props: Props) {
           `}
           >
             <ProgressBar
-              now={Math.round(props.progress)}
-              label={`${Math.round(props.progress)}%`}
+              now={Math.round(props.data.progress)}
+              label={`${Math.round(props.data.progress)}%`}
             />
           </FlexRow>
         )}

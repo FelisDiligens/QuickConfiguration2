@@ -1,4 +1,3 @@
-import { Profile } from "@/commands/bindings";
 import {
   FlexCol,
   FlexRow,
@@ -6,11 +5,10 @@ import {
   PageContent,
   PageTitle,
 } from "@/components/common";
-import { ConfirmModal } from "@/components/modals/ConfirmModal";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
+import { confirmModal, openModal } from "@/hooks/useModal";
 import * as profilesService from "@/services/profiles";
 import { useProfilesStore } from "@/stores/profiles";
-import { Nullish } from "@/types";
 import type { DragendEvent } from "@formkit/drag-and-drop";
 import {
   faPenToSquare,
@@ -18,7 +16,7 @@ import {
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { RefObject, useCallback, useRef, useState } from "react";
+import { RefObject, useCallback, useRef } from "react";
 import { Button, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import EditProfileModal from "./EditProfileModal";
@@ -99,11 +97,6 @@ function useProfiles(dndParentRef: RefObject<HTMLElement | null>) {
 export default function ProfilesView() {
   const { t } = useTranslation();
 
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editModalKey, setEditModalKey] = useState(0);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [editedProfile, setEditedProfile] = useState<Nullish<Profile>>(null);
-
   const dndParentRef = useRef<HTMLDivElement | null>(null);
   const {
     profiles,
@@ -119,19 +112,28 @@ export default function ProfilesView() {
     moveProfileDown,
   } = useProfiles(dndParentRef);
 
-  function openEditProfileModal(key: string) {
-    setEditedProfile(getProfileByKey(key));
-    setEditModalKey((prevValue) => prevValue + 1); // Force edit modal component to reset state
-    setShowEditModal(true);
+  async function openEditProfileModal(key: string) {
+    const profile = getProfileByKey(key);
+    if (!profile) return;
+    const savedProfile = await openModal(EditProfileModal, { profile });
+    if (savedProfile) updateProfile(savedProfile);
   }
 
-  function openConfirmDeleteModal() {
-    if (profiles.length > 1) setShowDeleteModal(true);
-  }
-
-  function onDelete() {
-    deleteSelectedProfile();
-    setShowDeleteModal(false);
+  async function openConfirmDeleteModal() {
+    if (!selectedProfile || profiles.length <= 1) return;
+    const confirmed = await confirmModal({
+      title: t("profiles.confirmDeleteModal.title", {
+        profile: selectedProfile.title,
+      }),
+      children: (
+        <p>
+          {t("profiles.confirmDeleteModal.text", {
+            profile: selectedProfile.title,
+          })}
+        </p>
+      ),
+    });
+    if (confirmed) deleteSelectedProfile();
   }
 
   function onAdd() {
@@ -141,12 +143,7 @@ export default function ProfilesView() {
   }
 
   function onEdit() {
-    openEditProfileModal(selectedKey);
-  }
-
-  function onEditModalSave(profile: Profile) {
-    updateProfile(profile);
-    setShowEditModal(false);
+    void openEditProfileModal(selectedKey);
   }
 
   function onSelect(index: number) {
@@ -216,31 +213,6 @@ export default function ProfilesView() {
           </FlexCol>
         </FlexRow>
       </PageContent>
-      {selectedProfile && (
-        <ConfirmModal
-          title={t("profiles.confirmDeleteModal.title", {
-            profile: selectedProfile.title,
-          })}
-          show={showDeleteModal}
-          onConfirm={onDelete}
-          onAbort={() => setShowDeleteModal(false)}
-        >
-          <p>
-            {t("profiles.confirmDeleteModal.text", {
-              profile: selectedProfile.title,
-            })}
-          </p>
-        </ConfirmModal>
-      )}
-      {editedProfile && (
-        <EditProfileModal
-          show={showEditModal}
-          key={editModalKey}
-          onHide={() => setShowEditModal(false)}
-          onSave={onEditModalSave}
-          profile={editedProfile}
-        />
-      )}
     </PageContainer>
   );
 }

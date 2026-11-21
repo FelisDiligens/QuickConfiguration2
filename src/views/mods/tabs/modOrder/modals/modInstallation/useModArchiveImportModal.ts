@@ -1,21 +1,18 @@
 import { commands, ManagedMod } from "@/commands/bindings";
 import { AnyError } from "@/commands/errors";
 import Mods from "@/commands/mods";
+import { openModal } from "@/hooks/useModal";
 import { createBaseManagedMod, modsEventBus } from "@/services/mods";
 import { updateModsStore, useModsStore } from "@/stores/mods";
 import { useProfilesStore } from "@/stores/profiles";
 import { useResourceListStore } from "@/stores/resourceList";
 import { useToastsStore } from "@/stores/toasts";
 import { path } from "@tauri-apps/api";
-import { useAtom } from "jotai";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { isModArchiveImportModalShownAtom } from "../";
+import ModArchiveImportModal from "./ModArchiveImportModal";
 
 export function useModArchiveImportModal() {
   const { t } = useTranslation();
-  const [show, setShow] = useAtom(isModArchiveImportModalShownAtom);
-  const [archives, setArchives] = useState<string[]>([]);
 
   const getArchives = async () => {
     try {
@@ -38,10 +35,14 @@ export function useModArchiveImportModal() {
         resourcesNotBelongingToAnyMod.push(resource);
       }
 
-      setArchives(resourcesNotBelongingToAnyMod);
-      setShow(true);
-
       modsEventBus.emitProgressFinished();
+
+      const result = await openModal(ModArchiveImportModal, {
+        archives: resourcesNotBelongingToAnyMod,
+      });
+      if (result) {
+        await installArchives(result.modName, result.archiveNames, {});
+      }
     } catch (error) {
       modsEventBus.emitProgressAborted(error as AnyError);
     }
@@ -90,16 +91,5 @@ export function useModArchiveImportModal() {
 
   return {
     getArchives: () => getArchives().catch(console.error),
-    modalProps: {
-      show,
-      archives,
-      onCreate: (modName: string, archiveNames: string[]) => {
-        setShow(false);
-        installArchives(modName, archiveNames, {}).catch(console.error);
-      },
-      onAbort: () => {
-        setShow(false);
-      },
-    },
   };
 }

@@ -3,10 +3,11 @@ import { AnyError, commandErrorToString } from "@/commands/errors";
 import NexusMods from "@/commands/nexusmods";
 import { FlexCol } from "@/components/common";
 import { modsEventBus } from "@/services/mods";
+import { ModalComponentProps } from "@/stores/modals";
 import { useModsStore } from "@/stores/mods";
 import { useNexusModsStore } from "@/stores/nexusmods";
 import { useToastsStore } from "@/stores/toasts";
-import { formatBytes } from "@/utils";
+import { animationsEnabled, formatBytes } from "@/utils";
 import { groupModFilesByCategory } from "@/utils/nexusmods";
 import { css } from "@emotion/react";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
@@ -14,15 +15,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useMemo } from "react";
 import { Button, Modal, OverlayTrigger, Table, Tooltip } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { TrackModFileState } from "./NexusModsModals";
+import type { TrackModFileState } from "./types";
 
-interface Props {
-  show: boolean;
-  onHide: () => void;
-  state?: TrackModFileState;
-}
-
-export default function TrackModFileModal(props: Props) {
+export default function TrackModFileModal(
+  props: ModalComponentProps<TrackModFileState, void>,
+) {
   const { t } = useTranslation();
 
   const categoryNames: Record<
@@ -47,7 +44,7 @@ export default function TrackModFileModal(props: Props) {
   };
 
   const trackFile = async (file: NexusModsModFile) => {
-    const state = props.state;
+    const state = props.data;
     if (!state) return;
     try {
       const modfile = await NexusMods.api.getModFileInfoFromModFiles(
@@ -70,7 +67,7 @@ export default function TrackModFileModal(props: Props) {
           "success",
         );
 
-      props.onHide();
+      props.close();
     } catch (error) {
       modsEventBus.emitProgressAborted(error as AnyError);
       console.error(
@@ -80,19 +77,19 @@ export default function TrackModFileModal(props: Props) {
   };
 
   const groups = useMemo(
-    () =>
-      props.state ? groupModFilesByCategory(props.state.modFiles.files) : [],
-    [props.state],
+    () => groupModFilesByCategory(props.data.modFiles.files),
+    [props.data],
   );
 
   return (
     <Modal
-      show={props.show}
-      onHide={props.onHide}
       size="xl"
+      show={props.isOpen}
+      onHide={props.cancel}
+      animation={animationsEnabled}
+      backdrop="static"
       scrollable
       centered
-      backdrop="static"
     >
       <Modal.Header closeButton>
         <Modal.Title>
@@ -236,7 +233,7 @@ export default function TrackModFileModal(props: Props) {
         )}
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={props.onHide}>
+        <Button variant="secondary" onClick={props.cancel}>
           {t("common.cancel")}
         </Button>
       </Modal.Footer>

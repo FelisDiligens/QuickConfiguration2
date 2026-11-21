@@ -1,30 +1,38 @@
-import { commands } from "@/commands/bindings";
-import { useAsync } from "@/hooks/async";
 import { info } from "@/info";
+import { ModalComponentProps } from "@/stores/modals";
 import { useSettingsStore } from "@/stores/settings";
 import { Trans, useTranslation } from "react-i18next";
 import { MessageModal } from "./MessageModal";
 
-export default function PrereleaseModal() {
+export default function PrereleaseModal(
+  props: ModalComponentProps<void, void>,
+) {
   const { t } = useTranslation();
-  const { data: isPrerelease } = useAsync(commands.isPrerelease);
-  const isDismissed = useSettingsStore((s) => s.prereleaseDismissed);
   const setPrereleaseDismissed = useSettingsStore(
     (s) => s.setPrereleaseDismissed,
   );
-  const show = !!isPrerelease && !isDismissed;
+
+  const dismiss = () => {
+    setPrereleaseDismissed(true);
+    props.cancel();
+  };
+
   return (
     <MessageModal
-      title={t("prereleaseModal.title")}
-      show={show}
-      onHide={() => setPrereleaseDismissed(true)}
-    >
-      <Trans
-        t={t}
-        i18nKey="prereleaseModal.text"
-        values={{ version: info.version }}
-        components={{ code: <code /> }}
-      />
-    </MessageModal>
+      isOpen={props.isOpen}
+      data={{
+        title: t("prereleaseModal.title"),
+        children: (
+          <Trans
+            t={t}
+            i18nKey="prereleaseModal.text"
+            values={{ version: info.version }}
+            components={{ code: <code /> }}
+          />
+        ),
+      }}
+      close={dismiss}
+      cancel={dismiss}
+    />
   );
 }

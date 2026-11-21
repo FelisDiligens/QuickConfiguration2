@@ -1,16 +1,19 @@
 import { commands } from "@/commands/bindings";
 import { PathEntryRow } from "@/components/common";
+import { ModalComponentProps } from "@/stores/modals";
+import { animationsEnabled } from "@/utils";
 import { useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
-interface Props {
-  show: boolean;
-  onHide: () => void;
-  onExtract: (archivePath: string, destinationPath: string) => void;
+export interface Archive2ExtractResult {
+  archivePath: string;
+  destinationPath: string;
 }
 
-export default function Archive2ExtractModal(props: Props) {
+export default function Archive2ExtractModal(
+  props: ModalComponentProps<void, Archive2ExtractResult>,
+) {
   const { t } = useTranslation();
   const [archivePath, setArchivePath] = useState("");
   const [destinationPath, setDestinationPath] = useState("");
@@ -34,15 +37,16 @@ export default function Archive2ExtractModal(props: Props) {
 
   function onExtract() {
     validateForm()
-      .then(() => props.onExtract(archivePath, destinationPath))
+      .then(() => props.close({ archivePath, destinationPath }))
       .catch(console.error);
   }
 
   return (
     <Modal
       size="xl"
-      show={props.show}
-      onHide={props.onHide}
+      show={props.isOpen}
+      onHide={props.cancel}
+      animation={animationsEnabled}
       backdrop="static"
       centered
     >
@@ -74,7 +78,7 @@ export default function Archive2ExtractModal(props: Props) {
         <Button variant="primary" onClick={onExtract}>
           {t("mods.modOrderTab.modals.archive2.extractButton")}
         </Button>
-        <Button variant="secondary" onClick={props.onHide}>
+        <Button variant="secondary" onClick={props.cancel}>
           {t("common.cancel")}
         </Button>
       </Modal.Footer>
