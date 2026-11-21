@@ -37,6 +37,7 @@ export function ModalPortal() {
     if (removed.length === 0) return;
     setClosing((current) => [...current, ...removed]);
     const timer = setTimeout(() => {
+      timersRef.current = timersRef.current.filter((t) => t !== timer);
       setClosing((current) =>
         current.filter((entry) => !removed.some((r) => r.id === entry.id)),
       );
