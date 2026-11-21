@@ -15,7 +15,7 @@ export const MODAL_EXIT_ANIMATION_MS = 300;
  *
  * All stack entries stay mounted and only the top entry receives `isOpen=true`,
  * so suspended modals keep their React state while another modal is shown on
- * top. Entries that were just closed are rendered for
+ * top. Entries that were just closed are kept mounted for
  * {@link MODAL_EXIT_ANIMATION_MS} with `isOpen=false` to allow the exit
  * animation, then removed.
  *
@@ -24,30 +24,38 @@ export const MODAL_EXIT_ANIMATION_MS = 300;
 export function ModalPortal() {
   const stack = useModalStore((store) => store.stack);
   const [closing, setClosing] = useState<ModalEntry[]>([]);
-  const previousStackRef = useRef<ModalEntry[]>([]);
-  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const [previousStack, setPreviousStack] = useState(stack);
+  const timersRef = useRef(new Map<string, ReturnType<typeof setTimeout>>());
 
-  // Keep entries that were just closed mounted (with isOpen=false) for a short
-  // time, so that the modal's exit animation can play:
-  useEffect(() => {
-    const previous = previousStackRef.current;
-    previousStackRef.current = stack;
+  // Detect entries that left the stack during render (the conditional setState
+  // makes React re-render before committing): a closed entry must stay in the
+  // rendered output across the commit where it leaves the stack. Otherwise the
+  // modal component would be unmounted and immediately re-mounted with
+  // isOpen=false, and a react-bootstrap <Modal show={false}> on a fresh mount
+  // never plays its exit transition — the dialog would vanish instantly
+  // instead of fading out:
+  if (previousStack !== stack) {
     const currentIds = new Set(stack.map((entry) => entry.id));
-    const removed = previous.filter((entry) => !currentIds.has(entry.id));
-    if (removed.length === 0) return;
-    setClosing((current) => [...current, ...removed]);
-    const timer = setTimeout(() => {
-      timersRef.current = timersRef.current.filter((t) => t !== timer);
-      setClosing((current) =>
-        current.filter((entry) => !removed.some((r) => r.id === entry.id)),
-      );
-    }, MODAL_EXIT_ANIMATION_MS);
-    timersRef.current.push(timer);
-  }, [stack]);
+    const removed = previousStack.filter((entry) => !currentIds.has(entry.id));
+    setPreviousStack(stack);
+    if (removed.length > 0) setClosing((current) => [...current, ...removed]);
+  }
+
+  // Remove closing entries from the DOM once the exit animation has played:
+  useEffect(() => {
+    for (const entry of closing) {
+      if (timersRef.current.has(entry.id)) continue;
+      const timer = setTimeout(() => {
+        timersRef.current.delete(entry.id);
+        setClosing((current) => current.filter((e) => e.id !== entry.id));
+      }, MODAL_EXIT_ANIMATION_MS);
+      timersRef.current.set(entry.id, timer);
+    }
+  }, [closing]);
 
   useEffect(
     () => () => {
-      for (const timer of timersRef.current) clearTimeout(timer);
+      for (const timer of timersRef.current.values()) clearTimeout(timer);
     },
     [],
   );
@@ -67,11 +75,10 @@ export function ModalPortal() {
     );
   }
 
-  return createPortal(
-    <>
-      {closing.map(renderEntry)}
-      {stack.map(renderEntry)}
-    </>,
-    document.body,
-  );
+  // Single flattened list: React namespaces keys per array child, so rendering
+  // two separate .map() arrays would unmount/re-mount an entry that moves from
+  // `stack` to `closing` (breaking the exit animation) even when it stays in
+  // the rendered output across the commit:
+  const renderList = [...closing, ...stack];
+  return createPortal(<>{renderList.map(renderEntry)}</>, document.body);
 }

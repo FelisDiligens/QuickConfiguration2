@@ -1,7 +1,7 @@
 import { MODAL_EXIT_ANIMATION_MS, ModalPortal } from "@/components/ModalPortal";
 import { ModalComponentProps, useModalStore } from "@/stores/modals";
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { vi } from "vitest";
 
 interface StubData {
@@ -134,6 +134,45 @@ describe("<ModalPortal />", () => {
     act(() => {
       vi.advanceTimersByTime(MODAL_EXIT_ANIMATION_MS);
     });
+    expect(screen.queryByTestId("modal-a")).not.toBeInTheDocument();
+  });
+
+  it("keeps the same mounted instance while closing (no unmount/remount), so the exit animation can play", () => {
+    vi.useFakeTimers();
+    let mounts = 0;
+    let unmounts = 0;
+    function MountTrackingModal(props: ModalComponentProps<StubData, string>) {
+      useEffect(() => {
+        mounts++;
+        return () => {
+          unmounts++;
+        };
+      }, []);
+      return <div data-testid={props.data.testId} data-open={props.isOpen} />;
+    }
+
+    render(<ModalPortal />);
+    act(() => {
+      void useModalStore.getState().open(MountTrackingModal, {
+        testId: "modal-a",
+      });
+    });
+    expect(mounts).toBe(1);
+    expect(screen.getByTestId("modal-a")).toHaveAttribute("data-open", "true");
+
+    act(() => {
+      useModalStore.getState().close("done");
+    });
+    // The entry must not have been unmounted/re-mounted on close — a freshly
+    // mounted modal with isOpen=false would not play the exit animation:
+    expect(screen.getByTestId("modal-a")).toHaveAttribute("data-open", "false");
+    expect(mounts).toBe(1);
+    expect(unmounts).toBe(0);
+
+    act(() => {
+      vi.advanceTimersByTime(MODAL_EXIT_ANIMATION_MS);
+    });
+    expect(unmounts).toBe(1);
     expect(screen.queryByTestId("modal-a")).not.toBeInTheDocument();
   });
 
