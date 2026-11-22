@@ -859,6 +859,7 @@
         "archive2AutoPacked": "Archive erstellt",
         "infoRetrieved": "Informationen abgerufen",
         "infoRetrievedWithCount": "Informationen abgerufen, Anzahl: {{count}}",
+        "noModsToRetrieveInfo": "Keine Mods installiert, daher gibt es keine Updates zu prüfen und keine Informationen abzurufen",
         "modsEndorsed": "Mods empfohlen, Anzahl: {{count}}",
         "fileTracked": "Datei wird verfolgt",
         "openingFilesPage": "Die Dateiansicht auf NexusMods wird im Browser geöffnet"

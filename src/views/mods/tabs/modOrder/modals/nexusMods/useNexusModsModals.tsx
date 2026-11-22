@@ -97,7 +97,7 @@ export function useNexusModsModals() {
         .addToast(t("mods.modOrderTab.toasts.infoRetrieved"), "", "success");
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
     } finally {
       await loadingModalState.close();
     }
@@ -130,7 +130,7 @@ export function useNexusModsModals() {
       );
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
     } finally {
       await loadingModalState.close();
     }
@@ -163,7 +163,7 @@ export function useNexusModsModals() {
       );
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
     } finally {
       await loadingModalState.close();
     }
@@ -175,7 +175,16 @@ export function useNexusModsModals() {
     const loadingModalState = loadingModal();
     try {
       const mods = useModsStore.getState().mods;
-      if (mods.length === 0) return false;
+      if (mods.length === 0) {
+        useToastsStore
+          .getState()
+          .addToast(
+            t("mods.modOrderTab.toasts.noModsToRetrieveInfo"),
+            "",
+            "secondary",
+          );
+        return false;
+      }
 
       const apiKey = useNexusModsStore.getState().apiKey;
       if (!apiKey) throw new Error("API key is not set");
@@ -196,7 +205,7 @@ export function useNexusModsModals() {
       return true;
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
       return false;
     } finally {
       await loadingModalState.close();
@@ -229,7 +238,7 @@ export function useNexusModsModals() {
         );
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
       return false;
     } finally {
       await loadingModalState.close();
@@ -294,7 +303,7 @@ export function useNexusModsModals() {
         );
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
     } finally {
       await loadingModalState.close();
     }

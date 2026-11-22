@@ -156,7 +156,7 @@ export function useModDeploymentModals() {
       }
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
     } finally {
       if (unlisten) unlisten();
       await loadingModalState.close();

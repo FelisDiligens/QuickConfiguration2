@@ -42,7 +42,7 @@ export function useModInstallationModals() {
       await installFromFileWithPath(filePath, {});
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
     }
   };
 
@@ -83,7 +83,7 @@ export function useModInstallationModals() {
       await openInstallModal(modDetails, fileContents, updateModKey);
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
     } finally {
       await loadingModalState.close();
     }
@@ -152,7 +152,7 @@ export function useModInstallationModals() {
       await openInstallModal(modDetails, fileContents);
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
     } finally {
       await loadingModalState.close();
     }
@@ -193,7 +193,7 @@ export function useModInstallationModals() {
       await openInstallModal(modDetails, fileContents);
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
     } finally {
       await loadingModalState.close();
     }
@@ -253,7 +253,7 @@ export function useModInstallationModals() {
       await Mods.actions.tempFolder.delete(modsPath);
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
     } finally {
       await loadingModalState.close();
     }

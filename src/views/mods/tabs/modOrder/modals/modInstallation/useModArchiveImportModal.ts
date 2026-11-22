@@ -47,7 +47,7 @@ export function useModArchiveImportModal() {
       }
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
     } finally {
       await loadingModalState.close();
     }
@@ -91,7 +91,7 @@ export function useModArchiveImportModal() {
         .addToast(t("mods.modOrderTab.toasts.modInstalled"), modDetails.title);
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
     } finally {
       await loadingModalState.close();
     }

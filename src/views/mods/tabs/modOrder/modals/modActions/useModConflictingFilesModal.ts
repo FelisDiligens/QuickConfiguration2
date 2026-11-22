@@ -25,7 +25,7 @@ export function useModConflictingFilesModal() {
       await openModal(ModConflictingFilesModal, { conflicts });
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
     } finally {
       await loadingModalState.close();
     }

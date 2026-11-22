@@ -123,7 +123,7 @@ export function useModDownloadModals(options: {
       if (cdnLink) await downloadMod(cdnLink, downloadSource);
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
       isPendingRef.current = false;
     } finally {
       await loadingModalState.close();
@@ -219,7 +219,7 @@ export function useModDownloadModals(options: {
       if (cdnLink) await downloadMod(cdnLink, downloadSource, mod.key);
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
       isPendingRef.current = false;
     } finally {
       await loadingModalState.close();
@@ -297,7 +297,7 @@ export function useModDownloadModals(options: {
       );
     } catch (error) {
       console.error(error);
-      await errorModal({ reason: error as AnyError });
+      void errorModal({ reason: error as AnyError });
     } finally {
       if (unlisten) unlisten();
       isPendingRef.current = false;
