@@ -1,8 +1,7 @@
 import { ManagedMod } from "@/commands/bindings";
-import { AnyError } from "@/commands/errors";
 import mitt from "mitt";
 
-export type UIActionEvent =
+export type UIModsActionEvent =
   | { type: "mods-install-from-file" }
   | {
       type: "mods-install-from-file-with-path";
@@ -17,7 +16,6 @@ export type UIActionEvent =
     }
   | { type: "mods-install-from-folder" }
   | { type: "mods-deploy" }
-  | { type: "mods-global-enabled-changed"; enabled: boolean }
   | { type: "mods-delete-mod"; key: string }
   | { type: "mods-import-installed-archives" }
   | { type: "mods-show-conflicting-files" }
@@ -35,31 +33,22 @@ export type UIActionEvent =
   | { type: "archive2-pick-file-extract-ba2-archive" }
   | { type: "archive2-pick-create-ba2-archive" }
   | { type: "archive2-pick-file-display-info-ba2-archive" }
-  | { type: "archive2-auto-pack-into-archives" }
+  | { type: "archive2-auto-pack-into-archives" };
+
+export type UIResourcesActionEvent =
   | { type: "resourcelist-add-archive" }
   | { type: "resourcelist-add-unlisted-archives" }
   | { type: "resourcelist-remove-non-existant-archives" }
   | { type: "resourcelist-remove-game-archives" }
   | { type: "resourcelist-remove-archive"; name: string };
 
-export type ProgressEvent =
-  | { type: "is-loading"; text: string; percent?: number }
-  | { type: "has-finished" }
-  | { type: "error"; error: AnyError };
-
-/* eslint-disable-next-line @typescript-eslint/consistent-type-definitions --
- * Uses type instead of interface for consistency with other event types.
- */
-export type Archive2Event = { type: "show-error-modal"; error: AnyError };
-
 /* eslint-disable-next-line @typescript-eslint/consistent-type-definitions --
  * `Events` needs to "satisfy the constraint 'Record<EventType, unknown>'"
  * otherwise it cannot be used with mitt.
  */
 export type Events = {
-  uiAction: UIActionEvent;
-  progress: ProgressEvent;
-  archive2: Archive2Event;
+  mods: UIModsActionEvent;
+  resources: UIResourcesActionEvent;
 };
 
 export class ModsEventBus {
@@ -67,61 +56,36 @@ export class ModsEventBus {
 
   private logEvent(
     type: string,
-    event: UIActionEvent | ProgressEvent | Archive2Event,
+    event: UIModsActionEvent | UIResourcesActionEvent,
   ): void {
     console.log(`[ModsEventBus:${type}] Event sent:`, event);
   }
 
-  emitUIActionEvent(event: UIActionEvent): void {
-    this.emitter.emit("uiAction", event);
-    this.logEvent("uiAction", event);
+  emitModsEvent(event: UIModsActionEvent): void {
+    this.emitter.emit("mods", event);
+    this.logEvent("mods", event);
   }
 
-  onUIActionEvent(callback: (event: UIActionEvent) => void): () => void {
-    this.emitter.on("uiAction", callback);
-    return () => this.emitter.off("uiAction", callback);
+  onModsEvent(callback: (event: UIModsActionEvent) => void): () => void {
+    this.emitter.on("mods", callback);
+    return () => this.emitter.off("mods", callback);
   }
 
-  /* Opens or updates the loading/progress modal. */
-  emitProgressUpdated(text: string, percent?: number): void {
-    const event: ProgressEvent = { type: "is-loading", text, percent };
-    this.emitter.emit("progress", event);
-    this.logEvent("progress", event);
+  emitResourcesEvent(event: UIResourcesActionEvent): void {
+    this.emitter.emit("resources", event);
+    this.logEvent("resources", event);
   }
 
-  /* Closes the loading/progress modal. */
-  emitProgressFinished(): void {
-    const event: ProgressEvent = { type: "has-finished" };
-    this.emitter.emit("progress", event);
-    this.logEvent("progress", event);
-  }
-
-  /* Opens or updates the error modal. Automatically closes the loading/progress modal. */
-  emitProgressAborted(error: AnyError): void {
-    const event: ProgressEvent = { type: "error", error };
-    this.emitter.emit("progress", event);
-    this.logEvent("progress", event);
-  }
-
-  /** Subscribe to listen to progress of operations in the ModOrder tab. */
-  onProgressEvent(callback: (event: ProgressEvent) => void): () => void {
-    this.emitter.on("progress", callback);
-    return () => this.emitter.off("progress", callback);
-  }
-
-  emitArchive2Event(event: Archive2Event): void {
-    this.emitter.emit("archive2", event);
-    this.logEvent("archive2", event);
-  }
-
-  onArchive2Event(callback: (event: Archive2Event) => void): () => void {
-    this.emitter.on("archive2", callback);
-    return () => this.emitter.off("archive2", callback);
+  onResourcesEvent(
+    callback: (event: UIResourcesActionEvent) => void,
+  ): () => void {
+    this.emitter.on("resources", callback);
+    return () => this.emitter.off("resources", callback);
   }
 
   /* Starts the "install mod from file" flow. */
   emitInstallModFromFile() {
-    this.emitUIActionEvent({ type: "mods-install-from-file" });
+    this.emitModsEvent({ type: "mods-install-from-file" });
   }
 
   /* Starts the "install mod from file" flow and skips the file picker dialog. */
@@ -130,7 +94,7 @@ export class ModsEventBus {
     details: Partial<ManagedMod>,
     updateModKey?: string,
   ) {
-    this.emitUIActionEvent({
+    this.emitModsEvent({
       type: "mods-install-from-file-with-path",
       path,
       details,
@@ -140,7 +104,7 @@ export class ModsEventBus {
 
   /* Starts the mod installation flow and skips the file picker dialog. */
   emitInstallModFromPaths(paths: string[], details: Partial<ManagedMod>) {
-    this.emitUIActionEvent({
+    this.emitModsEvent({
       type: "mods-install-from-paths",
       paths,
       details,
@@ -149,127 +113,122 @@ export class ModsEventBus {
 
   /* Starts the "install mod from folder" flow. */
   emitInstallModFromFolder() {
-    this.emitUIActionEvent({ type: "mods-install-from-folder" });
+    this.emitModsEvent({ type: "mods-install-from-folder" });
   }
 
   /* Starts the deployment of mods. */
   emitDeployMods() {
-    this.emitUIActionEvent({ type: "mods-deploy" });
-  }
-
-  /* Enable or disable mods globally. */
-  emitChangeModsEnabled(enabled: boolean) {
-    this.emitUIActionEvent({ type: "mods-global-enabled-changed", enabled });
+    this.emitModsEvent({ type: "mods-deploy" });
   }
 
   /* Opens the modal asking if the user is sure they want to delete them mod. */
   emitDeleteMod(key: string) {
-    this.emitUIActionEvent({ type: "mods-delete-mod", key });
+    this.emitModsEvent({ type: "mods-delete-mod", key });
   }
 
   /* Imports all installed *.ba2 archives belonging to mods that are not managed by the mod manager. */
   emitImportInstalledArchives() {
-    this.emitUIActionEvent({ type: "mods-import-installed-archives" });
+    this.emitModsEvent({ type: "mods-import-installed-archives" });
   }
 
   /* Searches all mods for duplicate (= conflicting) files and shows an enumeration of these. */
   emitShowConflictingFiles() {
-    this.emitUIActionEvent({ type: "mods-show-conflicting-files" });
+    this.emitModsEvent({ type: "mods-show-conflicting-files" });
   }
 
   /* Check installed mods for updates using the NexusMods API. */
   emitNexusModsCheckForUpdates() {
-    this.emitUIActionEvent({ type: "nexus-mods-check-for-updates" });
+    this.emitModsEvent({ type: "nexus-mods-check-for-updates" });
   }
 
   /* Update a single installed mod using the NexusMods API (or the browser as fallback). */
   emitNexusModsUpdateMod(key: string) {
-    this.emitUIActionEvent({ type: "nexus-mods-update-mod", key });
+    this.emitModsEvent({ type: "nexus-mods-update-mod", key });
   }
 
   /* Download mod information and preview images for all installed mods using the NexusMods API. */
   emitNexusModsDownloadModsInfo() {
-    this.emitUIActionEvent({ type: "nexus-mods-download-mods-info" });
+    this.emitModsEvent({ type: "nexus-mods-download-mods-info" });
   }
 
   /* Download mod information and the preview image for a single mod using the NexusMods API. */
   emitNexusModsDownloadModInfo(key: string) {
-    this.emitUIActionEvent({ type: "nexus-mods-download-mod-info", key });
+    this.emitModsEvent({ type: "nexus-mods-download-mod-info", key });
   }
 
   /* Endorse all installed mods using the NexusMods API. */
   emitNexusModsEndorseAllMods() {
-    this.emitUIActionEvent({ type: "nexus-mods-endorse-all-mods" });
+    this.emitModsEvent({ type: "nexus-mods-endorse-all-mods" });
   }
 
   /* Endorse a mod using the NexusMods API. */
   emitNexusModsEndorseMod(key: string) {
-    this.emitUIActionEvent({ type: "nexus-mods-endorse-mod", key });
+    this.emitModsEvent({ type: "nexus-mods-endorse-mod", key });
   }
 
   /* Abstain from endorsing a mod using the NexusMods API. */
   emitNexusModsAbstainMod(key: string) {
-    this.emitUIActionEvent({ type: "nexus-mods-abstain-mod", key });
+    this.emitModsEvent({ type: "nexus-mods-abstain-mod", key });
   }
 
   /* Start the flow to track a NexusMods file for a mod. */
   emitNexusModsTrackModFile(key: string) {
-    this.emitUIActionEvent({ type: "nexus-mods-track-mod-file", key });
+    this.emitModsEvent({ type: "nexus-mods-track-mod-file", key });
   }
 
   /* Open Archive2. */
   emitArchive2Open() {
-    this.emitUIActionEvent({ type: "archive2-open" });
+    this.emitModsEvent({ type: "archive2-open" });
   }
 
   /* Lets the user pick a *.ba2 file to open in Archive2. */
   emitArchive2PickFileExploreBA2() {
-    this.emitUIActionEvent({ type: "archive2-pick-file-explore-ba2-archive" });
+    this.emitModsEvent({ type: "archive2-pick-file-explore-ba2-archive" });
   }
 
   /* Lets the user pick a *.ba2 file to extract with Archive2. */
   emitArchive2PickFileExtractBA2() {
-    this.emitUIActionEvent({ type: "archive2-pick-file-extract-ba2-archive" });
+    this.emitModsEvent({ type: "archive2-pick-file-extract-ba2-archive" });
   }
 
   /* Lets the user create an archive with Archive2. */
   emitArchive2CreateBA2() {
-    this.emitUIActionEvent({ type: "archive2-pick-create-ba2-archive" });
+    this.emitModsEvent({ type: "archive2-pick-create-ba2-archive" });
   }
 
   /* Lets the user pick a *.ba2 file and shows some metadata. */
   emitArchive2PickFileAndDisplayMetadata() {
-    this.emitUIActionEvent({
+    this.emitModsEvent({
       type: "archive2-pick-file-display-info-ba2-archive",
     });
   }
 
   emitArchive2AutoPackIntoArchives() {
-    this.emitUIActionEvent({
+    this.emitModsEvent({
       type: "archive2-auto-pack-into-archives",
     });
   }
 
   emitResourcelistAddArchive() {
-    this.emitUIActionEvent({ type: "resourcelist-add-archive" });
+    this.emitResourcesEvent({ type: "resourcelist-add-archive" });
   }
 
   emitResourcelistAddUnlistedArchives() {
-    this.emitUIActionEvent({ type: "resourcelist-add-unlisted-archives" });
+    this.emitResourcesEvent({ type: "resourcelist-add-unlisted-archives" });
   }
 
   emitResourcelistRemoveNonExistantArchives() {
-    this.emitUIActionEvent({
+    this.emitResourcesEvent({
       type: "resourcelist-remove-non-existant-archives",
     });
   }
 
   emitResourcelistRemoveGameArchives() {
-    this.emitUIActionEvent({ type: "resourcelist-remove-game-archives" });
+    this.emitResourcesEvent({ type: "resourcelist-remove-game-archives" });
   }
 
   emitResourcelistRemoveArchive(name: string) {
-    this.emitUIActionEvent({ type: "resourcelist-remove-archive", name });
+    this.emitResourcesEvent({ type: "resourcelist-remove-archive", name });
   }
 }
 

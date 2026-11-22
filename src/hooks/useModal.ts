@@ -2,6 +2,12 @@ import {
   ConfirmModal,
   ConfirmModalData,
 } from "@/components/modals/ConfirmModal";
+import ErrorMessageModal, {
+  ErrorMessageModalData,
+} from "@/components/modals/ErrorMessageModal";
+import LoadingModal, {
+  LoadingModalData,
+} from "@/components/modals/LoadingModal";
 import {
   MessageModal,
   MessageModalData,
@@ -62,6 +68,55 @@ export function confirmModal(
  */
 export function messageModal(data: MessageModalData): Promise<void> {
   return openModal(MessageModal, data);
+}
+
+/**
+ * @returns functions to open, update, and close a {@link LoadingModal} that cannot be closed by the user.
+ *
+ * @example
+ * ```ts
+ * const modal = loadingModal();
+ * modal.open({ label: t("common.loading") });
+ * for (let progress = 0; progress <= 100; progress += 10)
+ *   modal.update({ label: t("common.loading"), progress });
+ * await modal.close();
+ * ```
+ */
+export function loadingModal() {
+  const ret = {
+    open(data: LoadingModalData) {
+      const promise = openModal(LoadingModal, data);
+      const id = useModalStore.getState().getCurrentId();
+      ret.open = (_data: LoadingModalData) => ret;
+      ret.update = (data: LoadingModalData) => {
+        if (id && useModalStore.getState().has(id)) {
+          useModalStore.getState().updateById(id, data);
+        }
+      };
+      ret.close = async () => {
+        if (id && useModalStore.getState().has(id)) {
+          useModalStore.getState().closeById(id);
+          await promise;
+        }
+      };
+      return ret;
+    },
+    update(data: LoadingModalData) {
+      ret.open(data);
+    },
+    close() {
+      return Promise.resolve();
+    },
+  };
+  return ret;
+}
+
+/**
+ * Opens an {@link ErrorMessageModal} with a single OK button.
+ * @returns resolves when the modal is closed
+ */
+export function errorModal(data: ErrorMessageModalData) {
+  return openModal(ErrorMessageModal, data);
 }
 
 /**

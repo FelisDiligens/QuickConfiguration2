@@ -1,12 +1,6 @@
 import { NexusModsFileCategory, NexusModsModFile } from "@/commands/bindings";
-import { AnyError, commandErrorToString } from "@/commands/errors";
-import NexusMods from "@/commands/nexusmods";
 import { FlexCol } from "@/components/common";
-import { modsEventBus } from "@/services/mods";
 import { ModalComponentProps } from "@/stores/modals";
-import { useModsStore } from "@/stores/mods";
-import { useNexusModsStore } from "@/stores/nexusmods";
-import { useToastsStore } from "@/stores/toasts";
 import { animationsEnabled, formatBytes } from "@/utils";
 import { groupModFilesByCategory } from "@/utils/nexusmods";
 import { css } from "@emotion/react";
@@ -18,7 +12,7 @@ import { useTranslation } from "react-i18next";
 import type { TrackModFileState } from "./types";
 
 export default function TrackModFileModal(
-  props: ModalComponentProps<TrackModFileState, void>,
+  props: ModalComponentProps<TrackModFileState, NexusModsModFile>,
 ) {
   const { t } = useTranslation();
 
@@ -41,39 +35,6 @@ export default function TrackModFileModal(
       "mods.modOrderTab.modals.trackModFileModal.categories.archived",
     ),
     OTHER: t("mods.modOrderTab.modals.trackModFileModal.categories.other"),
-  };
-
-  const trackFile = async (file: NexusModsModFile) => {
-    const state = props.data;
-    if (!state) return;
-    try {
-      const modfile = await NexusMods.api.getModFileInfoFromModFiles(
-        state.gameDomain,
-        state.gameScopedId,
-        file.fileId,
-        state.modFiles,
-      );
-      useNexusModsStore.getState().addOrUpdateModfile(modfile);
-
-      useModsStore
-        .getState()
-        .setMod(state.key, (mod) => ({ ...mod, nexusFileId: file.fileId }));
-
-      useToastsStore
-        .getState()
-        .addToast(
-          t("mods.modOrderTab.toasts.fileTracked"),
-          modfile.name,
-          "success",
-        );
-
-      props.close();
-    } catch (error) {
-      modsEventBus.emitProgressAborted(error as AnyError);
-      console.error(
-        `Failed to track file ${file.fileId}: ${commandErrorToString(error as AnyError)}`,
-      );
-    }
   };
 
   const groups = useMemo(
@@ -216,7 +177,7 @@ export default function TrackModFileModal(
                           <Button
                             variant="outline-primary"
                             size="sm"
-                            onClick={() => trackFile(file).catch(console.error)}
+                            onClick={() => props.close(file)}
                           >
                             {t(
                               "mods.modOrderTab.modals.trackModFileModal.trackButton",

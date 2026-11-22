@@ -1,7 +1,9 @@
 import { FlexCol, FlexRow } from "@/components/common";
 import { ModalComponentProps } from "@/stores/modals";
 import { animationsEnabled } from "@/utils";
+import { clamp } from "@/utils/math";
 import { css } from "@emotion/react";
+import { useMemo } from "react";
 import { Button, Modal, ProgressBar, Spinner } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
@@ -25,6 +27,10 @@ export default function LoadingModal(
   props: ModalComponentProps<LoadingModalData, void>,
 ) {
   const { t } = useTranslation();
+  const percent = useMemo(
+    () => clamp(Math.round(props.data.progress || 0), 0, 100),
+    [props.data.progress],
+  );
   return (
     <Modal
       size="xl"
@@ -67,10 +73,7 @@ export default function LoadingModal(
             }
           `}
           >
-            <ProgressBar
-              now={Math.round(props.data.progress)}
-              label={`${Math.round(props.data.progress)}%`}
-            />
+            <ProgressBar now={percent} label={`${percent}%`} />
           </FlexRow>
         )}
       </Modal.Body>

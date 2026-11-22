@@ -1,10 +1,10 @@
 import { MessageModal } from "@/components/modals/MessageModal";
 import { ModalComponentProps } from "@/stores/modals";
-import { ExtendedArchive2Info } from "@/hooks/mods";
 import { formatBytes } from "@/utils";
 import { css } from "@emotion/react";
 import { Table } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
+import { ExtendedArchive2Info } from "./types";
 
 export interface Archive2InfoModalData {
   info?: ExtendedArchive2Info | null;

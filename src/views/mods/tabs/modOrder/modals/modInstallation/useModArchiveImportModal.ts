@@ -1,8 +1,8 @@
 import { commands, ManagedMod } from "@/commands/bindings";
 import { AnyError } from "@/commands/errors";
 import Mods from "@/commands/mods";
-import { openModal } from "@/hooks/useModal";
-import { createBaseManagedMod, modsEventBus } from "@/services/mods";
+import { errorModal, loadingModal, openModal } from "@/hooks/useModal";
+import { createBaseManagedMod } from "@/services/mods";
 import { updateModsStore, useModsStore } from "@/stores/mods";
 import { useProfilesStore } from "@/stores/profiles";
 import { useResourceListStore } from "@/stores/resourceList";
@@ -14,14 +14,17 @@ import ModArchiveImportModal from "./ModArchiveImportModal";
 export function useModArchiveImportModal() {
   const { t } = useTranslation();
 
-  const getArchives = async () => {
+  const importArchives = async () => {
+    const loadingModalState = loadingModal();
     try {
       const state = useModsStore.getState().state;
       const resources = useResourceListStore.getState().resources;
       const gameDataPath = useProfilesStore.getState().getGameDataPath();
       if (!gameDataPath) throw new Error(t("mods.errors.unsetGamePath"));
 
-      modsEventBus.emitProgressUpdated(t("common.loading"));
+      loadingModalState.open({
+        label: t("common.loading"),
+      });
 
       const deployedResources = (
         await Mods.utils.getDeployedArchives(state)
@@ -35,8 +38,7 @@ export function useModArchiveImportModal() {
         resourcesNotBelongingToAnyMod.push(resource);
       }
 
-      modsEventBus.emitProgressFinished();
-
+      await loadingModalState.close();
       const result = await openModal(ModArchiveImportModal, {
         archives: resourcesNotBelongingToAnyMod,
       });
@@ -44,7 +46,10 @@ export function useModArchiveImportModal() {
         await installArchives(result.modName, result.archiveNames, {});
       }
     } catch (error) {
-      modsEventBus.emitProgressAborted(error as AnyError);
+      console.error(error);
+      await errorModal({ reason: error as AnyError });
+    } finally {
+      await loadingModalState.close();
     }
   };
 
@@ -54,6 +59,7 @@ export function useModArchiveImportModal() {
     archiveNames: string[],
     partialModDetails: Partial<ManagedMod>,
   ) => {
+    const loadingModalState = loadingModal();
     try {
       const managedMods = useModsStore.getState().getManagedMods();
       const modsPath = useProfilesStore.getState().getModsPath();
@@ -61,9 +67,9 @@ export function useModArchiveImportModal() {
       if (!modsPath || !gamePath)
         throw new Error(t("mods.errors.unsetModsPathOrGamePath"));
 
-      modsEventBus.emitProgressUpdated(
-        t("mods.modOrderTab.progress.installingMod"),
-      );
+      loadingModalState.open({
+        label: t("mods.modOrderTab.progress.installingMod"),
+      });
 
       const modDetails = {
         ...createBaseManagedMod(modName),
@@ -80,16 +86,18 @@ export function useModArchiveImportModal() {
         );
       updateModsStore(update);
 
-      modsEventBus.emitProgressFinished();
       useToastsStore
         .getState()
         .addToast(t("mods.modOrderTab.toasts.modInstalled"), modDetails.title);
     } catch (error) {
-      modsEventBus.emitProgressAborted(error as AnyError);
+      console.error(error);
+      await errorModal({ reason: error as AnyError });
+    } finally {
+      await loadingModalState.close();
     }
   };
 
   return {
-    getArchives: () => getArchives().catch(console.error),
+    importArchives,
   };
 }

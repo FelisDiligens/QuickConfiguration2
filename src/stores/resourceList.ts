@@ -6,6 +6,7 @@ import { subscribeWithSelector, syncStore } from "@/utils/zustand";
 import fastDeepEqual from "fast-deep-equal/es6";
 import { t } from "i18next";
 import { SetStateAction } from "jotai";
+import _ from "lodash";
 import { Dispatch } from "react";
 import { create } from "zustand";
 import { useProfilesStore } from "./profiles";
@@ -15,6 +16,8 @@ import { useToastsStore } from "./toasts";
 export interface ResourceListStore {
   resources: string[];
   setResources: Dispatch<SetStateAction<string[]>>;
+  addResource: (name: string) => void;
+  removeResource: (name: string) => void;
 }
 
 export const useResourceListStore = create<ResourceListStore>()((set, get) => ({
@@ -23,6 +26,10 @@ export const useResourceListStore = create<ResourceListStore>()((set, get) => ({
     typeof resources === "function"
       ? set({ resources: resources(get().resources) })
       : set({ resources }),
+  addResource: (name) =>
+    set({ resources: _(get().resources).push(name).uniq().value() }),
+  removeResource: (name) =>
+    set({ resources: get().resources.filter((resource) => resource !== name) }),
 }));
 
 export const resourceListStoreSync = syncStore(

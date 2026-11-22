@@ -3,29 +3,14 @@ import { AnyError } from "@/commands/errors";
 import Mods from "@/commands/mods";
 import { useProfilesStore } from "@/stores/profiles";
 import { UnlistenFn } from "@tauri-apps/api/event";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { loadingModal } from "../../../hooks/useModal";
 
-export function useModMigration(onSuccess?: () => void) {
+export function useModMigration(options: {
+  onSuccess?: () => void;
+  onError?: (error: AnyError) => void;
+}) {
   const { t } = useTranslation();
-
-  const [isPending, setIsPending] = useState(false);
-  const [statusText, setStatusText] = useState("");
-  const [progress, setProgress] = useState<number | undefined>(undefined);
-  const [error, setError] = useState<AnyError>(null);
-
-  const showProgress = (text: string, progress?: number) => {
-    setIsPending(true);
-    setStatusText(text);
-    setProgress(progress);
-  };
-
-  const hideProgress = () => setIsPending(false);
-
-  const showError = (error: AnyError) => {
-    hideProgress();
-    setError(error);
-  };
 
   const getValidatedPaths = async () => {
     const modsPath = useProfilesStore.getState().getModsPath();
@@ -47,6 +32,7 @@ export function useModMigration(onSuccess?: () => void) {
 
   const migrateMods = async () => {
     let unlisten: UnlistenFn | undefined = undefined;
+    const loadingModalState = loadingModal();
     try {
       const { modsPath, gamePath } = await getValidatedPaths();
 
@@ -55,7 +41,10 @@ export function useModMigration(onSuccess?: () => void) {
       if (!iniPath || !iniPrefix)
         throw new Error("iniPath and iniPrefix are required");
 
-      showProgress(t("mods.progress.migration.migratingMods"), 0);
+      loadingModalState.open({
+        label: t("mods.progress.migration.migratingMods"),
+        progress: 0,
+      });
 
       // Listen to progress events:
       // TODO: Perhaps, replace arbitrary percentages with actual percentages?
@@ -67,33 +56,38 @@ export function useModMigration(onSuccess?: () => void) {
       unlisten = await events.modsMigrationProgress.listen((event) => {
         switch (event.payload.status) {
           case "removing-bundled-archives":
-            showProgress(
-              t("mods.progress.migration.removingBundledArchives"),
-              0,
-            );
+            loadingModalState.update({
+              label: t("mods.progress.migration.removingBundledArchives"),
+              progress: 0,
+            });
             break;
           case "removing-mod":
-            showProgress(
-              t("mods.progress.migration.removingMod", {
+            loadingModalState.update({
+              label: t("mods.progress.migration.removingMod", {
                 modTitle: event.payload.modTitle,
                 count: event.payload.currentMod + 1,
                 total: event.payload.totalMods,
               }),
-              10 + (event.payload.currentMod / event.payload.totalMods) * 40,
-            );
+              progress:
+                10 + (event.payload.currentMod / event.payload.totalMods) * 40,
+            });
             break;
           case "migrating-mod":
-            showProgress(
-              t("mods.progress.migration.migratingMod", {
+            loadingModalState.update({
+              label: t("mods.progress.migration.migratingMod", {
                 modTitle: event.payload.modTitle,
                 count: event.payload.currentMod + 1,
                 total: event.payload.totalMods,
               }),
-              50 + (event.payload.currentMod / event.payload.totalMods) * 40,
-            );
+              progress:
+                50 + (event.payload.currentMod / event.payload.totalMods) * 40,
+            });
             break;
           case "cleanup":
-            showProgress(t("mods.progress.migration.cleanup"), 90);
+            loadingModalState.update({
+              label: t("mods.progress.migration.cleanup"),
+              progress: 90,
+            });
             break;
         }
       });
@@ -101,17 +95,18 @@ export function useModMigration(onSuccess?: () => void) {
       await Mods.legacy.migrateMods(gamePath, modsPath);
       await commands.iniSave(iniPath, iniPrefix, true);
 
-      hideProgress();
-      if (onSuccess) onSuccess();
+      if (options.onSuccess) options.onSuccess();
     } catch (error) {
-      showError(error as AnyError);
+      if (options.onError) options.onError(error as AnyError);
     } finally {
       if (unlisten) unlisten();
+      await loadingModalState.close();
     }
   };
 
   const deleteMods = async () => {
     let unlisten: UnlistenFn | undefined = undefined;
+    const loadingModalState = loadingModal();
     try {
       const { modsPath, gamePath } = await getValidatedPaths();
 
@@ -120,7 +115,10 @@ export function useModMigration(onSuccess?: () => void) {
       if (!iniPath || !iniPrefix)
         throw new Error("iniPath and iniPrefix are required");
 
-      showProgress(t("mods.progress.deletion.removingMods"), 0);
+      loadingModalState.open({
+        label: t("mods.progress.deletion.removingMods"),
+        progress: 0,
+      });
 
       // Listen to progress events:
       // TODO: Perhaps, replace arbitrary percentages with actual percentages?
@@ -131,26 +129,30 @@ export function useModMigration(onSuccess?: () => void) {
       unlisten = await events.modsMigrationProgress.listen((event) => {
         switch (event.payload.status) {
           case "removing-bundled-archives":
-            showProgress(
-              t("mods.progress.deletion.removingBundledArchives"),
-              0,
-            );
+            loadingModalState.update({
+              label: t("mods.progress.deletion.removingBundledArchives"),
+              progress: 0,
+            });
             break;
           case "removing-mod":
-            showProgress(
-              t("mods.progress.deletion.removingMod", {
+            loadingModalState.update({
+              label: t("mods.progress.deletion.removingMod", {
                 modTitle: event.payload.modTitle,
                 count: event.payload.currentMod + 1,
                 total: event.payload.totalMods,
               }),
-              20 + (event.payload.currentMod / event.payload.totalMods) * 60,
-            );
+              progress:
+                20 + (event.payload.currentMod / event.payload.totalMods) * 60,
+            });
             break;
           case "migrating-mod":
             // Unused: Doesn't get send when only deleting.
             break;
           case "cleanup":
-            showProgress(t("mods.progress.deletion.cleanup"), 80);
+            loadingModalState.update({
+              label: t("mods.progress.deletion.cleanup"),
+              progress: 80,
+            });
             break;
         }
       });
@@ -158,20 +160,16 @@ export function useModMigration(onSuccess?: () => void) {
       await Mods.legacy.removeMods(gamePath, modsPath);
       await commands.iniSave(iniPath, iniPrefix, true);
 
-      hideProgress();
-      if (onSuccess) onSuccess();
+      if (options.onSuccess) options.onSuccess();
     } catch (error) {
-      showError(error as AnyError);
+      if (options.onError) options.onError(error as AnyError);
     } finally {
       if (unlisten) unlisten();
+      await loadingModalState.close();
     }
   };
 
   return {
-    isPending,
-    error,
-    statusText,
-    progress,
     migrateMods,
     deleteMods,
   };

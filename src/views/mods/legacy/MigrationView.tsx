@@ -1,4 +1,5 @@
 import { ModsMigrationState } from "@/commands/bindings";
+import { AnyError } from "@/commands/errors";
 import {
   ButtonRow,
   PageAlert,
@@ -7,9 +8,7 @@ import {
   PageTitle,
   PreferencesGroup,
 } from "@/components/common";
-import LoadingModal from "@/components/modals/LoadingModal";
 import { AppTheme } from "@/components/MyThemeProvider";
-import { useModMigration } from "@/hooks/mods";
 import { confirmModal } from "@/hooks/useModal";
 import { css } from "@emotion/react";
 import {
@@ -18,7 +17,9 @@ import {
   faTriangleExclamation,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useModMigration } from "./useModMigration";
 
 interface Props {
   migrationState: ModsMigrationState;
@@ -27,8 +28,11 @@ interface Props {
 
 export default function MigrationView(props: Props) {
   const { t } = useTranslation();
-  const { isPending, error, statusText, progress, migrateMods, deleteMods } =
-    useModMigration(props.reloadMigrationBoundary);
+  const [error, setError] = useState<AnyError>(null);
+  const { migrateMods, deleteMods } = useModMigration({
+    onSuccess: props.reloadMigrationBoundary,
+    onError: setError,
+  });
 
   async function confirmMigrateMods() {
     const confirmed = await confirmModal({
@@ -72,53 +76,45 @@ export default function MigrationView(props: Props) {
   }
 
   return (
-    <>
-      <PageContainer>
-        <PageTitle>{t("mods.migration.title")}</PageTitle>
-        <div
-          css={(theme: AppTheme) => css`
+    <PageContainer>
+      <PageTitle>{t("mods.migration.title")}</PageTitle>
+      <div
+        css={(theme: AppTheme) => css`
         margin: 10px auto 30px auto;
         width: 100%;
         max-width: ${theme.card.maxWidth};
       `}
-        >
-          {error && <PageErrorAlert reason={error}></PageErrorAlert>}
-          <p>{t("mods.migration.description")}</p>
-          <p>
-            {t("mods.migration.migrationState")}{" "}
-            <code>{props.migrationState}</code>
-          </p>
-          <PageAlert>
-            <FontAwesomeIcon size="xl" icon={faTriangleExclamation} />
-            &nbsp;
-            <span>{t("mods.migration.warning")}</span>
-          </PageAlert>
-          <PreferencesGroup title={t("mods.migration.decideWhatToDo")}>
-            <ButtonRow
-              center
-              variant="danger"
-              onClick={() => void confirmMigrateMods()}
-            >
-              <FontAwesomeIcon icon={faRightLeft} />
-              &nbsp; {t("mods.migration.migrateOldModsButton")}
-            </ButtonRow>
-            <ButtonRow
-              center
-              variant="danger"
-              onClick={() => void confirmDeleteMods()}
-            >
-              <FontAwesomeIcon icon={faSackXmark} />
-              &nbsp; {t("mods.migration.deleteOldModsButton")}
-            </ButtonRow>
-          </PreferencesGroup>
-        </div>
-      </PageContainer>
-      <LoadingModal
-        isOpen={isPending}
-        data={{ label: statusText, progress }}
-        close={() => undefined}
-        cancel={() => undefined}
-      />
-    </>
+      >
+        {error && <PageErrorAlert reason={error}></PageErrorAlert>}
+        <p>{t("mods.migration.description")}</p>
+        <p>
+          {t("mods.migration.migrationState")}{" "}
+          <code>{props.migrationState}</code>
+        </p>
+        <PageAlert>
+          <FontAwesomeIcon size="xl" icon={faTriangleExclamation} />
+          &nbsp;
+          <span>{t("mods.migration.warning")}</span>
+        </PageAlert>
+        <PreferencesGroup title={t("mods.migration.decideWhatToDo")}>
+          <ButtonRow
+            center
+            variant="danger"
+            onClick={() => void confirmMigrateMods()}
+          >
+            <FontAwesomeIcon icon={faRightLeft} />
+            &nbsp; {t("mods.migration.migrateOldModsButton")}
+          </ButtonRow>
+          <ButtonRow
+            center
+            variant="danger"
+            onClick={() => void confirmDeleteMods()}
+          >
+            <FontAwesomeIcon icon={faSackXmark} />
+            &nbsp; {t("mods.migration.deleteOldModsButton")}
+          </ButtonRow>
+        </PreferencesGroup>
+      </div>
+    </PageContainer>
   );
 }

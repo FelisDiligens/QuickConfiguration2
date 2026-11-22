@@ -1,21 +1,12 @@
-import { AnyError } from "@/commands/errors";
 import { FlexRow } from "@/components/common";
-import { useModDeployment, useModManagement } from "@/hooks/mods";
-import { modsEventBus } from "@/services/mods";
 import { useModsStore } from "@/stores/mods";
 import { css } from "@emotion/react";
 import { faCaretLeft, faCaretRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { atom, useAtom } from "jotai";
-import { useEffect } from "react";
 import { Button } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { useArchive2Modals } from "./modals/archive2/useArchive2Modals";
-import { useCommonModals } from "./modals/common/useCommonModals";
-import { useModConflictingFilesModal } from "./modals/modActions/useModConflictingFilesModal";
-import { useModDownloadModals } from "./modals/modDownload/useModDownloadModals";
-import { useModInstallationModals } from "./modals/modInstallation/useModInstallationModals";
-import { useNexusModsModals } from "./modals/nexusMods/useNexusModsModals";
+import useModOrderModals from "./modals/useModOrderModals";
 import ModDetails from "./ModDetails";
 import ModTable from "./ModTable";
 import StatusRow from "./StatusRow";
@@ -31,31 +22,7 @@ export default function ModOrderTab() {
   const selectedModIndex = useModsStore((store) => store.getSelectedModIndex());
   const [showDetails, setShowDetails] = useAtom(showDetailsAtom);
 
-  const { deployMods } = useModDeployment();
-  useModManagement();
-  useModConflictingFilesModal();
-  useNexusModsModals();
-  useArchive2Modals();
-  useModDownloadModals();
-  useModInstallationModals();
-  useCommonModals();
-
-  // React to messages:
-  useEffect(
-    () =>
-      modsEventBus.onUIActionEvent((message) => {
-        switch (message.type) {
-          case "mods-deploy":
-            deployMods().catch((reason) => {
-              console.error(reason);
-              modsEventBus.emitProgressAborted(reason as AnyError);
-            });
-            break;
-          // no default
-        }
-      }),
-    [],
-  );
+  useModOrderModals();
 
   return (
     <>

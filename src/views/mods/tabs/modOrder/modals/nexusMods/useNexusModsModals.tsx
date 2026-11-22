@@ -1,14 +1,19 @@
-import { AnyError, commandErrorToString } from "@/commands/errors";
+import { AnyError } from "@/commands/errors";
 import NexusMods from "@/commands/nexusmods";
-import { messageModal, openModal } from "@/hooks/useModal";
-import { modsEventBus } from "@/services/mods";
+import {
+  errorModal,
+  loadingModal,
+  messageModal,
+  openModal,
+} from "@/hooks/useModal";
 import * as nexusmodsApi from "@/services/nexusmods";
 import { useModsStore } from "@/stores/mods";
 import {
   nexusmodsStoreAccountSync,
   useNexusModsStore,
 } from "@/stores/nexusmods";
-import { useEffect } from "react";
+import { useToastsStore } from "@/stores/toasts";
+import { parseNexusModsUrl } from "@/utils/nexusmods";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import OutdatedModsModal from "./OutdatedModsModal";
@@ -36,18 +41,25 @@ export function useNexusModsModals() {
     });
   }
 
-  async function checkApiKey() {
-    const apiKey = useNexusModsStore.getState().apiKey;
-
+  async function loadApiKey() {
     // Is API key loaded?
-    if (apiKey) return true;
+    const apiKey = useNexusModsStore.getState().apiKey;
+    if (apiKey) return apiKey;
 
     // If not, load account info:
     await nexusmodsStoreAccountSync.load();
 
     // Is the API key loaded now?
     const currentApiKey = useNexusModsStore.getState().apiKey;
-    if (currentApiKey) return true;
+    if (currentApiKey) return currentApiKey;
+
+    return undefined;
+  }
+
+  async function checkApiKey() {
+    // Get API key from store or load from file:
+    const apiKey = await loadApiKey();
+    if (apiKey) return true;
 
     // If not, show a message to the user that they have to login:
     void showLoggedOutModal();
@@ -56,104 +68,262 @@ export function useNexusModsModals() {
 
   async function retrieveModInfo(key: string) {
     if (!(await checkApiKey())) return;
-    const mod = getMod(key);
-    if (!mod) {
-      modsEventBus.emitProgressAborted(
-        t("mods.modOrderTab.progress.modNotFound"),
+
+    const loadingModalState = loadingModal();
+    try {
+      const mod = getMod(key);
+      if (!mod) throw new Error(t("mods.modOrderTab.progress.modNotFound"));
+
+      const apiKey = useNexusModsStore.getState().apiKey;
+      if (!apiKey) throw new Error("API key is not set");
+
+      const ids = parseNexusModsUrl(mod.url);
+      if (!ids) throw new Error("URL could not be parsed");
+
+      loadingModalState.open({
+        label: t("mods.modOrderTab.progress.retrievingModInfo"),
+      });
+
+      console.log("Retrieving mod info for", mod.url);
+      await nexusmodsApi.retrieveModinfo(
+        apiKey,
+        ids.gameDomain,
+        ids.gameScopedId,
+        mod.nexusFileId,
       );
-      return;
+
+      useToastsStore
+        .getState()
+        .addToast(t("mods.modOrderTab.toasts.infoRetrieved"), "", "success");
+    } catch (error) {
+      console.error(error);
+      await errorModal({ reason: error as AnyError });
+    } finally {
+      await loadingModalState.close();
     }
-    await nexusmodsApi.retrieveModinfo(mod.url, mod.nexusFileId);
   }
 
   async function endorse(key: string) {
     if (!(await checkApiKey())) return;
-    const mod = getMod(key);
-    if (!mod) {
-      modsEventBus.emitProgressAborted(
-        t("mods.modOrderTab.progress.modNotFound"),
+
+    const loadingModalState = loadingModal();
+    try {
+      const mod = getMod(key);
+      if (!mod) throw new Error(t("mods.modOrderTab.progress.modNotFound"));
+
+      const apiKey = useNexusModsStore.getState().apiKey;
+      if (!apiKey) throw new Error("API key is not set");
+
+      const ids = parseNexusModsUrl(mod.url);
+      if (!ids) throw new Error("URL could not be parsed");
+
+      loadingModalState.open({
+        label: t("mods.modOrderTab.progress.endorsingMod"),
+      });
+
+      console.log("Endorsing mod:", mod.url, mod.version);
+      await nexusmodsApi.endorse(
+        apiKey,
+        ids.gameDomain,
+        ids.gameScopedId,
+        mod.version,
       );
-      return;
+    } catch (error) {
+      console.error(error);
+      await errorModal({ reason: error as AnyError });
+    } finally {
+      await loadingModalState.close();
     }
-    await nexusmodsApi.endorse(mod.url, mod.version);
   }
 
   async function abstain(key: string) {
     if (!(await checkApiKey())) return;
-    const mod = getMod(key);
-    if (!mod) {
-      modsEventBus.emitProgressAborted(
-        t("mods.modOrderTab.progress.modNotFound"),
+
+    const loadingModalState = loadingModal();
+    try {
+      const mod = getMod(key);
+      if (!mod) throw new Error(t("mods.modOrderTab.progress.modNotFound"));
+
+      const apiKey = useNexusModsStore.getState().apiKey;
+      if (!apiKey) throw new Error("API key is not set");
+
+      const ids = parseNexusModsUrl(mod.url);
+      if (!ids) throw new Error("URL could not be parsed");
+
+      loadingModalState.open({
+        label: t("mods.modOrderTab.progress.abstainingFromEndorsingMod"),
+      });
+
+      console.log("Abstaining from endorsing mod:", mod.url, mod.version);
+      await nexusmodsApi.abstain(
+        apiKey,
+        ids.gameDomain,
+        ids.gameScopedId,
+        mod.version,
       );
-      return;
+    } catch (error) {
+      console.error(error);
+      await errorModal({ reason: error as AnyError });
+    } finally {
+      await loadingModalState.close();
     }
-    await nexusmodsApi.abstain(mod.url, mod.version);
   }
 
   async function retrieveModInfoAll() {
-    if (!(await checkApiKey())) throw new Error("API key is not set");
-    const mods = useModsStore.getState().mods;
-    await nexusmodsApi.retrieveModInfoAll(mods);
+    if (!(await checkApiKey())) return false;
+
+    const loadingModalState = loadingModal();
+    try {
+      const mods = useModsStore.getState().mods;
+      if (mods.length === 0) return false;
+
+      const apiKey = useNexusModsStore.getState().apiKey;
+      if (!apiKey) throw new Error("API key is not set");
+
+      const { retrievedCount } = await nexusmodsApi.retrieveModInfoAll(
+        apiKey,
+        mods,
+        (data) => loadingModalState.update(data),
+      );
+
+      useToastsStore.getState().addToast(
+        t("mods.modOrderTab.toasts.infoRetrievedWithCount", {
+          count: retrievedCount,
+        }),
+        "",
+        "success",
+      );
+      return true;
+    } catch (error) {
+      console.error(error);
+      await errorModal({ reason: error as AnyError });
+      return false;
+    } finally {
+      await loadingModalState.close();
+    }
   }
 
   async function endorseAll() {
     if (!(await checkApiKey())) return;
-    const mods = useModsStore.getState().mods;
-    await nexusmodsApi.endorseAll(mods);
+
+    const loadingModalState = loadingModal();
+    try {
+      const mods = useModsStore.getState().mods;
+      if (mods.length === 0) return false;
+
+      const apiKey = useNexusModsStore.getState().apiKey;
+      if (!apiKey) throw new Error("API key is not set");
+
+      const { endorsedCount } = await nexusmodsApi.endorseAll(
+        apiKey,
+        mods,
+        (data) => loadingModalState.update(data),
+      );
+
+      useToastsStore
+        .getState()
+        .addToast(
+          t("mods.modOrderTab.toasts.modsEndorsed", { count: endorsedCount }),
+          "",
+          "success",
+        );
+    } catch (error) {
+      console.error(error);
+      await errorModal({ reason: error as AnyError });
+      return false;
+    } finally {
+      await loadingModalState.close();
+    }
   }
 
   async function trackModFile(key: string) {
     if (!(await checkApiKey())) return;
-    const mod = getMod(key);
-    if (!mod) {
-      modsEventBus.emitProgressAborted(
-        t("mods.modOrderTab.progress.modNotFound"),
-      );
-      return;
-    }
+
+    const loadingModalState = loadingModal();
     try {
-      const { gameDomain, gameScopedId, modFiles } =
-        await nexusmodsApi.listModFiles(mod.url);
+      const mod = getMod(key);
+      if (!mod) throw new Error(t("mods.modOrderTab.progress.modNotFound"));
+
+      const apiKey = useNexusModsStore.getState().apiKey;
+      if (!apiKey) throw new Error("API key is not set");
+
+      const ids = parseNexusModsUrl(mod.url);
+      if (!ids) throw new Error("URL could not be parsed");
+
+      loadingModalState.open({
+        label: t("mods.modOrderTab.progress.listingModFiles"),
+      });
+
+      console.log("Listing mod files for", mod.url);
+      const modFiles = await NexusMods.api.listModFiles(
+        apiKey,
+        ids.gameDomain,
+        ids.gameScopedId,
+        null,
+      );
+
       const state: TrackModFileState = {
         key,
-        gameDomain,
-        gameScopedId,
+        gameDomain: ids.gameDomain,
+        gameScopedId: ids.gameScopedId,
         modFiles,
       };
-      await openModal(TrackModFileModal, state);
-    } catch (error) {
-      console.error(
-        `Failed to list mod files for mod '${mod.title}': ${commandErrorToString(error as AnyError)}`,
+
+      await loadingModalState.close();
+      const file = await openModal(TrackModFileModal, state);
+      if (!file) return;
+
+      const modfile = await NexusMods.api.getModFileInfoFromModFiles(
+        ids.gameDomain,
+        ids.gameScopedId,
+        file.fileId,
+        modFiles,
       );
+      useNexusModsStore.getState().addOrUpdateModfile(modfile);
+
+      useModsStore
+        .getState()
+        .setMod(key, (mod) => ({ ...mod, nexusFileId: file.fileId }));
+
+      useToastsStore
+        .getState()
+        .addToast(
+          t("mods.modOrderTab.toasts.fileTracked"),
+          modfile.name,
+          "success",
+        );
+    } catch (error) {
+      console.error(error);
+      await errorModal({ reason: error as AnyError });
+    } finally {
+      await loadingModalState.close();
     }
   }
 
   async function checkForUpdates() {
-    await retrieveModInfoAll();
+    if (!(await retrieveModInfoAll())) return;
+
     const outdatedMods: OutdatedMod[] = [];
     const mods = useModsStore.getState().mods;
     for (const mod of mods) {
-      let gameDomain, gameScopedId;
-      try {
-        [gameDomain, gameScopedId] = await NexusMods.extractIdsFromUrl(mod.url);
-      } catch (error) {
+      const ids = parseNexusModsUrl(mod.url);
+      if (!ids) {
         // If a single mod has an invalid URL, don't stop here. Log and move on:
-        console.warn(
-          `Couldn't extract IDs from URL: '${mod.url}'\n${commandErrorToString(error as AnyError)}`,
-        );
+        console.warn(`Couldn't extract IDs from URL: '${mod.url}'`);
         continue;
       }
+
       const latestVersion = getLatestVersion({
-        gameDomain,
-        gameScopedId,
+        gameDomain: ids.gameDomain,
+        gameScopedId: ids.gameScopedId,
         fileId: mod.nexusFileId,
       });
       if (isModOutdated(mod) && latestVersion != undefined) {
         outdatedMods.push({
           key: mod.key,
           title: mod.title,
-          gameDomain,
-          gameScopedId,
+          gameDomain: ids.gameDomain,
+          gameScopedId: ids.gameScopedId,
           currentVersion: mod.version,
           latestVersion,
         });
@@ -162,38 +332,14 @@ export function useNexusModsModals() {
     await openModal(OutdatedModsModal, { outdatedMods });
   }
 
-  // React to messages:
-  useEffect(
-    () =>
-      modsEventBus.onUIActionEvent((message) => {
-        switch (message.type) {
-          case "nexus-mods-check-for-updates":
-            checkForUpdates().catch(console.error);
-            break;
-          case "nexus-mods-download-mods-info":
-            retrieveModInfoAll().catch(console.error);
-            break;
-          case "nexus-mods-endorse-all-mods":
-            endorseAll().catch(console.error);
-            break;
-          case "nexus-mods-download-mod-info":
-            retrieveModInfo(message.key).catch(console.error);
-            break;
-          case "nexus-mods-endorse-mod":
-            endorse(message.key).catch(console.error);
-            break;
-          case "nexus-mods-abstain-mod":
-            abstain(message.key).catch(console.error);
-            break;
-          case "nexus-mods-not-logged-in":
-            showLoggedOutModal().catch(console.error);
-            break;
-          case "nexus-mods-track-mod-file":
-            trackModFile(message.key).catch(console.error);
-            break;
-          // no default
-        }
-      }),
-    [],
-  );
+  return {
+    checkForUpdates,
+    retrieveModInfoAll,
+    endorseAll,
+    retrieveModInfo,
+    endorse,
+    abstain,
+    showLoggedOutModal,
+    trackModFile,
+  };
 }

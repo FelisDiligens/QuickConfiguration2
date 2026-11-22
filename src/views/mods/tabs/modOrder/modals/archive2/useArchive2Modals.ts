@@ -1,125 +1,160 @@
-import { useArchive2 } from "@/hooks/mods";
-import { openModal } from "@/hooks/useModal";
-import { modsEventBus } from "@/services/mods";
+import { getFileSize } from "@/commands/additions";
+import { commands } from "@/commands/bindings";
+import { AnyError } from "@/commands/errors";
+import Mods from "@/commands/mods";
+import { loadingModal, openModal } from "@/hooks/useModal";
+import { useToastsStore } from "@/stores/toasts";
 import * as dialog from "@tauri-apps/plugin-dialog";
-import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Archive2AutoPackModal from "./Archive2AutoPackModal";
 import Archive2CreateModal from "./Archive2CreateModal";
 import Archive2ErrorModal from "./Archive2ErrorModal";
 import Archive2ExtractModal from "./Archive2ExtractModal";
 import Archive2InfoModal from "./Archive2InfoModal";
+import { ExtendedArchive2Info } from "./types";
 
 export function useArchive2Modals() {
-  const {
-    openArchive2,
-    exploreArchive,
-    readArchive2Info,
-    createArchive,
-    extractArchive,
-    autoPackBa2Archives,
-  } = useArchive2();
+  const { t } = useTranslation();
 
-  async function doExploreArchive2() {
+  async function openArchive() {
+    try {
+      await commands.archive2OpenProgram();
+    } catch (error) {
+      console.error(error);
+      void openModal(Archive2ErrorModal, { reason: error as AnyError });
+    }
+  }
+
+  async function exploreArchive() {
     const path = await dialog.open({
       directory: false,
       multiple: false,
     });
     if (path == null) return;
+
     try {
-      await exploreArchive(path);
-    } catch (reason) {
-      console.error(reason);
+      await commands.archive2ExploreArchive(path);
+    } catch (error) {
+      console.error(error);
+      void openModal(Archive2ErrorModal, { reason: error as AnyError });
     }
   }
 
-  async function doShowArchive2Info() {
+  async function readArchiveInfo() {
     const path = await dialog.open({
       directory: false,
       multiple: false,
     });
     if (path == null) return;
+
+    const loadingModalState = loadingModal().open({
+      label: t("common.loading"),
+    });
     try {
-      const info = await readArchive2Info(path);
-      if (info) await openModal(Archive2InfoModal, { info });
-    } catch (reason) {
-      console.error(reason);
+      const info = await commands.archive2ReadArchive(path);
+      const size = await getFileSize(path);
+      const extendedInfo: ExtendedArchive2Info = {
+        ...info,
+        fileSize: size,
+        filePath: path,
+      };
+      await loadingModalState.close();
+      await openModal(Archive2InfoModal, { info: extendedInfo });
+    } catch (error) {
+      console.error(error);
+      void openModal(Archive2ErrorModal, { reason: error as AnyError });
+    } finally {
+      await loadingModalState.close();
     }
   }
 
-  async function showCreateModal() {
+  async function createArchive() {
     const result = await openModal(Archive2CreateModal, undefined);
-    if (result) {
-      createArchive(
+    if (!result) return;
+
+    const loadingModalState = loadingModal().open({
+      label: t("mods.modOrderTab.progress.creatingArchive"),
+    });
+    try {
+      await commands.archive2CreateArchive(
         result.archivePath,
         result.sourcePath,
         result.format,
         result.compression,
-      ).catch(console.error);
-    }
-  }
-
-  async function showExtractModal() {
-    const result = await openModal(Archive2ExtractModal, undefined);
-    if (result) {
-      extractArchive(result.archivePath, result.destinationPath).catch(
-        console.error,
       );
+      useToastsStore
+        .getState()
+        .addToast(t("mods.modOrderTab.toasts.archive2Created"), "", "success");
+    } catch (error) {
+      console.error(error);
+      void openModal(Archive2ErrorModal, { reason: error as AnyError });
+    } finally {
+      await loadingModalState.close();
     }
   }
 
-  async function showAutoPackModal() {
+  async function extractArchive() {
+    const result = await openModal(Archive2ExtractModal, undefined);
+    if (!result) return;
+
+    const loadingModalState = loadingModal().open({
+      label: t("mods.modOrderTab.progress.extractingArchive"),
+    });
+    try {
+      await commands.archive2ExtractArchive(
+        result.archivePath,
+        result.destinationPath,
+      );
+      useToastsStore
+        .getState()
+        .addToast(
+          t("mods.modOrderTab.toasts.archive2Extracted"),
+          "",
+          "success",
+        );
+    } catch (error) {
+      console.error(error);
+      void openModal(Archive2ErrorModal, { reason: error as AnyError });
+    } finally {
+      await loadingModalState.close();
+    }
+  }
+
+  async function autoPackBa2Archives() {
     const result = await openModal(Archive2AutoPackModal, undefined);
-    if (result) {
-      autoPackBa2Archives(
+    if (!result) return;
+
+    const loadingModalState = loadingModal().open({
+      label: t("mods.modOrderTab.progress.autoPackingArchives"),
+    });
+    try {
+      await Mods.utils.autoPackBa2Archives(
         result.modName,
         result.sourcePath,
         result.destinationPath,
         result.tempPath,
-      ).catch(console.error);
+      );
+      useToastsStore
+        .getState()
+        .addToast(
+          t("mods.modOrderTab.toasts.archive2AutoPacked"),
+          "",
+          "success",
+        );
+    } catch (error) {
+      console.error(error);
+      void openModal(Archive2ErrorModal, { reason: error as AnyError });
+    } finally {
+      await loadingModalState.close();
     }
   }
 
-  // React to messages:
-  useEffect(
-    () =>
-      modsEventBus.onUIActionEvent((message) => {
-        switch (message.type) {
-          case "archive2-open":
-            openArchive2().catch(console.error);
-            break;
-          case "archive2-pick-file-explore-ba2-archive":
-            doExploreArchive2().catch(console.error);
-            break;
-          case "archive2-pick-file-extract-ba2-archive":
-            showExtractModal().catch(console.error);
-            break;
-          case "archive2-pick-create-ba2-archive":
-            showCreateModal().catch(console.error);
-            break;
-          case "archive2-auto-pack-into-archives":
-            showAutoPackModal().catch(console.error);
-            break;
-          case "archive2-pick-file-display-info-ba2-archive":
-            doShowArchive2Info().catch(console.error);
-            break;
-          // no default
-        }
-      }),
-    [],
-  );
-
-  useEffect(
-    () =>
-      modsEventBus.onArchive2Event((message) => {
-        switch (message.type) {
-          case "show-error-modal":
-            openModal(Archive2ErrorModal, { reason: message.error }).catch(
-              console.error,
-            );
-            break;
-          // no default
-        }
-      }),
-    [],
-  );
+  return {
+    openArchive,
+    exploreArchive,
+    extractArchive,
+    createArchive,
+    autoPackBa2Archives,
+    readArchiveInfo,
+  };
 }

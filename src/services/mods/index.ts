@@ -1,7 +1,7 @@
 import { ManagedMod } from "@/commands/bindings";
 
 export { ModsEventBus, modsEventBus } from "./eventBus";
-export type { Archive2Event, ProgressEvent, UIActionEvent } from "./eventBus";
+export type { UIModsActionEvent, UIResourcesActionEvent } from "./eventBus";
 
 export function createBaseManagedMod(basename?: string): ManagedMod {
   return {

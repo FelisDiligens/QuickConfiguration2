@@ -1,7 +1,7 @@
 import { events } from "@/commands/bindings";
 import { AnyError } from "@/commands/errors";
 import Mods from "@/commands/mods";
-import { modsEventBus } from "@/services/mods";
+import { errorModal, loadingModal } from "@/hooks/useModal";
 import { updateModsStore, useModsStore } from "@/stores/mods";
 import { useProfilesStore } from "@/stores/profiles";
 import { useResourceListStore } from "@/stores/resourceList";
@@ -11,11 +11,12 @@ import { formatDuration } from "@/utils";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 
-export function useModDeployment() {
+export function useModDeploymentModals() {
   const { t } = useTranslation();
 
   const deployMods = async () => {
     let unlisten: UnlistenFn | undefined = undefined;
+    const loadingModalState = loadingModal();
     try {
       // Get all required state:
       const managedMods = useModsStore.getState().getManagedMods();
@@ -29,9 +30,9 @@ export function useModDeployment() {
       if (!modsPath || !gamePath)
         throw new Error(t("mods.errors.unsetModsPathOrGamePath"));
 
-      modsEventBus.emitProgressUpdated(
-        t("mods.modOrderTab.progress.deploying.deploying"),
-      );
+      loadingModalState.open({
+        label: t("mods.modOrderTab.progress.deploying.deploying"),
+      });
 
       // Listen to progress events:
       unlisten = await events.modsDeployProgressUpdate.listen((event) => {
@@ -49,9 +50,9 @@ export function useModDeployment() {
               removedFiles,
               totalFiles,
             } = event.payload;
-            let percent =
+            let progress =
               removedMods / totalMods + removedFiles / totalFiles / totalMods;
-            const text = t("mods.modOrderTab.progress.removingModStatusText", {
+            const label = t("mods.modOrderTab.progress.removingModStatusText", {
               removedMods: removedMods + 1,
               totalMods,
               modTitle,
@@ -59,8 +60,8 @@ export function useModDeployment() {
               totalFiles,
               fileName,
             });
-            percent = globalEnabled ? percent / 2 : percent;
-            modsEventBus.emitProgressUpdated(text, percent);
+            progress = globalEnabled ? progress / 2 : progress;
+            loadingModalState.update({ label, progress: progress * 100 });
             break;
           }
           case "finalizing-removal":
@@ -70,14 +71,14 @@ export function useModDeployment() {
             break;
           case "preparing-deployment-of-mod": {
             const { modTitle, deployedMods, totalMods } = event.payload;
-            const text = t("mods.modOrderTab.progress.deploying.modXofY", {
+            const label = t("mods.modOrderTab.progress.deploying.modXofY", {
               count: deployedMods + 1,
               total: totalMods,
               name: modTitle,
             });
-            let percent = deployedMods / totalMods;
-            percent = percent / 2 + 0.5;
-            modsEventBus.emitProgressUpdated(text, percent);
+            let progress = deployedMods / totalMods;
+            progress = progress / 2 + 0.5;
+            loadingModalState.update({ label, progress: progress * 100 });
             break;
           }
           case "deploying-mod": {
@@ -89,7 +90,7 @@ export function useModDeployment() {
               copiedFiles,
               totalFiles,
             } = event.payload;
-            const text =
+            const label =
               t("mods.modOrderTab.progress.deploying.modXofY", {
                 count: deployedMods + 1,
                 total: totalMods,
@@ -101,10 +102,10 @@ export function useModDeployment() {
                 total: totalFiles,
                 name: fileName,
               });
-            let percent =
+            let progress =
               deployedMods / totalMods + copiedFiles / totalFiles / totalMods;
-            percent = percent / 2 + 0.5;
-            modsEventBus.emitProgressUpdated(text, percent);
+            progress = progress / 2 + 0.5;
+            loadingModalState.update({ label, progress: progress * 100 });
             break;
           }
           case "finished-deployment":
@@ -130,7 +131,7 @@ export function useModDeployment() {
       useResourceListStore.getState().setResources(newResources);
 
       // Done:
-      modsEventBus.emitProgressFinished();
+      await loadingModalState.close();
       if (globalEnabled) {
         const deployedCount = managedMods.mods.filter(
           (mod) => mod.enabled,
@@ -154,9 +155,11 @@ export function useModDeployment() {
         );
       }
     } catch (error) {
-      modsEventBus.emitProgressAborted(error as AnyError);
+      console.error(error);
+      await errorModal({ reason: error as AnyError });
     } finally {
       if (unlisten) unlisten();
+      await loadingModalState.close();
     }
   };
 
