@@ -11,7 +11,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Dispatch, SetStateAction, useRef } from "react";
 import { Button, Table } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { Resource } from "./ResourceListTab";
+import { Resource } from "./useMappedResources";
 
 function ResourceTableRow({ resource }: { resource: Resource }) {
   const { t } = useTranslation();
