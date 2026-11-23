@@ -20,21 +20,17 @@ export default function TrackModFileModal(
     NonNullable<NexusModsFileCategory> | "OTHER",
     string
   > = {
-    MAIN: t("mods.modOrderTab.modals.trackModFileModal.categories.main"),
-    UPDATE: t("mods.modOrderTab.modals.trackModFileModal.categories.update"),
-    OPTIONAL: t(
-      "mods.modOrderTab.modals.trackModFileModal.categories.optional",
-    ),
+    MAIN: t("mods.modOrderTab.modals.modFileModals.categories.main"),
+    UPDATE: t("mods.modOrderTab.modals.modFileModals.categories.update"),
+    OPTIONAL: t("mods.modOrderTab.modals.modFileModals.categories.optional"),
     MISCELLANEOUS: t(
-      "mods.modOrderTab.modals.trackModFileModal.categories.miscellaneous",
+      "mods.modOrderTab.modals.modFileModals.categories.miscellaneous",
     ),
     OLD_VERSION: t(
-      "mods.modOrderTab.modals.trackModFileModal.categories.oldVersion",
+      "mods.modOrderTab.modals.modFileModals.categories.oldVersion",
     ),
-    ARCHIVED: t(
-      "mods.modOrderTab.modals.trackModFileModal.categories.archived",
-    ),
-    OTHER: t("mods.modOrderTab.modals.trackModFileModal.categories.other"),
+    ARCHIVED: t("mods.modOrderTab.modals.modFileModals.categories.archived"),
+    OTHER: t("mods.modOrderTab.modals.modFileModals.categories.other"),
   };
 
   const groups = useMemo(
@@ -60,7 +56,7 @@ export default function TrackModFileModal(
       <Modal.Body>
         <p>{t("mods.modOrderTab.modals.trackModFileModal.question")}</p>
         {groups.length === 0 ? (
-          <p>{t("mods.modOrderTab.modals.trackModFileModal.noFiles")}</p>
+          <p>{t("mods.modOrderTab.modals.modFileModals.noFiles")}</p>
         ) : (
           <FlexCol gap="1rem">
             {groups.map((group) => (
@@ -98,27 +94,27 @@ export default function TrackModFileModal(
                     <tr>
                       <th className="expand">
                         {t(
-                          "mods.modOrderTab.modals.trackModFileModal.tableHeaderFile",
+                          "mods.modOrderTab.modals.modFileModals.tableHeaderFile",
                         )}
                       </th>
                       <th>
                         {t(
-                          "mods.modOrderTab.modals.trackModFileModal.tableHeaderVersion",
+                          "mods.modOrderTab.modals.modFileModals.tableHeaderVersion",
                         )}
                       </th>
                       <th>
                         {t(
-                          "mods.modOrderTab.modals.trackModFileModal.tableHeaderUploaded",
+                          "mods.modOrderTab.modals.modFileModals.tableHeaderUploaded",
                         )}
                       </th>
                       <th>
                         {t(
-                          "mods.modOrderTab.modals.trackModFileModal.tableHeaderSize",
+                          "mods.modOrderTab.modals.modFileModals.tableHeaderSize",
                         )}
                       </th>
                       <th>
                         {t(
-                          "mods.modOrderTab.modals.trackModFileModal.tableHeaderActions",
+                          "mods.modOrderTab.modals.modFileModals.tableHeaderActions",
                         )}
                       </th>
                     </tr>
@@ -133,7 +129,7 @@ export default function TrackModFileModal(
                               overlay={
                                 <Tooltip>
                                   {t(
-                                    "mods.modOrderTab.modals.trackModFileModal.primaryFile",
+                                    "mods.modOrderTab.modals.modFileModals.primaryFile",
                                   )}
                                 </Tooltip>
                               }

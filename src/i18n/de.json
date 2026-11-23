@@ -790,6 +790,14 @@
         "trackModFileModal": {
           "title": "Eine Datei verfolgen",
           "question": "Welche Datei hast du von NexusMods heruntergeladen?",
+          "trackButton": "Verfolgen"
+        },
+        "pickModFileModal": {
+          "title": "Mod-Datei herunterladen",
+          "question": "Welche Datei der Mod „{{modTitle}}“ möchtest du herunterladen?",
+          "downloadButton": "Herunterladen"
+        },
+        "modFileModals": {
           "noFiles": "Für diesen Mod wurden keine Dateien gefunden.",
           "categories": {
             "main": "Hauptdateien",
@@ -805,7 +813,6 @@
           "tableHeaderUploaded": "Hochgeladen am",
           "tableHeaderSize": "Dateigröße",
           "tableHeaderActions": "Aktionen",
-          "trackButton": "Verfolgen",
           "primaryFile": "Primäre Datei"
         }
       },

@@ -790,6 +790,14 @@
         "trackModFileModal": {
           "title": "Track a file",
           "question": "Which file did you download from NexusMods?",
+          "trackButton": "Track"
+        },
+        "pickModFileModal": {
+          "title": "Download a mod file",
+          "question": "Which file of \"{{modTitle}}\" do you want to download?",
+          "downloadButton": "Download"
+        },
+        "modFileModals": {
           "noFiles": "No files found for this mod.",
           "categories": {
             "main": "Main files",
@@ -805,7 +813,6 @@
           "tableHeaderUploaded": "Date uploaded",
           "tableHeaderSize": "File size",
           "tableHeaderActions": "Actions",
-          "trackButton": "Track",
           "primaryFile": "Primary file"
         }
       },
