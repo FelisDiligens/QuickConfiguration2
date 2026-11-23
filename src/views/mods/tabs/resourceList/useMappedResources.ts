@@ -1,11 +1,8 @@
-import { getFileSize } from "@/commands/additions";
-import { commands } from "@/commands/bindings";
 import type { ManagedMod, ModInstallationState } from "@/commands/bindings";
 import Mods from "@/commands/mods";
 import { useModsStore } from "@/stores/mods";
 import { useProfilesStore } from "@/stores/profiles";
 import { useResourceListStore } from "@/stores/resourceList";
-import * as path from "@tauri-apps/api/path";
 import fastDeepEqual from "fast-deep-equal/es6";
 import _ from "lodash";
 import {
@@ -69,41 +66,35 @@ export function useMappedResources() {
     lastInputsRef.current = inputs;
 
     const mapResources = async () => {
-      // Get deployed resources from mods:
-      const deployedResources = await Mods.utils.getDeployedArchives(modState);
+      // Get deployed resources from mods and the archives' file infos in one batch each:
+      const [deployedResources, fileInfos] = await Promise.all([
+        Mods.utils.getDeployedArchives(modState),
+        dataPath
+          ? Mods.utils.getArchiveFileInfos(dataPath, resources)
+          : Promise.resolve([]),
+      ]);
+
+      // Index the batch results for O(1) lookups while mapping:
+      const fileInfoByName = new Map(
+        fileInfos.map((info) => [info.name, info] as const),
+      );
+      const modKeyByArchive = new Map(
+        deployedResources.map((r) => [r.archiveName, r.modId] as const),
+      );
+      const modByKey = new Map(mods.map((mod) => [mod.key, mod] as const));
 
       // Supplement resources with additional information:
-      const mapped: Resource[] = [];
-      for (const resourceName of resources) {
-        // Construct full path:
-        const resourcePath = dataPath
-          ? await path.join(dataPath, resourceName)
-          : undefined;
+      return resources.map((resourceName) => {
+        const fileInfo = fileInfoByName.get(resourceName);
+        const mod = modByKey.get(modKeyByArchive.get(resourceName) ?? "");
 
-        // Check if the file exists:
-        const exists =
-          dataPath && resourcePath
-            ? await commands.isFile(resourcePath)
-            : false;
-
-        // If it exists, get it's file size:
-        const fileSize =
-          exists && resourcePath ? await getFileSize(resourcePath) : 0;
-
-        // Determine which mod the resource belongs to (if at all):
-        const modKey = deployedResources.find(
-          (r) => r.archiveName === resourceName,
-        )?.modId;
-        const mod = modKey ? mods.find((m) => m.key === modKey) : undefined;
-
-        mapped.push({
+        return {
           name: resourceName,
           modName: mod?.title || "-/-",
-          fileSize,
-          exists,
-        });
-      }
-      return mapped;
+          fileSize: fileInfo?.fileSize ? parseInt(fileInfo.fileSize) : 0,
+          exists: fileInfo?.exists ?? false,
+        };
+      });
     };
 
     mapResources()

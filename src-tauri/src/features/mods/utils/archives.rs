@@ -1,5 +1,7 @@
 use std::collections::HashMap;
+use std::fs;
 
+use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -13,6 +15,38 @@ pub struct DeployedArchive {
     mod_id: String,
     /// The file name of the deployed *.ba2 archive
     archive_name: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct ArchiveFileInfo {
+    /// The file name of the archive, as passed in `archive_names`
+    pub name: String,
+    /// Whether the archive exists as a file in the game's Data folder
+    pub exists: bool,
+    /// The file size in number of bytes, formatted as string because the numbers might get too large for a `u32`.
+    /// Only set if the file exists.
+    pub file_size: Option<String>,
+}
+
+/// Returns existence and file size of each archive name, resolved against the game's Data folder.
+pub fn get_archive_file_infos(
+    data_path: &Utf8Path,
+    archive_names: &[String],
+) -> Vec<ArchiveFileInfo> {
+    archive_names
+        .iter()
+        .map(|name| {
+            let metadata = fs::metadata(data_path.join(name))
+                .ok()
+                .filter(|metadata| metadata.is_file());
+            ArchiveFileInfo {
+                name: name.clone(),
+                exists: metadata.is_some(),
+                file_size: metadata.map(|metadata| metadata.len().to_string()),
+            }
+        })
+        .collect()
 }
 
 /// Returns all *.ba2 file names that are currently deployed by a mod.

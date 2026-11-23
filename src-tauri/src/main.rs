@@ -92,6 +92,7 @@ fn main() {
             commands::mods::mods_migrate_legacy_managed_mods,
             commands::mods::mods_remove_legacy_managed_mods,
             commands::mods::mods_utils_pack_ba2_archives,
+            commands::mods::mods_utils_get_archive_file_infos,
             commands::mods::mods_utils_get_conflicting_files,
             commands::mods::mods_utils_get_deployed_archives,
             commands::resourcelists::resourcelist_load_from_ini,

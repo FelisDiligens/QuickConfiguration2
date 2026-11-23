@@ -1,9 +1,10 @@
+use camino::Utf8PathBuf;
 use tap::TapFallible;
 use tauri::async_runtime::spawn_blocking;
 
 use crate::commands::errors::{CommandError, CommandResult};
 use crate::features::mods::models::json::{ManagedMod, ModInstallationState};
-use crate::features::mods::utils::{self, Conflict, DeployedArchive};
+use crate::features::mods::utils::{self, ArchiveFileInfo, Conflict, DeployedArchive};
 
 #[tauri::command]
 #[specta::specta]
@@ -38,6 +39,25 @@ pub async fn mods_utils_get_conflicting_files(
         utils::get_conflicting_files(mods_path, &mods)
             .tap_err(|e| log::error!("Couldn't get conflicting files: {e}"))
             .map_err(CommandError::from)
+    })
+    .await
+    .tap_err(|e| log::error!("Couldn't join handle in {}: {}", function_name!(), e))
+    .map_err(CommandError::from)
+    .flatten()
+}
+
+/// Returns existence and file size of each archive name, resolved against the game's Data folder.
+#[tauri::command]
+#[specta::specta]
+#[function_name::named]
+pub async fn mods_utils_get_archive_file_infos(
+    data_path: String,
+    archive_names: Vec<String>,
+) -> CommandResult<Vec<ArchiveFileInfo>> {
+    log::trace!("Called command {}", function_name!());
+    spawn_blocking(move || {
+        let data_path = Utf8PathBuf::from(data_path);
+        Ok(utils::get_archive_file_infos(&data_path, &archive_names))
     })
     .await
     .tap_err(|e| log::error!("Couldn't join handle in {}: {}", function_name!(), e))

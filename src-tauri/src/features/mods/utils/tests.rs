@@ -1,9 +1,10 @@
 use std::fs;
 
+use camino::Utf8PathBuf;
 use tempfile::TempDir;
 
 use crate::features::mods::models::json::{ManagedMod, ModInstallationOptions};
-use crate::features::mods::utils::get_conflicting_files;
+use crate::features::mods::utils::{get_archive_file_infos, get_conflicting_files};
 use crate::utils::fs_util;
 
 #[test]
@@ -121,4 +122,39 @@ fn test_get_conflicting_files() {
     } else {
         assert_eq!(conflict.files, vec!["Data/file.txt"]);
     }
+}
+
+#[test]
+fn test_get_archive_file_infos() {
+    let temp_dir = TempDir::new().expect("Failed to create temp dir");
+    let data_path = Utf8PathBuf::from_path_buf(temp_dir.path().to_path_buf())
+        .expect("Temp dir path is not valid UTF-8");
+
+    // Existing archives with known sizes:
+    fs_util::write_to_file(data_path.join("a.ba2"), "12345").expect("Failed to create a.ba2");
+    fs_util::write_to_file(data_path.join("b.ba2"), "").expect("Failed to create b.ba2");
+    // A directory with an archive name should not count as an existing file:
+    fs::create_dir_all(data_path.join("c.ba2")).expect("Failed to create c.ba2 dir");
+
+    let archive_names = vec![
+        "a.ba2".to_string(),
+        "b.ba2".to_string(),
+        "c.ba2".to_string(),
+        "missing.ba2".to_string(),
+    ];
+    let infos = get_archive_file_infos(&data_path, &archive_names);
+
+    assert_eq!(infos.len(), 4);
+    assert_eq!(infos[0].name, "a.ba2");
+    assert!(infos[0].exists);
+    assert_eq!(infos[0].file_size.as_deref(), Some("5"));
+    assert_eq!(infos[1].name, "b.ba2");
+    assert!(infos[1].exists);
+    assert_eq!(infos[1].file_size.as_deref(), Some("0"));
+    assert_eq!(infos[2].name, "c.ba2");
+    assert!(!infos[2].exists);
+    assert_eq!(infos[2].file_size, None);
+    assert_eq!(infos[3].name, "missing.ba2");
+    assert!(!infos[3].exists);
+    assert_eq!(infos[3].file_size, None);
 }

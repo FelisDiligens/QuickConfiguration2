@@ -46,6 +46,7 @@ const Mods = {
   },
   utils: {
     autoPackBa2Archives: commands.modsUtilsPackBa2Archives,
+    getArchiveFileInfos: commands.modsUtilsGetArchiveFileInfos,
     getConflictingFiles: commands.modsUtilsGetConflictingFiles,
     getDeployedArchives: commands.modsUtilsGetDeployedArchives,
   },

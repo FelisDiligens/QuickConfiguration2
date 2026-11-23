@@ -309,6 +309,12 @@ async modsRemoveLegacyManagedMods(gamePath: string, modsPath: string) : Promise<
 async modsUtilsPackBa2Archives(modName: string, srcPath: string, dstPath: string, tmpPath: string) : Promise<null> {
     return await TAURI_INVOKE("mods_utils_pack_ba2_archives", { modName, srcPath, dstPath, tmpPath });
 },
+/**
+ * Returns existence and file size of each archive name, resolved against the game's Data folder.
+ */
+async modsUtilsGetArchiveFileInfos(dataPath: string, archiveNames: string[]) : Promise<ArchiveFileInfo[]> {
+    return await TAURI_INVOKE("mods_utils_get_archive_file_infos", { dataPath, archiveNames });
+},
 async modsUtilsGetConflictingFiles(modsPath: string, mods: ManagedMod[]) : Promise<Conflict[]> {
     return await TAURI_INVOKE("mods_utils_get_conflicting_files", { modsPath, mods });
 },
@@ -479,6 +485,20 @@ export type Archive2Format = "General" |
  */
 "DDS" | "XBoxDDS" | "GNF"
 export type Archive2Info = { compression: Archive2Compression; format: Archive2Format; numOfFiles: number }
+export type ArchiveFileInfo = { 
+/**
+ * The file name of the archive, as passed in `archive_names`
+ */
+name: string; 
+/**
+ * Whether the archive exists as a file in the game's Data folder
+ */
+exists: boolean; 
+/**
+ * The file size in number of bytes, formatted as string because the numbers might get too large for a `u32`.
+ * Only set if the file exists.
+ */
+fileSize: string | null }
 export type CommandError = { type: "String"; message: string } | { type: "Anyhow"; message: string } | { type: "UnsupportedPlatform"; message: string } | { type: "Io"; message: string } | { type: "PathError"; message: string; variant: string } | { type: "Utf8Error"; message: string } | { type: "SevenzipError"; message: string; variant: string } | { type: "Archive2Error"; message: string; variant: string } | { type: "Archive2ReadError"; message: string; variant: string } | { type: "ParseIntError"; message: string } | { type: "MutexLock"; message: string } | { type: "TauriError"; message: string } | { type: "TokioError"; message: string } | { type: "RegexError"; message: string } | { type: "DowncastError"; message: string } | { type: "WindowsError"; message: string } | { type: "ReqwestError"; message: string } | { type: "DownloadError"; message: string; variant: string } | { type: "ModActionError"; message: string; variant: string } | { type: "IniParseError"; fileName: string | null; line: number; col: number; msg: string } | { type: "TranslationParseError"; key: string; filePath: string; fileName: string; line: number; column: number; message: string } | { type: "UrlParseError"; message: string }
 export type Conflict = { 
 /**

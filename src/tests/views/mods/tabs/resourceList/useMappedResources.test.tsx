@@ -1,6 +1,5 @@
-import { getFileSize } from "@/commands/additions";
-import { commands } from "@/commands/bindings";
 import type {
+  ArchiveFileInfo,
   DeployedArchive,
   ManagedMod,
   ModInstallationState,
@@ -61,27 +60,13 @@ vi.mock("@/commands/mods", () => ({
   default: {
     utils: {
       getDeployedArchives: vi.fn(),
+      getArchiveFileInfos: vi.fn(),
     },
   },
 }));
 
-vi.mock("@/commands/additions", () => ({
-  getFileSize: vi.fn(),
-}));
-
-vi.mock("@/commands/bindings", () => ({
-  commands: {
-    isFile: vi.fn(),
-  },
-}));
-
-vi.mock("@tauri-apps/api/path", () => ({
-  join: vi.fn(async (...parts: string[]) => parts.join("/")),
-}));
-
 const getDeployedArchives = vi.mocked(Mods.utils.getDeployedArchives);
-const isFile = vi.mocked(commands.isFile);
-const mockGetFileSize = vi.mocked(getFileSize);
+const getArchiveFileInfos = vi.mocked(Mods.utils.getArchiveFileInfos);
 
 function createMod(key: string, title: string): ManagedMod {
   return {
@@ -102,6 +87,10 @@ function createState(key: string): ModInstallationState {
     rootFolder: "",
     files: [`Data\\mod-${key}.ba2`],
   };
+}
+
+function createFileInfo(name: string, exists: boolean, fileSize?: string) {
+  return { name, exists, fileSize } as ArchiveFileInfo;
 }
 
 // The mocked profiles store is typed as the real one, so setting the mock-only
@@ -132,8 +121,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   setStores({});
   getDeployedArchives.mockResolvedValue([]);
-  isFile.mockResolvedValue(false);
-  mockGetFileSize.mockResolvedValue(0);
+  getArchiveFileInfos.mockResolvedValue([]);
 });
 
 describe("useMappedResources", () => {
@@ -147,8 +135,9 @@ describe("useMappedResources", () => {
     getDeployedArchives.mockResolvedValue([
       { modId: "mod-1", archiveName: "mod-mod-1.ba2" } as DeployedArchive,
     ]);
-    isFile.mockResolvedValue(true);
-    mockGetFileSize.mockResolvedValue(1234);
+    getArchiveFileInfos.mockResolvedValue([
+      createFileInfo("mod-mod-1.ba2", true, "1234"),
+    ]);
 
     const { result } = renderHook(() => useMappedResources());
 
@@ -162,13 +151,15 @@ describe("useMappedResources", () => {
         },
       ]),
     );
-    expect(isFile).toHaveBeenCalledWith("/game/Data/mod-mod-1.ba2");
-    expect(mockGetFileSize).toHaveBeenCalledWith("/game/Data/mod-mod-1.ba2");
+    expect(getArchiveFileInfos).toHaveBeenCalledWith("/game/Data", [
+      "mod-mod-1.ba2",
+    ]);
   });
 
   it("shows -/- and exists=false for resources not deployed by any mod", async () => {
     setStores({ resources: ["a.ba2"] });
     getDeployedArchives.mockResolvedValue([]);
+    getArchiveFileInfos.mockResolvedValue([createFileInfo("a.ba2", false)]);
 
     const { result } = renderHook(() => useMappedResources());
 
@@ -177,11 +168,9 @@ describe("useMappedResources", () => {
         { name: "a.ba2", modName: "-/-", fileSize: 0, exists: false },
       ]),
     );
-    expect(isFile).toHaveBeenCalledWith("/game/Data/a.ba2");
-    expect(mockGetFileSize).not.toHaveBeenCalled();
   });
 
-  it("does not touch the file system when no game data path is set", async () => {
+  it("does not query file infos when no game data path is set", async () => {
     setStores({ resources: ["a.ba2"] });
     setDataPath(undefined);
 
@@ -192,7 +181,7 @@ describe("useMappedResources", () => {
         { name: "a.ba2", modName: "-/-", fileSize: 0, exists: false },
       ]),
     );
-    expect(isFile).not.toHaveBeenCalled();
+    expect(getArchiveFileInfos).not.toHaveBeenCalled();
   });
 
   it("re-maps when the mods store changes even if the resource names stay identical (import + deploy scenario)", async () => {
