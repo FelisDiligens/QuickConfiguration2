@@ -24,7 +24,7 @@ export default function MigrationBoundary(props: Props) {
   const gamePath = useProfilesStore((store) => store.getGamePath());
   const modsPath = useProfilesStore((store) => store.getModsPath());
   const gamePathState = useGamePathCheck(gamePath);
-  const modsPathState = usePathCheck(modsPath);
+  const modsPathState = usePathCheck(modsPath, { allowMissing: true });
   const {
     data: migrationState,
     isPending,

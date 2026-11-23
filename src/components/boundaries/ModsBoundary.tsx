@@ -1,3 +1,10 @@
+import {
+  PageContainer,
+  PageErrorAlert,
+  PageLoadingAlert,
+  PagePathError,
+  PageTitle,
+} from "@/components/common";
 import useGamePathCheck from "@/hooks/useGamePathCheck";
 import usePathCheck from "@/hooks/usePathCheck";
 import { modsStoreSync } from "@/stores/mods";
@@ -6,13 +13,6 @@ import { useSyncLoadState } from "@/utils/zustand";
 import { useEffect } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import {
-  PageContainer,
-  PageErrorAlert,
-  PageLoadingAlert,
-  PagePathError,
-  PageTitle,
-} from "@/components/common";
 
 interface Props {
   title: string;
@@ -24,7 +24,7 @@ export function ModsBoundary(props: Props) {
   const gamePath = useProfilesStore((store) => store.getGamePath());
   const modsPath = useProfilesStore((store) => store.getModsPath());
   const gamePathState = useGamePathCheck(gamePath);
-  const modsPathState = usePathCheck(modsPath);
+  const modsPathState = usePathCheck(modsPath, { allowMissing: true });
   const { isPending, hasLoaded, error } = useSyncLoadState(modsStoreSync);
 
   useEffect(() => {
