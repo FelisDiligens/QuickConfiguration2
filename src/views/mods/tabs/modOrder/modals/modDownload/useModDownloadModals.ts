@@ -4,6 +4,7 @@ import {
   ManagedMod,
   NexusModsDownloadLink,
   NexusModsModFile,
+  NexusModsModFiles,
 } from "@/commands/bindings";
 import { AnyError, commandErrorToString } from "@/commands/errors";
 import NexusMods from "@/commands/nexusmods";
@@ -56,34 +57,15 @@ export function useModDownloadModals(options: {
   }
 
   async function chooseModFileToDownload(
-    apiKey: string,
-    gameDomain: string,
-    gameScopedId: number,
     modTitle: string,
+    modFiles: NexusModsModFiles,
   ): Promise<NexusModsModFile | undefined> {
-    const listingModalState = loadingModal();
-    try {
-      listingModalState.open({
-        label: t("mods.modOrderTab.progress.listingModFiles"),
-      });
-
-      const modFiles = await NexusMods.api.listModFiles(
-        apiKey,
-        gameDomain,
-        gameScopedId,
-        null,
-      );
-
-      await listingModalState.close();
-      const file = await openModal(PickModFileModal, { modTitle, modFiles });
-      if (file) {
-        return file;
-      } else {
-        isPendingRef.current = false;
-        return undefined;
-      }
-    } finally {
-      await listingModalState.close();
+    const file = await openModal(PickModFileModal, { modTitle, modFiles });
+    if (file) {
+      return file;
+    } else {
+      isPendingRef.current = false;
+      return undefined;
     }
   }
 
@@ -208,31 +190,53 @@ export function useModDownloadModals(options: {
 
       // Determine next file ID either by consulting API or asking the user:
 
+      let modFiles: NexusModsModFiles | undefined = undefined;
+      const fetchModFiles = async (): Promise<NexusModsModFiles> => {
+        if (modFiles) return modFiles;
+        const listingModalState = loadingModal();
+        try {
+          listingModalState.open({
+            label: t("mods.modOrderTab.progress.listingModFiles"),
+          });
+          modFiles = await NexusMods.api.listModFiles(
+            apiKey,
+            gameDomain,
+            gameScopedId,
+            null,
+          );
+          return modFiles;
+        } finally {
+          await listingModalState.close();
+        }
+      };
+
       if (mod.nexusFileId != null && modfile?.fileId !== mod.nexusFileId) {
         console.log(
-          `Tracked file ID ${mod.nexusFileId} doesn't match the cached mod file info, fetching the file info from the API again`,
+          `Tracked file ID ${mod.nexusFileId} doesn't match the cached mod file info, fetching fresh mod files from the API`,
         );
-        const freshModfile = await NexusMods.api.getModFile(
-          apiKey,
+        const freshModfile = await NexusMods.api.getModFileInfoFromModFiles(
           gameDomain,
           gameScopedId,
           mod.nexusFileId,
+          await fetchModFiles(),
         );
         useNexusModsStore.getState().addOrUpdateModfile(freshModfile);
         modfile = useNexusModsStore.getState().modfiles.get(mod);
         latestFileId = modfile?.latestFile?.fileId;
       }
 
-      if (mod.nexusFileId == null || latestFileId == null) {
+      if (
+        mod.nexusFileId == null ||
+        modfile?.fileId !== mod.nexusFileId ||
+        latestFileId == null
+      ) {
         console.log(
           `Couldn't determine latest file of mod '${mod.title}' (nexusFileId: ${mod.nexusFileId}), asking the user which file to download instead`,
         );
         isPendingRef.current = true;
         const file = await chooseModFileToDownload(
-          apiKey,
-          gameDomain,
-          gameScopedId,
           mod.title,
+          await fetchModFiles(),
         );
         if (!file) return;
         latestFileId = file.fileId;
