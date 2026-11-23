@@ -10,6 +10,15 @@ use crate::features::mods::deployment::{
 #[serde(rename_all = "kebab-case", tag = "status")]
 pub enum ModsDeployProgressUpdate {
     Preparing,
+    #[serde(rename_all = "camelCase")]
+    Comparing {
+        /// The name of the mod whose files are currently being compared
+        mod_title: String,
+        /// Number of compared mods (0..total, excluding total)
+        compared_mods: u32,
+        /// Number of mods to deploy in total
+        total_mods: u32,
+    },
     PreparingRemoval,
     #[serde(rename_all = "camelCase")]
     RemovingMod {
@@ -70,6 +79,15 @@ impl TryFrom<ModsDeployProgress> for ModsDeployProgressUpdate {
     fn try_from(value: ModsDeployProgress) -> Result<Self, Self::Error> {
         match value {
             ModsDeployProgress::Preparing => Ok(ModsDeployProgressUpdate::Preparing),
+            ModsDeployProgress::Comparing {
+                mod_title,
+                compared_mods,
+                total_mods,
+            } => Ok(ModsDeployProgressUpdate::Comparing {
+                mod_title,
+                compared_mods,
+                total_mods,
+            }),
             ModsDeployProgress::Removing { progress } => match progress {
                 ModsRemoveProgress::Preparing => Ok(ModsDeployProgressUpdate::PreparingRemoval),
                 ModsRemoveProgress::Removing {

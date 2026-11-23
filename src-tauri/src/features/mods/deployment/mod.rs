@@ -82,7 +82,7 @@ pub fn deploy_mods<P: AsRef<Path>>(
     // Determine which previously deployed files can be kept because an enabled
     // mod will redeploy a byte-identical file to the same path:
     let files_to_keep = if options.compare_files && global_enabled {
-        find_files_to_keep(managed, mods_path, game_path)?
+        find_files_to_keep(managed, mods_path, game_path, tx.clone())?
     } else {
         HashSet::new()
     };
@@ -201,14 +201,32 @@ fn find_files_to_keep<P: AsRef<Path>>(
     managed: &ManagedMods,
     mods_path: P,
     game_path: P,
+    tx: Option<tokio::sync::mpsc::Sender<ModsDeployProgress>>,
 ) -> ModActionResult<HashSet<PathBuf>> {
     let mods_path = mods_path.as_ref();
     let game_path = game_path.as_ref();
 
+    let enabled_mods = managed.mods.iter().filter(|r#mod| r#mod.enabled).count();
+
     // Map the destination path of each file that will be deployed to its source path.
     // If multiple mods deploy to the same path, the last one wins (same as during deployment):
     let mut redeploy_sources: HashMap<PathBuf, PathBuf> = HashMap::new();
-    for r#mod in managed.mods.iter().filter(|r#mod| r#mod.enabled) {
+    for (compared_mods, r#mod) in managed
+        .mods
+        .iter()
+        .filter(|r#mod| r#mod.enabled)
+        .enumerate()
+    {
+        let _ = channel::blocking_send_opt(
+            &tx,
+            function_name!(),
+            ModsDeployProgress::Comparing {
+                mod_title: r#mod.title.clone(),
+                compared_mods: compared_mods as u32,
+                total_mods: enabled_mods as u32,
+            },
+        );
+
         let src_path = r#mod.folder_path(mods_path)?;
         let dst_root = r#mod.destination_path(game_path)?;
         for file_path in fs_util::list_files_recursively(&src_path, 50)? {

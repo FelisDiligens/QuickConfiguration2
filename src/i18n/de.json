@@ -827,6 +827,7 @@
         "extractingArchive": "Extrahiere...",
         "creatingArchive": "Erstelle...",
         "autoPackingArchives": "Erstelle Archive...",
+        "comparingModStatusText": "Vergleiche Mod {{comparedMods}} von {{totalMods}}: {{modTitle}}",
         "removingModStatusText": "Entferne Mod {{removedMods}} von {{totalMods}}: {{modTitle}}, Datei {{removedFiles}} von {{totalFiles}}: {{fileName}}",
         "retrievingInfoForMods": "Lade Modinformationen",
         "retrievingInfoForModXofY": "Lade Modinformationen für Mod {{currentMod}} von {{totalMods}}: {{modTitle}}",

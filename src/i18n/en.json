@@ -835,6 +835,7 @@
         "listingModFiles": "Listing mod files",
         "endorsingMod": "Endorsing mod",
         "abstainingFromEndorsingMod": "Abstaining from endorsing mod",
+        "comparingModStatusText": "Comparing mod {{comparedMods}} of {{totalMods}}: {{modTitle}}",
         "removingModStatusText": "Removing mod {{removedMods}} of {{totalMods}}: {{modTitle}}, file {{removedFiles}} of {{totalFiles}}: {{fileName}}",
         "modNotFound": "Mod not found",
         "checkingForConflicts": "Checking for conflicts"

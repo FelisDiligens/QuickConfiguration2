@@ -26,6 +26,7 @@ export function useModDeploymentModals() {
       const resources = useResourceListStore.getState().resources;
 
       const globalEnabled = managedMods.enabled;
+      let scanning = false;
 
       if (!modsPath || !gamePath)
         throw new Error(t("mods.errors.unsetModsPathOrGamePath"));
@@ -41,6 +42,22 @@ export function useModDeploymentModals() {
           case "preparing-removal":
             // Unused
             break;
+          case "comparing": {
+            const { modTitle, comparedMods, totalMods } = event.payload;
+            let progress = comparedMods / totalMods;
+            const label = t(
+              "mods.modOrderTab.progress.comparingModStatusText",
+              {
+                comparedMods: comparedMods + 1,
+                totalMods,
+                modTitle,
+              },
+            );
+            progress = progress / 3;
+            loadingModalState.update({ label, progress: progress * 100 });
+            scanning = true;
+            break;
+          }
           case "removing-mod": {
             const {
               modTitle,
@@ -60,7 +77,9 @@ export function useModDeploymentModals() {
               totalFiles,
               fileName,
             });
-            progress = globalEnabled ? progress / 2 : progress;
+            progress =
+              progress / (1 + Number(globalEnabled) + Number(scanning));
+            if (globalEnabled && scanning) progress += 0.33;
             loadingModalState.update({ label, progress: progress * 100 });
             break;
           }
@@ -77,7 +96,7 @@ export function useModDeploymentModals() {
               name: modTitle,
             });
             let progress = deployedMods / totalMods;
-            progress = progress / 2 + 0.5;
+            progress = scanning ? progress / 3 + 0.66 : progress / 2 + 0.5;
             loadingModalState.update({ label, progress: progress * 100 });
             break;
           }
@@ -104,7 +123,7 @@ export function useModDeploymentModals() {
               });
             let progress =
               deployedMods / totalMods + copiedFiles / totalFiles / totalMods;
-            progress = progress / 2 + 0.5;
+            progress = scanning ? progress / 3 + 0.66 : progress / 2 + 0.5;
             loadingModalState.update({ label, progress: progress * 100 });
             break;
           }

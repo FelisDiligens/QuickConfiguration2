@@ -6,6 +6,15 @@ use specta::Type;
 pub enum ModsDeployProgress {
     Preparing,
     #[serde(rename_all = "camelCase")]
+    Comparing {
+        /// The name of the mod whose files are currently being compared
+        mod_title: String,
+        /// Number of compared mods (0..total, excluding total)
+        compared_mods: u32,
+        /// Number of mods to deploy in total
+        total_mods: u32,
+    },
+    #[serde(rename_all = "camelCase")]
     Removing {
         progress: ModsRemoveProgress,
     },
