@@ -10,6 +10,8 @@ import Mods from "@/commands/mods";
 import { Entry, FlexCol, FlexRow } from "@/components/common";
 import { useLazyAsync } from "@/hooks/async";
 import useModinfos from "@/hooks/nexusmods/useModinfos";
+import { useDebouncedReactState } from "@/hooks/useDebouncedState";
+import useWindowClose from "@/hooks/useWindowClose";
 import { modsEventBus } from "@/services/mods";
 import { updateModsStore, useModsStore } from "@/stores/mods";
 import { useProfilesStore } from "@/stores/profiles";
@@ -269,6 +271,10 @@ function Options(props: {
   const { t } = useTranslation();
   const { folderName, renameError, isRenaming, handleFolderRename } =
     useModFolderRename(props.mod);
+  const [mod, setMod] = useDebouncedReactState(props.mod, props.setMod, 1000, {
+    flushOnExit: true,
+  });
+  useWindowClose(() => setMod.flush(), [setMod], 10);
 
   const pickRootFolder = async () => {
     const gamePath = useProfilesStore.getState().getGamePath();
@@ -281,7 +287,7 @@ function Options(props: {
     const rootFolder = gamePath
       ? await commands.pathStripPrefix(gamePath, folderPath)
       : folderPath;
-    props.setMod((mod) => ({
+    setMod((mod) => ({
       ...mod,
       options: { ...mod.options, rootFolder },
     }));
@@ -293,7 +299,7 @@ function Options(props: {
       console.error("Mods path is null");
       return;
     }
-    const folderPath = await path.join(modsPath, props.mod.folderName);
+    const folderPath = await path.join(modsPath, mod.folderName);
     commands.openPathInFileExplorer(folderPath).catch(console.error);
   };
 
@@ -314,31 +320,31 @@ function Options(props: {
           <FlexCol gap="0.5rem">
             <Entry
               label={t("mods.modOrderTab.detailsPane.modName")}
-              value={props.mod.title}
+              value={mod.title}
               onChange={(value) => {
-                props.setMod((mod) => ({ ...mod, title: value }));
+                setMod((mod) => ({ ...mod, title: value }));
               }}
             />
             <Entry
               label={t("mods.modOrderTab.detailsPane.installedVersion")}
-              value={props.mod.version}
+              value={mod.version}
               onChange={(value) => {
-                props.setMod((mod) => ({ ...mod, version: value }));
+                setMod((mod) => ({ ...mod, version: value }));
               }}
             />
             <FlexRow gap="0.5rem">
               <Entry
                 label={t("mods.modOrderTab.detailsPane.webpageUrl")}
-                value={props.mod.url}
+                value={mod.url}
                 onChange={(value) => {
-                  props.setMod((mod) => ({ ...mod, url: value }));
+                  setMod((mod) => ({ ...mod, url: value }));
                 }}
               />
               <Button
                 variant="outline-primary"
                 title={t("mods.modOrderTab.detailsPane.openLinkInBrowser")}
                 onClick={() => {
-                  if (props.mod.url) open(props.mod.url).catch(console.error);
+                  if (mod.url) open(mod.url).catch(console.error);
                 }}
               >
                 <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
@@ -346,9 +352,9 @@ function Options(props: {
             </FlexRow>
             <Entry
               label={t("mods.modOrderTab.detailsPane.notes")}
-              value={props.mod.notes}
+              value={mod.notes}
               onChange={(value) => {
-                props.setMod((mod) => ({ ...mod, notes: value }));
+                setMod((mod) => ({ ...mod, notes: value }));
               }}
             />
           </FlexCol>
@@ -364,9 +370,9 @@ function Options(props: {
             <FlexRow gap="0.5rem">
               <Entry
                 label={t("mods.modOrderTab.detailsPane.installInto")}
-                value={props.mod.options.rootFolder}
+                value={mod.options.rootFolder}
                 onChange={(value) => {
-                  props.setMod((mod) => ({
+                  setMod((mod) => ({
                     ...mod,
                     options: { ...mod.options, rootFolder: value },
                   }));
@@ -386,7 +392,7 @@ function Options(props: {
                   let rootFolder = ".";
                   if (props.state?.rootFolder)
                     rootFolder = props.state.rootFolder;
-                  props.setMod((mod) => ({
+                  setMod((mod) => ({
                     ...mod,
                     options: { ...mod.options, rootFolder },
                   }));
@@ -457,7 +463,7 @@ function Options(props: {
                         "mods.modOrderTab.detailsPane.setLatestVersion",
                       )}
                       onClick={() => {
-                        props.setMod((mod) => ({
+                        setMod((mod) => ({
                           ...mod,
                           version: props.modinfo?.version || mod.version,
                         }));
@@ -489,7 +495,7 @@ function Options(props: {
                           "mods.modOrderTab.detailsPane.setLatestVersion",
                         )}
                         onClick={() => {
-                          props.setMod((mod) => ({
+                          setMod((mod) => ({
                             ...mod,
                             version:
                               props.modfile?.latestFile?.version ||
@@ -506,7 +512,7 @@ function Options(props: {
                   {props.modfile?.latestFile?.version || props.modfile?.version}
                 </InfoLine>
               )}
-              {props.mod.nexusFileId != undefined && (
+              {mod.nexusFileId != undefined && (
                 <InfoLine
                   label={t("mods.modOrderTab.detailsPane.fileId")}
                   action={
@@ -525,7 +531,7 @@ function Options(props: {
                           "mods.modOrderTab.detailsPane.untrackFile",
                         )}
                         onClick={() => {
-                          props.setMod((mod) => ({
+                          setMod((mod) => ({
                             ...mod,
                             nexusFileId: null,
                           }));
@@ -536,25 +542,25 @@ function Options(props: {
                     </OverlayTrigger>
                   }
                 >
-                  {props.mod.nexusFileId}
+                  {mod.nexusFileId}
                 </InfoLine>
               )}
               <FlexCol gap="8px" css={css`margin-top: 8px;`}>
                 <Button
                   variant="secondary"
                   onClick={() =>
-                    modsEventBus.emitNexusModsDownloadModInfo(props.mod.key)
+                    modsEventBus.emitNexusModsDownloadModInfo(mod.key)
                   }
                 >
                   <FontAwesomeIcon icon={faDownload} />
                   &nbsp;
                   {t("mods.modOrderTab.detailsPane.downloadModInfo")}
                 </Button>
-                {!props.mod.nexusFileId && (
+                {!mod.nexusFileId && (
                   <Button
                     variant="secondary"
                     onClick={() =>
-                      modsEventBus.emitNexusModsTrackModFile(props.mod.key)
+                      modsEventBus.emitNexusModsTrackModFile(mod.key)
                     }
                   >
                     {t("mods.modOrderTab.detailsPane.trackFile")}
@@ -607,6 +613,7 @@ export default function ModDetails() {
         disableMod={disableMod}
       />
       <Options
+        key={mod.key}
         mod={mod}
         state={state}
         setMod={(value) => setMod(mod.key, value)}

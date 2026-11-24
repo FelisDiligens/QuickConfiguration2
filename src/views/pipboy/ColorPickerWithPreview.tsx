@@ -1,5 +1,5 @@
 import { FlexCol, FlexRow, PreferencesGroup } from "@/components/common";
-import useDebouncedState from "@/hooks/useDebouncedState";
+import { useDebouncedState } from "@/hooks/useDebouncedState";
 import { css } from "@emotion/react";
 import { InputGroup, ListGroup } from "react-bootstrap";
 import { HexColorInput, HexColorPicker } from "react-colorful";

@@ -8,8 +8,8 @@ import {
 import {
   ScreenNarrationVoiceType,
   useAlternativeNoteViewBackgroundColor as useAlternativeNodeViewBackgroundColor,
-  useAlternativeNoteViewLargeText,
   useAlternativeNoteViewTextColor as useAlternativeNodeViewTextColor,
+  useAlternativeNoteViewLargeText,
   useMessageWindowFadeAmount,
   useMessageWindowFadeTime,
   useScreenNarrationEnabled,
@@ -18,7 +18,7 @@ import {
   useSingleButtonNotificationCancel,
   useSpeechToText,
 } from "@/hooks/tweaks/accessibility";
-import useDebouncedState from "@/hooks/useDebouncedState";
+import { useDebouncedState } from "@/hooks/useDebouncedState";
 import { useTranslation } from "react-i18next";
 
 export default function AccessibilityTab() {
