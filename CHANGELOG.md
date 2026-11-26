@@ -1,24 +1,50 @@
+## What's new in v2.0.0-beta.8
+
+This update lets you update outdated mods with one click\*, speeds up deployment for mod folders outside the game folder, makes the migration from v1 recoverable, improves performance, and fixes some bugs.
+
+- **Added**: Outdated mods can now be updated with one click from the mod list and the outdated mods popup\*.
+- **Added**: The mod update check now also detects when a newer file version of an already installed mod is available on NexusMods.
+- **Added**: Comparing files before copying when deploying mods. This may speed up deployment in some situations. Can be enabled/disabled in the mod manager settings.
+- **Added**: Notifications for deploying/removing mods and for resource list actions (remove non-existing archives, add unlisted archives, remove game archives) now show how many items were affected and how long it took.
+- **Improved**: Migrating mods from v1 is now recoverable - if the migration fails, your old mods should stay untouched and you can simply retry.
+- **Improved**: The tweaks page should react faster when changing settings now.
+- **Improved**: The performance of the mod list should be improved now.
+- **Improved**: The mod details side panel debounces its changes which makes typing less sluggish (especially if many mods are installed).
+- **Improved**: Removed the animation when switching tabs in the tweaks page, mod manager and Pip-Boy customization page.
+- **Improved**: The endorsement state in the mod order is now shown as thumbs up/down icons (question mark for "undecided") instead of text.
+- **Fixed**: Deploying mods no longer creates `.old` backup files when two mods deploy the same file (the file is overwritten instead).
+- **Fixed**: Migrating legacy mods with a missing or invalid game/mods path now shows a helpful error message instead of failing with an I/O error.
+- **Fixed**: Hardlink failing on Linux without fallback to copying (os error 18).
+- **Fixed**: Resource list table not updating metadata (file size, mod title, etc.) after deploying mods.
+- **Fixed**: Page content briefly jumping down when hovering a color preset orb in the Pip-Boy view.
+- **Fixed**: Infinite loading animation when an error occurred while loading the mods (regression from a previous update).
+- **Fixed**: "The mods folder does not exist" error message showing in the mod manager.
+- **Fixed**: UNC paths (`\\?\C:\...`) getting mangled. (You may have to fix your mods path in the profile settings manually).
+- And also lots of code cleanup.
+
+> \* **Important:** The direct update only works if a URL has been entered for the mod. It also requires a NexusMods premium subscription. Otherwise it just opens the browser.
+
 ## What's new in v2.0.0-beta.7
 
 This update adds new toolbar buttons to the gallery, makes the mod table keyboard-navigable, and fixes a few bugs:
 
-- Added: Toolbar buttons in the gallery (Open screenshot, open screenshot folder, delete screenshot, zoom in, zoom out)
-- Improved: Mod table is now keyboard-navigable (Arrow up/down to focus mod, Alt+Arrow up/down to reorder mod, Enter/Space to select mod and open side bar, Delete/Backspace to delete a focused mod)
-- Improved: Show endorsement state (Endorsed/Abstained/Undecided) instead of Yes/No in the mod table
-- Improved: Added some labels, landmarks and button pressed states for screen readers
-- Fixed: Loading mod information of a hidden mod from NexusMods API ([Issue #6 - BUG: missing field name at line 1 column 625](https://github.com/FelisDiligens/QuickConfiguration2/issues/6))
-- Fixed: Block tweaks, pipboy, and mods view from loading if the profile is not setup correctly. Instead it shows a more helpful error message. Might prevent OS error 123 ("ERROR_INVALID_NAME").
+- **Added**: Toolbar buttons in the gallery (Open screenshot, open screenshot folder, delete screenshot, zoom in, zoom out)
+- **Improved**: Mod table is now keyboard-navigable (Arrow up/down to focus mod, Alt+Arrow up/down to reorder mod, Enter/Space to select mod and open side bar, Delete/Backspace to delete a focused mod)
+- **Improved**: Show endorsement state (Endorsed/Abstained/Undecided) instead of Yes/No in the mod table
+- **Improved**: Added some labels, landmarks and button pressed states for screen readers
+- **Fixed**: Loading mod information of a hidden mod from NexusMods API ([Issue #6 - BUG: missing field name at line 1 column 625](https://github.com/FelisDiligens/QuickConfiguration2/issues/6))
+- **Fixed**: Block tweaks, pipboy, and mods view from loading if the profile is not setup correctly. Instead it shows a more helpful error message. Might prevent OS error 123 ("ERROR_INVALID_NAME").
 - Updated dependencies
 
 ## What's new in v2.0.0-beta.6
 
 This update adds two new settings for the ini files and fixes a few I/O errors:
 
-- Added: Setting to make ini files read-only
-- Added: Setting to bypass read-only state when saving ini files (If the ini files are set read-only, this setting allows the app to save them anyways)
-- Improved: Prevent creating mods with invalid folder names
-- Fixed: OS error 5 ("ERROR_ACCESS_DENIED") when attempting to overwrite read-only ini files
-- Fixed: OS error 17 ("ERROR_NOT_SAME_DEVICE") when deploying mods from a different hard drive
+- **Added**: Setting to make ini files read-only
+- **Added**: Setting to bypass read-only state when saving ini files (If the ini files are set read-only, this setting allows the app to save them anyways)
+- **Improved**: Prevent creating mods with invalid folder names
+- **Fixed**: OS error 5 ("ERROR_ACCESS_DENIED") when attempting to overwrite read-only ini files
+- **Fixed**: OS error 17 ("ERROR_NOT_SAME_DEVICE") when deploying mods from a different hard drive
 
 ## What's new in v2.0.0-beta.5
 
@@ -28,44 +54,44 @@ It also improves the performance of the file tree picker, so installing mods wit
 On Windows, users should no longer see a console window popup when extracting archives (e.g. while installing mods).
 Also, Linux users using [AppManager](https://github.com/kem-a/AppManager) should now be able to install the AppImage without error messages.
 
-- Added: Option to update an existing mod in the installing mod dialog
-- Improved: Order files alphabetically in the file selector tree in the installing mod dialog
-- Improved: Performance in the file selector tree in the installing mod dialog
-- Improved: Readme / text file buttons have proper gaps and maximum height in the installing mod dialog
-- Fixed: Console window spawning on Windows when creating/extracting archives
-- Fixed: Broken .DirIcon symlink in AppImage on Linux (upstream fix: [tauri-apps/tauri#15110](https://github.com/tauri-apps/tauri/issues/15110))
-- Misc: Updated Cargo and npm dependencies
+- **Added**: Option to update an existing mod in the installing mod dialog
+- **Improved**: Order files alphabetically in the file selector tree in the installing mod dialog
+- **Improved**: Performance in the file selector tree in the installing mod dialog
+- **Improved**: Readme / text file buttons have proper gaps and maximum height in the installing mod dialog
+- **Fixed**: Console window spawning on Windows when creating/extracting archives
+- **Fixed**: Broken .DirIcon symlink in AppImage on Linux (upstream fix: [tauri-apps/tauri#15110](https://github.com/tauri-apps/tauri/issues/15110))
+- Updated Cargo and npm dependencies
 
 ## What's new in v2.0.0-beta.4
 
 This update should fix issues with extracting RAR archives:
 
-- Updated: Bundling 7z instead of 7za for UnRAR support on Windows.
-- Added: More helpful error message if RAR archives cannot be extracted.
-- Added: Fallback to WinRAR to extract RAR archives if it is installed and 7-Zip doesn't support RAR extraction.
-- Fixed: If Windows was installed on a different drive than `C:`, then Steam should be found now.
+- **Updated**: Bundling 7z instead of 7za for UnRAR support on Windows.
+- **Added**: More helpful error message if RAR archives cannot be extracted.
+- **Added**: Fallback to WinRAR to extract RAR archives if it is installed and 7-Zip doesn't support RAR extraction.
+- **Fixed**: If Windows was installed on a different drive than `C:`, then Steam should be found now.
 
 ## What's new in v2.0.0-beta.3
 
 This update adds new game settings, automatic translation downloads and some smaller bug fixes:
 
-- Added: New game settings (throwing arc, item scrap prompts, locked item use, map region names)
-- Added: Automatic download of translations on app start (opt-out)
-- Added: Button to show custom resolution picker
-- Fixed: Show that deployment is necessary when reordering mods
-- Fixed: Create the `languages` folder when opening the translation folder from the app instead of displaying an error
-- Fixed: Prevent a possible race condition when saving profiles and settings which might have caused corruption / data loss
-- Fixed: Disable autocomplete suggestions on input fields
-- Fixed: Empty mods path was not set when game path was changed in the profile editing dialog in some situations
+- **Added**: New game settings (throwing arc, item scrap prompts, locked item use, map region names)
+- **Added**: Automatic download of translations on app start (opt-out)
+- **Added**: Button to show custom resolution picker
+- **Fixed**: Show that deployment is necessary when reordering mods
+- **Fixed**: Create the `languages` folder when opening the translation folder from the app instead of displaying an error
+- **Fixed**: Prevent a possible race condition when saving profiles and settings which might have caused corruption / data loss
+- **Fixed**: Disable autocomplete suggestions on input fields
+- **Fixed**: Empty mods path was not set when game path was changed in the profile editing dialog in some situations
 
 ## What's new in v2.0.0-beta.2
 
 A small bug fix update:
 
-- Added: "Remove game's archives" button in the resource list tab.
-- Fixed: Switching the resource list in the mod manager should now switch it in the `Fallout76Custom.ini` file instead of leaving duplicates.
-- Fixed: The toast message that an update is available should no longer be shown on start, unless there really is an update.
-- Fixed: The resource list tab might not have refreshed the list properly when the number of items didn't change.
+- **Added**: "Remove game's archives" button in the resource list tab.
+- **Fixed**: Switching the resource list in the mod manager should now switch it in the `Fallout76Custom.ini` file instead of leaving duplicates.
+- **Fixed**: The toast message that an update is available should no longer be shown on start, unless there really is an update.
+- **Fixed**: The resource list tab might not have refreshed the list properly when the number of items didn't change.
 
 ## What's new in v2.0.0-beta.1
 
