@@ -4,9 +4,7 @@ use std::{fs, path::PathBuf};
 
 use tempfile::TempDir;
 
-use crate::features::mods::deployment::{
-    DeployModsOptions, ModDeployProgress, ModsDeployProgress, deploy_mods,
-};
+use crate::features::mods::deployment::{DeployModsOptions, ModsDeployProgress, deploy_mods};
 use crate::features::mods::models::json::{
     ManagedMod, ManagedMods, ModInstallationOptions, ModInstallationState,
 };
@@ -34,42 +32,32 @@ impl TestPaths {
     }
 }
 
-/// Deploys the mods and collects all progress messages sent on the channel.
+/// Deploys the mods and collects all progress messages passed to the callback.
 fn deploy_and_collect(
     mods: &mut ManagedMods,
     list: &mut ResourceList,
     paths: &TestPaths,
     options: DeployModsOptions,
 ) -> Vec<ModsDeployProgress> {
-    let (tx, mut rx) = tokio::sync::mpsc::channel(100);
-    let collector = std::thread::spawn(move || {
-        let mut messages = Vec::new();
-        while let Some(message) = rx.blocking_recv() {
-            messages.push(message);
-        }
-        messages
-    });
+    let messages = std::sync::Mutex::new(Vec::new());
     deploy_mods(
         mods,
         list,
         &paths.mods_path,
         &paths.game_path,
         options,
-        Some(tx),
+        &|progress| messages.lock().unwrap().push(progress),
     )
     .unwrap();
-    collector.join().unwrap()
+    messages.into_inner().unwrap()
 }
 
-/// Sums up the `skipped` counts of all per-mod `Finished` progress messages.
+/// Sums up the `skipped` counts of all per-mod `FinishedModDeployment` progress messages.
 fn count_skipped_files(messages: &[ModsDeployProgress]) -> u32 {
     messages
         .iter()
         .filter_map(|message| match message {
-            ModsDeployProgress::Deploying {
-                progress: ModDeployProgress::Finished { skipped, .. },
-                ..
-            } => Some(*skipped),
+            ModsDeployProgress::FinishedModDeployment { skipped, .. } => Some(*skipped),
             _ => None,
         })
         .sum()
@@ -220,7 +208,7 @@ fn test_deploy_mods_1() {
             keep_config_files: true,
             compare_files: true,
         },
-        None,
+        &|_| {},
     )
     .unwrap();
 
@@ -414,7 +402,7 @@ fn test_deploy_mods_2() {
             keep_config_files: true,
             compare_files: true,
         },
-        None,
+        &|_| {},
     )
     .unwrap();
 
@@ -553,7 +541,7 @@ fn test_deploy_mods_3() {
             keep_config_files: true,
             compare_files: true,
         },
-        None,
+        &|_| {},
     )
     .unwrap();
 
@@ -652,7 +640,7 @@ fn test_deploy_mods_4() {
                 keep_config_files: true,
                 compare_files: true,
             },
-            None,
+            &|_| {},
         )
         .unwrap();
 
@@ -836,7 +824,7 @@ fn test_deploy_mods_compare_files_keeps_backup_of_unmanaged_identical_file() {
         &paths.mods_path,
         &paths.game_path,
         options.clone(),
-        None,
+        &|_| {},
     )
     .unwrap();
     assert!(paths.game_data_path.join("Unmanaged.txt").is_file());
@@ -854,7 +842,7 @@ fn test_deploy_mods_compare_files_keeps_backup_of_unmanaged_identical_file() {
         &paths.mods_path,
         &paths.game_path,
         options.clone(),
-        None,
+        &|_| {},
     )
     .unwrap();
     assert!(paths.game_data_path.join("Unmanaged.txt").is_file());
@@ -909,7 +897,7 @@ fn test_deploy_mods_compare_files_preserves_backup_on_redeploy() {
         &paths.mods_path,
         &paths.game_path,
         options.clone(),
-        None,
+        &|_| {},
     )
     .unwrap();
     assert_eq!(
@@ -929,7 +917,7 @@ fn test_deploy_mods_compare_files_preserves_backup_on_redeploy() {
         &paths.mods_path,
         &paths.game_path,
         options.clone(),
-        None,
+        &|_| {},
     )
     .unwrap();
     assert_eq!(
@@ -949,7 +937,7 @@ fn test_deploy_mods_compare_files_preserves_backup_on_redeploy() {
         &paths.mods_path,
         &paths.game_path,
         options.clone(),
-        None,
+        &|_| {},
     )
     .unwrap();
     assert_eq!(

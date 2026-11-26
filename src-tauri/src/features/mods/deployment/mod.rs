@@ -5,9 +5,8 @@ pub mod tests;
 
 use std::collections::{HashMap, HashSet};
 use std::path::{self, Path, PathBuf};
-use std::{fs, io, thread};
+use std::{fs, io};
 
-use clone_macro::clone;
 use itertools::Itertools;
 use normalize_path::NormalizePath;
 use tap::TapFallible;
@@ -16,7 +15,6 @@ use crate::features::mods::errors::{ModActionError, ModActionResult};
 use crate::features::mods::models::json::{ManagedMod, ManagedMods, ModInstallationState};
 use crate::features::resourcelists::ResourceList;
 use crate::features::stores::settings::models::{ModCopyMethod, ResourceInsertionPosition};
-use crate::utils::channel;
 use crate::utils::fs_util;
 
 mod models;
@@ -43,6 +41,14 @@ struct DeployedFiles {
     kept: HashSet<PathBuf>,
 }
 
+/// Per-mod progress reporting context within a `deploy_mods` run.
+struct ModProgress<'a> {
+    mod_title: String,
+    deployed_mods: u32,
+    total_mods: u32,
+    on_progress: &'a dyn Fn(ModsDeployProgress),
+}
+
 #[function_name::named]
 pub fn deploy_mods<P: AsRef<Path>>(
     managed: &mut ManagedMods,
@@ -50,7 +56,7 @@ pub fn deploy_mods<P: AsRef<Path>>(
     mods_path: P,
     game_path: P,
     options: DeployModsOptions,
-    tx: Option<tokio::sync::mpsc::Sender<ModsDeployProgress>>,
+    on_progress: &dyn Fn(ModsDeployProgress),
 ) -> ModActionResult<()> {
     let start_time = std::time::Instant::now();
     let global_enabled = managed.enabled;
@@ -68,7 +74,6 @@ pub fn deploy_mods<P: AsRef<Path>>(
         options.copy_method,
         options.compare_files
     );
-    let _ = channel::blocking_send_opt(&tx, function_name!(), ModsDeployProgress::Preparing);
 
     // Check all enabled mods for invalid paths:
     for r#mod in managed.mods.iter() {
@@ -82,7 +87,7 @@ pub fn deploy_mods<P: AsRef<Path>>(
     // Determine which previously deployed files can be kept because an enabled
     // mod will redeploy a byte-identical file to the same path:
     let files_to_keep = if options.compare_files && global_enabled {
-        find_files_to_keep(managed, mods_path, game_path, tx.clone())?
+        find_files_to_keep(managed, mods_path, game_path, on_progress)?
     } else {
         HashSet::new()
     };
@@ -95,33 +100,14 @@ pub fn deploy_mods<P: AsRef<Path>>(
     }
 
     // Removing all mods prior to deployment:
-    let (remove_tx, mut remove_rx) = tokio::sync::mpsc::channel(10);
-    let handle = thread::spawn(clone!([tx], move || {
-        while let Some(progress) = remove_rx.blocking_recv() {
-            let _ = channel::blocking_send_opt(
-                &tx,
-                function_name!(),
-                ModsDeployProgress::Removing { progress },
-            );
-        }
-    }));
-
     remove_mods(
         managed,
         list,
         game_path,
         &options,
         &files_to_keep,
-        Some(remove_tx),
+        on_progress,
     )?;
-
-    let _ = handle.join().tap_err(|e| {
-        log::error!(
-            "[{}] Couldn't join receiver thread: {:?}",
-            function_name!(),
-            e
-        )
-    });
 
     // Deploy all enabled mods unless mods were globally disabled:
     if global_enabled {
@@ -138,25 +124,13 @@ pub fn deploy_mods<P: AsRef<Path>>(
                 continue;
             }
 
-            // Re-emit deployment progress, wrapped in additional information:
-            let mod_title = r#mod.title.clone();
-            let (mod_tx, mut mod_rx) = tokio::sync::mpsc::channel(10);
-            let handle = thread::spawn(clone!([tx], move || {
-                while let Some(progress) = mod_rx.blocking_recv() {
-                    let _ = channel::blocking_send_opt(
-                        &tx,
-                        function_name!(),
-                        ModsDeployProgress::Deploying {
-                            mod_title: mod_title.clone(),
-                            deployed_mods: deployed_mod_count,
-                            total_mods: enabled_mod_count as u32,
-                            progress,
-                        },
-                    );
-                }
-            }));
-
             // Deploy mod:
+            let progress = ModProgress {
+                mod_title: r#mod.title.clone(),
+                deployed_mods: deployed_mod_count,
+                total_mods: enabled_mod_count as u32,
+                on_progress,
+            };
             let mod_state = deploy_mod_internal(
                 r#mod,
                 &mut new_resources,
@@ -164,19 +138,11 @@ pub fn deploy_mods<P: AsRef<Path>>(
                 mods_path,
                 game_path,
                 &options,
-                Some(mod_tx),
+                &progress,
             )?;
             // Update state:
             managed.state.push(mod_state);
             deployed_mod_count += 1;
-
-            let _ = handle.join().tap_err(|e| {
-                log::error!(
-                    "[{}] Couldn't join receiver thread: {:?}",
-                    function_name!(),
-                    e
-                )
-            });
         }
 
         // Update resource list:
@@ -185,8 +151,6 @@ pub fn deploy_mods<P: AsRef<Path>>(
             ResourceInsertionPosition::Append => list.append(new_resources.into_iter()),
         }
     }
-
-    let _ = channel::blocking_send_opt(&tx, function_name!(), ModsDeployProgress::Finished);
 
     let duration = start_time.elapsed();
     log::info!("Deployment took {duration:?}");
@@ -201,7 +165,7 @@ fn find_files_to_keep<P: AsRef<Path>>(
     managed: &ManagedMods,
     mods_path: P,
     game_path: P,
-    tx: Option<tokio::sync::mpsc::Sender<ModsDeployProgress>>,
+    on_progress: &dyn Fn(ModsDeployProgress),
 ) -> ModActionResult<HashSet<PathBuf>> {
     let mods_path = mods_path.as_ref();
     let game_path = game_path.as_ref();
@@ -217,15 +181,11 @@ fn find_files_to_keep<P: AsRef<Path>>(
         .filter(|r#mod| r#mod.enabled)
         .enumerate()
     {
-        let _ = channel::blocking_send_opt(
-            &tx,
-            function_name!(),
-            ModsDeployProgress::Comparing {
-                mod_title: r#mod.title.clone(),
-                compared_mods: compared_mods as u32,
-                total_mods: enabled_mods as u32,
-            },
-        );
+        on_progress(ModsDeployProgress::Comparing {
+            mod_title: r#mod.title.clone(),
+            compared_mods: compared_mods as u32,
+            total_mods: enabled_mods as u32,
+        });
 
         let src_path = r#mod.folder_path(mods_path)?;
         let dst_root = r#mod.destination_path(game_path)?;
@@ -266,7 +226,7 @@ fn deploy_mod_internal<P: AsRef<Path>>(
     mods_path: P,
     game_path: P,
     options: &DeployModsOptions,
-    tx: Option<tokio::sync::mpsc::Sender<ModDeployProgress>>,
+    progress: &ModProgress,
 ) -> ModActionResult<ModInstallationState> {
     let src_path = r#mod.folder_path(mods_path)?;
     let dst_path = r#mod.destination_path(game_path.as_ref())?;
@@ -279,7 +239,11 @@ fn deploy_mod_internal<P: AsRef<Path>>(
         src_path,
         dst_path
     );
-    let _ = channel::blocking_send_opt(&tx, function_name!(), ModDeployProgress::Preparing);
+    (progress.on_progress)(ModsDeployProgress::PreparingDeploymentOfMod {
+        mod_title: progress.mod_title.clone(),
+        deployed_mods: progress.deployed_mods,
+        total_mods: progress.total_mods,
+    });
 
     // Bail early if the paths aren't folders:
     if !src_path.is_dir() {
@@ -349,15 +313,14 @@ fn deploy_mod_internal<P: AsRef<Path>>(
             })?;
 
         // Report progress:
-        let _ = channel::blocking_send_opt(
-            &tx,
-            function_name!(),
-            ModDeployProgress::Copying {
-                file_name: file_name.to_string(),
-                copied: copied_files,
-                total: total_files as u32,
-            },
-        );
+        (progress.on_progress)(ModsDeployProgress::DeployingMod {
+            mod_title: progress.mod_title.clone(),
+            deployed_mods: progress.deployed_mods,
+            total_mods: progress.total_mods,
+            file_name: file_name.to_string(),
+            copied_files,
+            total_files: total_files as u32,
+        });
 
         // Determine relative path and full destination path:
         let relative_path = fs_util::get_relative_path(&src_path, &file_path)?;
@@ -465,15 +428,14 @@ fn deploy_mod_internal<P: AsRef<Path>>(
     }
 
     // Report progress:
-    let _ = channel::blocking_send_opt(
-        &tx,
-        function_name!(),
-        ModDeployProgress::Finished {
-            copied: copied_files,
-            skipped: skipped_files,
-            resources: archive_count as u32,
-        },
-    );
+    (progress.on_progress)(ModsDeployProgress::FinishedModDeployment {
+        mod_title: progress.mod_title.clone(),
+        deployed_mods: progress.deployed_mods,
+        total_mods: progress.total_mods,
+        copied: copied_files,
+        skipped: skipped_files,
+        resources: archive_count as u32,
+    });
 
     // Return mod state:
     let mod_state = ModInstallationState {
@@ -492,7 +454,7 @@ pub fn remove_mods<P: AsRef<Path>>(
     game_path: P,
     options: &DeployModsOptions,
     files_to_keep: &HashSet<PathBuf>,
-    tx: Option<tokio::sync::mpsc::Sender<ModsRemoveProgress>>,
+    on_progress: &dyn Fn(ModsDeployProgress),
 ) -> ModActionResult<()> {
     let game_path = game_path.as_ref();
     let deployed_mod_count = managed.state.len();
@@ -503,15 +465,12 @@ pub fn remove_mods<P: AsRef<Path>>(
         deployed_mod_count,
         game_path,
     );
-    let _ = channel::blocking_send_opt(&tx, function_name!(), ModsRemoveProgress::Preparing);
-
     // For each mod that was deployed:
-    let mut removed_mods = 0;
     let mut backup_files = Vec::new();
     let mut folders = Vec::new();
     let mut archives = Vec::new();
     let game_data_path = game_path.join("Data").normalize();
-    for state in managed.state.iter() {
+    for (removed_mods, state) in managed.state.iter().enumerate() {
         let r#mod = managed.get_mod(&state.key);
         let mod_title = r#mod
             .map(|r#mod| r#mod.title.clone())
@@ -541,18 +500,14 @@ pub fn remove_mods<P: AsRef<Path>>(
                 })?;
 
             // Report progress
-            let _ = channel::blocking_send_opt(
-                &tx,
-                function_name!(),
-                ModsRemoveProgress::Removing {
-                    mod_title: mod_title.clone(),
-                    removed_mods,
-                    total_mods: deployed_mod_count as u32,
-                    file_name: file_name.to_string(),
-                    removed_files,
-                    total_files: state.files.len() as u32,
-                },
-            );
+            on_progress(ModsDeployProgress::RemovingMod {
+                mod_title: mod_title.clone(),
+                removed_mods: removed_mods as u32,
+                total_mods: deployed_mod_count as u32,
+                file_name: file_name.to_string(),
+                removed_files,
+                total_files: state.files.len() as u32,
+            });
 
             // Check if the file was kept because it will be redeployed identically:
             let keep_because_redeployed = files_to_keep.contains(&file_path);
@@ -614,13 +569,10 @@ pub fn remove_mods<P: AsRef<Path>>(
             removed_files - skipped_files,
             skipped_files,
         );
-        removed_mods += 1;
     }
 
     // Clear state since we deleted all files:
     managed.state.clear();
-
-    let _ = channel::blocking_send_opt(&tx, function_name!(), ModsRemoveProgress::Finalizing);
 
     // Restore backups ("filename.ext.old" -> "filename.ext"):
     if !backup_files.is_empty() {
@@ -662,14 +614,6 @@ pub fn remove_mods<P: AsRef<Path>>(
         }
     }
 
-    let _ = channel::blocking_send_opt(
-        &tx,
-        function_name!(),
-        ModsRemoveProgress::Finished {
-            removed_mods,
-            removed_resources: archives.len() as u32,
-        },
-    );
     Ok(())
 }
 

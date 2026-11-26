@@ -450,14 +450,14 @@ async sanitizeFilename(filename: string, replacement: string) : Promise<string> 
 
 export const events = __makeEvents__<{
 downloadProgress: DownloadProgress,
-modsDeployProgressUpdate: ModsDeployProgressUpdate,
+modsDeployProgress: ModsDeployProgress,
 modsMigrationProgress: ModsMigrationProgress,
 nxmNewLink: NXMNewLink,
 ssoAbort: NexusModsSSOAbort,
 ssoUpdate: NexusModsSSOUpdate
 }>({
 downloadProgress: "download-progress",
-modsDeployProgressUpdate: "mods-deploy-progress-update",
+modsDeployProgress: "mods-deploy-progress",
 modsMigrationProgress: "mods-migration-progress",
 nxmNewLink: "nxm-new-link",
 ssoAbort: "sso-abort",
@@ -702,7 +702,10 @@ downloadPath: string;
  * Display NexusMods titles instead of mod names if available. User-preference.
  */
 showNexusModsTitle: boolean }
-export type ModsDeployProgressUpdate = { status: "preparing" } | { status: "comparing"; modTitle: string; comparedMods: number; totalMods: number } | { status: "preparing-removal" } | { status: "removing-mod"; modTitle: string; removedMods: number; totalMods: number; fileName: string; removedFiles: number; totalFiles: number } | { status: "finalizing-removal" } | { status: "finished-removal"; removedMods: number; removedResources: number } | { status: "preparing-deployment" } | { status: "preparing-deployment-of-mod"; modTitle: string; deployedMods: number; totalMods: number } | { status: "deploying-mod"; modTitle: string; deployedMods: number; totalMods: number; fileName: string; copiedFiles: number; totalFiles: number } | { status: "finished-deployment" } | { status: "finished" }
+/**
+ * Progress updates emitted while deploying mods to the game folder.
+ */
+export type ModsDeployProgress = { status: "comparing"; modTitle: string; comparedMods: number; totalMods: number } | { status: "removing-mod"; modTitle: string; removedMods: number; totalMods: number; fileName: string; removedFiles: number; totalFiles: number } | { status: "preparing-deployment-of-mod"; modTitle: string; deployedMods: number; totalMods: number } | { status: "deploying-mod"; modTitle: string; deployedMods: number; totalMods: number; fileName: string; copiedFiles: number; totalFiles: number } | { status: "finished-mod-deployment"; modTitle: string; deployedMods: number; totalMods: number; copied: number; skipped: number; resources: number }
 export type ModsMigration = { date: string }
 export type ModsMigrationProgress = { status: "removing-bundled-archives" } | { status: "removing-mod"; modTitle: string; currentMod: number; totalMods: number } | { status: "migrating-mod"; modTitle: string; currentMod: number; totalMods: number } | { status: "cleanup" }
 export type ModsMigrationState = 

@@ -1,5 +1,4 @@
 mod deployment;
-mod events;
 mod installation;
 mod installation_fixes;
 mod legacy;
@@ -9,7 +8,6 @@ mod models;
 mod utils;
 
 pub use deployment::*;
-pub use events::*;
 pub use installation::*;
 pub use installation_fixes::*;
 pub use legacy::*;

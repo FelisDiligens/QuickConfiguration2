@@ -36,12 +36,8 @@ export function useModDeploymentModals() {
       });
 
       // Listen to progress events:
-      unlisten = await events.modsDeployProgressUpdate.listen((event) => {
+      unlisten = await events.modsDeployProgress.listen((event) => {
         switch (event.payload.status) {
-          case "preparing":
-          case "preparing-removal":
-            // Unused
-            break;
           case "comparing": {
             const { modTitle, comparedMods, totalMods } = event.payload;
             let progress = comparedMods / totalMods;
@@ -83,11 +79,6 @@ export function useModDeploymentModals() {
             loadingModalState.update({ label, progress: progress * 100 });
             break;
           }
-          case "finalizing-removal":
-          case "finished-removal":
-          case "preparing-deployment":
-            // Unused
-            break;
           case "preparing-deployment-of-mod": {
             const { modTitle, deployedMods, totalMods } = event.payload;
             const label = t("mods.modOrderTab.progress.deploying.modXofY", {
@@ -127,8 +118,7 @@ export function useModDeploymentModals() {
             loadingModalState.update({ label, progress: progress * 100 });
             break;
           }
-          case "finished-deployment":
-          case "finished":
+          case "finished-mod-deployment":
             // Unused
             break;
         }

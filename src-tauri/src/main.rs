@@ -130,7 +130,7 @@ fn main() {
         .events(collect_events![
             commands::nexusmods::SSOUpdate,
             commands::nexusmods::SSOAbort,
-            commands::mods::ModsDeployProgressUpdate,
+            features::mods::deployment::ModsDeployProgress,
             features::mods::legacy::ModsMigrationProgress,
             commands::nxm::NXMNewLink,
             commands::download::DownloadProgress,
