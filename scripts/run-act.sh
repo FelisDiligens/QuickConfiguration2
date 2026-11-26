@@ -21,4 +21,5 @@ act \
     --input upload-artifacts=true \
     -s TAURI_SIGNING_PRIVATE_KEY="$(cat ${KEY_PATH})" \
     -s TAURI_SIGNING_PRIVATE_KEY_PASSWORD="${PASSWORD}" \
+    -P ubuntu-24.04="ghcr.io/catthehacker/ubuntu:act-24.04" \
     workflow_dispatch
