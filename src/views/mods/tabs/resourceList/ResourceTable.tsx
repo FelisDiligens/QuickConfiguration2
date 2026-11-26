@@ -32,7 +32,7 @@ function ResourceTableRow({ resource }: { resource: Resource }) {
           <b>{resource.name}</b>
         </FlexCol>
       </td>
-      <td className="center">{resource.modName}</td>
+      <td>{resource.modName}</td>
       <td className="center">{formatBytes(resource.fileSize)}</td>
       <td className="center">
         {resource.exists
@@ -109,9 +109,7 @@ export default function ResourceTable(props: {
             <th className="expand">
               {t("mods.resourceListTab.table.header.archiveName")}
             </th>
-            <th className="center">
-              {t("mods.resourceListTab.table.header.modName")}
-            </th>
+            <th>{t("mods.resourceListTab.table.header.modName")}</th>
             <th className="center">
               {t("mods.resourceListTab.table.header.fileSize")}
             </th>
