@@ -23,12 +23,21 @@ export function range(startAt: number, endAt: number) {
   return [...Array(endAt - startAt).keys()].map((i) => i + startAt);
 }
 
-export function getPathSep() {
-  return family() == "windows" ? "\\" : "/";
-}
-
 export function pathJoinSync(...paths: string[]) {
-  const pathSep = getPathSep();
+  const isWindows = family() === "windows";
+  const pathSep = isWindows ? "\\" : "/";
+  // UNC path handling:
+  if (isWindows) {
+    const rootPath = paths.at(0);
+    if (rootPath?.startsWith("\\\\")) {
+      return (
+        "\\\\" +
+        [rootPath.substring(2), ...paths.slice(1)]
+          .join(pathSep)
+          .replace(/[\\/]+/g, pathSep)
+      );
+    }
+  }
   return paths.join(pathSep).replace(/[\\/]+/g, pathSep);
 }
 

@@ -66,6 +66,7 @@ percent-encoding = "2.3.2"
 semver = "1.0.28"
 normalize-path = "0.2.2"
 content_disposition = "0.4.0"
+dunce = "1"
 
 [dev-dependencies]
 mockall = "0.15.0"
@@ -83,7 +84,6 @@ windows = { version = "0.54.0", features = [
     "Win32_Storage_FileSystem",
     "Win32_System_WindowsProgramming",
 ] }
-dunce = "1"
 windows-registry = "0.5"
 windows-result = "0.3"
 

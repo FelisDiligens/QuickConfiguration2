@@ -29,7 +29,7 @@ pub fn find_steam_installation_folders() -> Result<Vec<PathBuf>> {
             PathBuf::from(r"C:\Program Files (x86)\Steam"),
         ]
         .into_iter()
-        .map(|p| fs::canonicalize(&p).unwrap_or(p))
+        .map(|p| dunce::canonicalize(&p).unwrap_or(p))
         .filter(|p| p.is_dir())
         .collect()
     } else if cfg!(target_os = "linux") {
@@ -47,7 +47,7 @@ pub fn find_steam_installation_folders() -> Result<Vec<PathBuf>> {
         ]
         .into_iter()
         .map(|p| home_dir.join(p))
-        .map(|p| fs::canonicalize(&p).unwrap_or(p))
+        .map(|p| dunce::canonicalize(&p).unwrap_or(p))
         .filter(|p| p.is_dir())
         .unique()
         .collect()
