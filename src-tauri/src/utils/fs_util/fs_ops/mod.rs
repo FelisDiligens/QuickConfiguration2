@@ -7,7 +7,6 @@ use std::path::Path;
 
 use cfg_if::cfg_if;
 
-use crate::utils::channel;
 use crate::utils::fs_util::listing::{count_files_recursively, is_empty};
 
 #[derive(Debug, Default, Clone)]
@@ -241,18 +240,16 @@ pub enum CopyDirProgress {
 /// Copies (or symlink/hardlink) the contents of a folder recursively into another folder.
 /// Creates the destination folder (and all it's parents) if needed.
 /// This function is not atomic. If it returns an error, any files it was able to copy will remain.
-/// It will send it's progress via the `tx` mspc channel.
+/// It will report it's progress via the `on_progress` callback.
 #[function_name::named]
 pub fn copy_dir_all_with_progress<P1: AsRef<Path>, P2: AsRef<Path>>(
     src: P1,
     dst: P2,
     method: CopyMethod,
-    tx: tokio::sync::mpsc::Sender<CopyDirProgress>,
+    on_progress: &dyn Fn(CopyDirProgress),
 ) -> io::Result<()> {
-    let scope = function_name!();
-
     // Send preparing status
-    let _ = channel::blocking_send(&tx, scope, CopyDirProgress::Preparing);
+    on_progress(CopyDirProgress::Preparing);
 
     // First, count all files to copy
     let total_files = count_files_recursively(&src)?;
@@ -260,16 +257,19 @@ pub fn copy_dir_all_with_progress<P1: AsRef<Path>, P2: AsRef<Path>>(
     fs::create_dir_all(&dst)?;
 
     let mut copied_count = 0;
-    copy_dir_all_with_progress_internal(&src, &dst, &method, &tx, &mut copied_count, total_files)?;
+    copy_dir_all_with_progress_internal(
+        &src,
+        &dst,
+        &method,
+        on_progress,
+        &mut copied_count,
+        total_files,
+    )?;
 
     // Send finished status
-    let _ = channel::blocking_send(
-        &tx,
-        scope,
-        CopyDirProgress::Finished {
-            copied: copied_count,
-        },
-    );
+    on_progress(CopyDirProgress::Finished {
+        copied: copied_count,
+    });
 
     Ok(())
 }
@@ -280,12 +280,10 @@ fn copy_dir_all_with_progress_internal<P1: AsRef<Path>, P2: AsRef<Path>>(
     src: P1,
     dst: P2,
     method: &CopyMethod,
-    tx: &tokio::sync::mpsc::Sender<CopyDirProgress>,
+    on_progress: &dyn Fn(CopyDirProgress),
     copied_count: &mut usize,
     total_files: usize,
 ) -> io::Result<()> {
-    let scope = function_name!();
-
     for entry in fs::read_dir(src)? {
         let entry = entry?;
         let ty = entry.file_type()?;
@@ -300,21 +298,17 @@ fn copy_dir_all_with_progress_internal<P1: AsRef<Path>, P2: AsRef<Path>>(
                 &src_path,
                 &dst_path,
                 method,
-                tx,
+                on_progress,
                 copied_count,
                 total_files,
             )?;
         } else {
             // Send progress update:
-            let _ = channel::try_send(
-                tx,
-                scope,
-                CopyDirProgress::Copying {
-                    file_name: file_name.to_string_lossy().into_owned(),
-                    copied: *copied_count,
-                    total: total_files,
-                },
-            );
+            on_progress(CopyDirProgress::Copying {
+                file_name: file_name.to_string_lossy().into_owned(),
+                copied: *copied_count,
+                total: total_files,
+            });
 
             // Copy file, then update copied count:
             copy_or_link(src_path, dst_path, method.clone())?;

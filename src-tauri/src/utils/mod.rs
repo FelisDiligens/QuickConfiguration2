@@ -6,7 +6,6 @@ pub mod bindings;
 #[cfg(target_os = "windows")]
 pub mod windows;
 
-pub mod channel;
 pub mod download;
 pub mod fs_util;
 pub mod ini;

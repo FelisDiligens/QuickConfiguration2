@@ -722,12 +722,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "clone-macro"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc1611c3bfb806c7d6f2b534e02e79aba227111a8943f31bc41a0fedf63a8316"
-
-[[package]]
 name = "cmake"
 version = "0.1.58"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1498,7 +1492,6 @@ dependencies = [
  "camino",
  "cfg-if",
  "chrono",
- "clone-macro",
  "content_disposition",
  "dirs",
  "duct",

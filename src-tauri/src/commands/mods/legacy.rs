@@ -30,27 +30,20 @@ pub async fn mods_migrate_legacy_managed_mods(
 ) -> CommandResult<()> {
     log::trace!("Called command {}", function_name!());
     let custom = Arc::clone(&state.custom);
-    let (tx, mut rx) = tokio::sync::mpsc::channel(10);
-    let (result, _) = tokio::try_join!(
-        spawn_blocking(move || {
-            let mut custom_lock = custom
-                .lock()
-                .tap_err(|e| log::error!("Couldn't lock mutex for *Custom.ini: {e}"))?;
-            legacy::migrate_legacy_managed_mods(game_path, mods_path, &mut custom_lock, Some(tx))
-                .tap_err(|e| log::error!("Couldn't migrate legacy mods: {e}"))
-                .map_err(CommandError::from)
-        }),
-        async move {
-            while let Some(msg) = rx.recv().await {
-                log::trace!("[{}] Event received: {:?}", function_name!(), msg);
-                app.emit(MODS_MIGRATION_PROGRESS_EVENT, msg)
-                    .tap_err(|e| log::error!("Couldn't send progress event: {e}"))?;
-            }
-            Ok(())
-        }
-    )
-    .tap_err(|e| log::error!("Couldn't join handle in {}: {}", function_name!(), e))?;
-    result
+    spawn_blocking(move || {
+        let mut custom_lock = custom
+            .lock()
+            .tap_err(|e| log::error!("Couldn't lock mutex for *Custom.ini: {e}"))?;
+        legacy::migrate_legacy_managed_mods(game_path, mods_path, &mut custom_lock, &|progress| {
+            let _ = app
+                .emit(MODS_MIGRATION_PROGRESS_EVENT, progress)
+                .tap_err(|e| log::error!("Couldn't send progress event: {e}"));
+        })
+        .tap_err(|e| log::error!("Couldn't migrate legacy mods: {e}"))
+        .map_err(CommandError::from)
+    })
+    .await
+    .tap_err(|e| log::error!("Couldn't join handle in {}: {}", function_name!(), e))?
 }
 
 /// Delete mods from v1 managed.xml.
@@ -65,25 +58,18 @@ pub async fn mods_remove_legacy_managed_mods(
 ) -> CommandResult<()> {
     log::trace!("Called command {}", function_name!());
     let custom = Arc::clone(&state.custom);
-    let (tx, mut rx) = tokio::sync::mpsc::channel(10);
-    let (result, _) = tokio::try_join!(
-        spawn_blocking(move || {
-            let mut custom_lock = custom
-                .lock()
-                .tap_err(|e| log::error!("Couldn't lock mutex for *Custom.ini: {e}"))?;
-            legacy::remove_legacy_managed_mods(game_path, mods_path, &mut custom_lock, Some(tx))
-                .tap_err(|e| log::error!("Couldn't remove legacy mods: {e}"))
-                .map_err(CommandError::from)
-        }),
-        async move {
-            while let Some(msg) = rx.recv().await {
-                log::trace!("[{}] Event received: {:?}", function_name!(), msg);
-                app.emit(MODS_MIGRATION_PROGRESS_EVENT, msg)
-                    .tap_err(|e| log::error!("Couldn't send progress event: {e}"))?;
-            }
-            Ok(())
-        }
-    )
-    .tap_err(|e| log::error!("Couldn't join handle in {}: {}", function_name!(), e))?;
-    result
+    spawn_blocking(move || {
+        let mut custom_lock = custom
+            .lock()
+            .tap_err(|e| log::error!("Couldn't lock mutex for *Custom.ini: {e}"))?;
+        legacy::remove_legacy_managed_mods(game_path, mods_path, &mut custom_lock, &|progress| {
+            let _ = app
+                .emit(MODS_MIGRATION_PROGRESS_EVENT, progress)
+                .tap_err(|e| log::error!("Couldn't send progress event: {e}"));
+        })
+        .tap_err(|e| log::error!("Couldn't remove legacy mods: {e}"))
+        .map_err(CommandError::from)
+    })
+    .await
+    .tap_err(|e| log::error!("Couldn't join handle in {}: {}", function_name!(), e))?
 }

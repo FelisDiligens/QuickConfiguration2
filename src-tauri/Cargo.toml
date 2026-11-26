@@ -71,7 +71,6 @@ content_disposition = "0.4.0"
 mockall = "0.15.0"
 wiremock = "0.6.5"
 indoc = "2"
-clone-macro = "1.0.0"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 indoc = "2"

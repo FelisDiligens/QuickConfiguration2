@@ -255,10 +255,6 @@ impl From<DownloadError> for CommandError {
             DownloadError::Reqwest(err) => Self::ReqwestError {
                 message: err.to_string(),
             },
-            DownloadError::SendError => Self::DownloadError {
-                message: value.to_string(),
-                variant: value.as_ref().to_owned(),
-            },
             DownloadError::ContentLengthUnknown => Self::DownloadError {
                 message: value.to_string(),
                 variant: value.as_ref().to_owned(),

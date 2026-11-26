@@ -307,7 +307,8 @@ pub fn test_migration_migrate_1() {
     test_utils::setup_stdout_logger();
     let paths = setup_test_case_1();
     let mut ini = Ini::new();
-    super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None).unwrap();
+    super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {})
+        .unwrap();
 
     assert!(paths.mods_path.join("managed.xml").exists());
     assert!(paths.mods_path.join("resources.txt").exists());
@@ -346,7 +347,8 @@ pub fn test_migration_remove_1() {
     test_utils::setup_stdout_logger();
     let paths = setup_test_case_1();
     let mut ini = Ini::new();
-    super::remove_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None).unwrap();
+    super::remove_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {})
+        .unwrap();
 
     assert!(!paths.mods_path.join("managed.xml").exists());
     assert!(!paths.mods_path.join("resources.txt").exists());
@@ -431,7 +433,8 @@ pub fn test_migration_enabled_not_deployed() {
     test_utils::setup_stdout_logger();
     let paths = setup_test_enabled_not_deployed();
     let mut ini = Ini::new();
-    super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None).unwrap();
+    super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {})
+        .unwrap();
 
     assert!(paths.mods_path.join("managed.xml").exists());
     assert!(paths.mods_path.join("resources.txt").exists());
@@ -656,7 +659,7 @@ pub fn test_migration_empty_mod_folders() {
     let paths = setup_test_empty_mod_folders();
     let mut ini = Ini::new();
     let result =
-        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {});
     assert!(
         result.is_ok(),
         "Migration should not error with empty mod folders"
@@ -818,7 +821,7 @@ pub fn test_migration_missing_mod_folders() {
     let paths = setup_test_missing_mod_folders();
     let mut ini = Ini::new();
     let result =
-        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {});
     assert!(
         result.is_ok(),
         "Migration should not error with missing mod folders"
@@ -922,7 +925,8 @@ pub fn test_old_restore_behavior() {
     test_utils::setup_stdout_logger();
     let paths = setup_test_old_restore();
     let mut ini = Ini::new();
-    super::remove_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None).unwrap();
+    super::remove_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {})
+        .unwrap();
 
     let game_test_dll_path = paths.game_path.join("test.dll");
     let game_config_path = paths.game_path.join("config.ini");
@@ -1023,7 +1027,7 @@ pub fn test_migration_nested_loose_files() {
     let paths = setup_test_nested_loose_files();
     let mut ini = Ini::new();
     let result =
-        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {});
     assert!(result.is_ok(), "Migration should handle nested loose files");
 
     assert!(paths.mods_path.join("managed.xml").exists());
@@ -1131,7 +1135,7 @@ pub fn test_migration_existing_tmp_folder() {
 
     let mut ini = Ini::new();
     let result =
-        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {});
     assert!(
         result.is_ok(),
         "Migration should handle existing _tmp folder"
@@ -1786,7 +1790,8 @@ pub fn test_migration_migrate_2() {
         ResourceList::load_from_ini(&ini, Some("Archive"), "sResourceArchive2List");
     assert_eq!(archive_list_before.resources.len(), 5);
 
-    super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None).unwrap();
+    super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {})
+        .unwrap();
 
     // INI archive lists should be empty after migration:
     let archive_list_after =
@@ -2057,7 +2062,8 @@ pub fn test_migration_loose_path_variations() {
     fs_util::write_to_file(paths.game_path.join("barefile.dll"), "6").unwrap();
 
     let mut ini = Ini::new();
-    super::remove_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None).unwrap();
+    super::remove_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {})
+        .unwrap();
 
     assert!(!paths.game_path.join("backslash.dll").exists());
     assert!(!paths.game_path.join("forward").join("slash.dll").exists());
@@ -2152,7 +2158,7 @@ pub fn test_migration_mods_old_exists_fails() {
 
     let mut ini = Ini::new();
     let result =
-        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {});
     assert!(
         result.is_err(),
         "Migration should fail when Mods.old already exists"
@@ -2173,7 +2179,7 @@ pub fn test_migration_missing_managed_xml_fails() {
 
     let mut ini = Ini::new();
     let result =
-        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {});
     assert!(
         result.is_err(),
         "Migration should fail when managed.xml is missing"
@@ -2188,7 +2194,7 @@ pub fn test_migration_missing_resources_txt_succeeds() {
 
     let mut ini = Ini::new();
     let result =
-        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {});
     assert!(
         result.is_ok(),
         "Migration should succeed even when resources.txt is missing"
@@ -2299,7 +2305,7 @@ pub fn test_migration_different_mods_path() {
     .unwrap();
 
     let mut ini = Ini::new();
-    let result = super::migrate_legacy_managed_mods(&game_path, &mods_path, &mut ini, None);
+    let result = super::migrate_legacy_managed_mods(&game_path, &mods_path, &mut ini, &|_| {});
     assert!(
         result.is_ok(),
         "Migration should succeed when mods_path is not game_path/Mods, got: {:?}",
@@ -2343,7 +2349,7 @@ pub fn test_migration_failure_rolls_back_and_retry_succeeds() {
 
     let mut ini = Ini::new();
     let result =
-        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {});
     assert!(
         result.is_err(),
         "Migration should fail when the mod folder cannot be copied"
@@ -2371,7 +2377,7 @@ pub fn test_migration_failure_rolls_back_and_retry_succeeds() {
 
     let mut ini = Ini::new();
     let result =
-        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {});
     assert!(
         result.is_ok(),
         "Retry after a failed migration should succeed, got: {:?}",
@@ -2475,7 +2481,7 @@ pub fn test_migration_checkpoints_state_when_removal_fails() {
 
     let mut ini = Ini::new();
     let result =
-        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {});
     assert!(
         result.is_err(),
         "Migration should fail when a deployed archive cannot be removed"
@@ -2501,7 +2507,7 @@ pub fn test_migration_checkpoints_state_when_removal_fails() {
     fs::remove_dir_all(paths.game_data_path.join("CheckSep.ba2")).unwrap();
     let mut ini = Ini::new();
     let result =
-        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None);
+        super::migrate_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {});
     assert!(
         result.is_ok(),
         "Retry after a failed migration should succeed, got: {:?}",
@@ -2521,7 +2527,8 @@ pub fn test_remove_legacy_mods_removes_stale_mods_old() {
     fs_util::write_to_file(mods_old_path.join("stale.txt"), "stale").unwrap();
 
     let mut ini = Ini::new();
-    super::remove_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, None).unwrap();
+    super::remove_legacy_managed_mods(&paths.game_path, &paths.mods_path, &mut ini, &|_| {})
+        .unwrap();
 
     assert!(!paths.mods_path.exists());
     assert!(

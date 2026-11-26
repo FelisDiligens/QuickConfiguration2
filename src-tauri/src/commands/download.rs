@@ -20,6 +20,16 @@ pub struct DownloadProgress {
 }
 const DOWNLOAD_PROGRESS_EVENT: &str = "download-progress";
 
+impl From<utils::download::DownloadProgress> for DownloadProgress {
+    fn from(progress: utils::download::DownloadProgress) -> Self {
+        DownloadProgress {
+            downloaded_bytes: progress.downloaded_bytes.to_string(),
+            total_bytes: progress.total_bytes.to_string(),
+            percent: progress.downloaded_bytes as f32 / progress.total_bytes as f32,
+        }
+    }
+}
+
 #[tauri::command]
 #[specta::specta]
 #[function_name::named]
@@ -40,29 +50,17 @@ pub async fn download_with_progress(
 
     // Download file:
     log::trace!("Downloading from {download_url} to {download_folder}");
-    let (tx, mut rx) = tokio::sync::mpsc::channel::<utils::download::DownloadProgress>(3);
-    let handle = tokio::spawn(async move {
-        while let Some(msg) = rx.recv().await {
-            let percent = msg.downloaded_bytes as f32 / msg.total_bytes as f32 * 100.0;
-            app.emit(
-                DOWNLOAD_PROGRESS_EVENT,
-                DownloadProgress {
-                    downloaded_bytes: msg.downloaded_bytes.to_string(),
-                    total_bytes: msg.total_bytes.to_string(),
-                    percent: percent / 100.0,
-                },
-            )
-            .unwrap();
-        }
-    });
     let file_path = utils::download::download_file(
         reqwest::Client::new().get(download_url),
         &download_folder,
         None,
-        tx,
+        &|progress| {
+            let _ = app
+                .emit(DOWNLOAD_PROGRESS_EVENT, DownloadProgress::from(progress))
+                .tap_err(|e| log::error!("Couldn't send progress event: {e}"));
+        },
     )
     .await
     .tap_err(|e| log::error!("Couldn't download file: {e}"))?;
-    handle.await?;
     Ok(file_path.to_string_lossy().to_string())
 }

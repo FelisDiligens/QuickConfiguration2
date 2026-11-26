@@ -4,7 +4,6 @@ use std::path::{Path, PathBuf};
 use ini::Ini;
 use normalize_path::NormalizePath;
 use tap::{TapFallible, TapOptional};
-use tokio::sync::mpsc::Sender;
 
 use crate::features::archive2;
 use crate::features::archive2::models::{Archive2Compression, Archive2Format};
@@ -17,7 +16,6 @@ use crate::features::mods::{
     save_legacy_mods, save_mods,
 };
 use crate::features::resourcelists::{ResourceList, get_legacy_mods_resources_path};
-use crate::utils::channel;
 use crate::utils::fs_util::{self, CopyMethod};
 
 use super::ModsMigrationProgress;
@@ -59,14 +57,10 @@ pub fn cleanup_resources(resources_to_remove: Vec<String>, ini: &mut Ini) {
 pub fn remove_bundled_archives<P: AsRef<Path>>(
     game_path: P,
     resources_to_remove: &mut Vec<String>,
-    tx: Option<Sender<ModsMigrationProgress>>,
+    on_progress: &dyn Fn(ModsMigrationProgress),
 ) -> ModActionResult<()> {
     log::trace!("Removing bundled archives");
-    let _ = channel::blocking_send_opt(
-        &tx,
-        function_name!(),
-        ModsMigrationProgress::RemovingBundledArchives,
-    );
+    on_progress(ModsMigrationProgress::RemovingBundledArchives);
     let game_path = game_path.as_ref();
 
     // Delete bundled archives:
@@ -91,7 +85,7 @@ pub fn remove_all_old_mods<P: AsRef<Path>>(
     game_path: P,
     mods_path: P,
     ini: &mut Ini,
-    tx: Option<Sender<ModsMigrationProgress>>,
+    on_progress: &dyn Fn(ModsMigrationProgress),
 ) -> ModActionResult<()> {
     log::trace!("Removing all old mods");
     let game_path = game_path.as_ref();
@@ -107,7 +101,7 @@ pub fn remove_all_old_mods<P: AsRef<Path>>(
     let mut resources_to_remove = Vec::new();
 
     // Delete bundled archives:
-    remove_bundled_archives(game_path, &mut resources_to_remove, tx.clone())
+    remove_bundled_archives(game_path, &mut resources_to_remove, on_progress)
         .tap_err(|e| log::error!("Couldn't remove bundled archives: {e:?}"))?;
 
     // Remove mods:
@@ -120,15 +114,11 @@ pub fn remove_all_old_mods<P: AsRef<Path>>(
                 log::trace!("Not deployed, skipped.");
                 continue;
             }
-            let _ = channel::blocking_send_opt(
-                &tx,
-                function_name!(),
-                ModsMigrationProgress::RemovingMod {
-                    mod_title: r#mod.title.clone(),
-                    current_mod: mod_index as u32,
-                    total_mods: total_mods as u32,
-                },
-            );
+            on_progress(ModsMigrationProgress::RemovingMod {
+                mod_title: r#mod.title.clone(),
+                current_mod: mod_index as u32,
+                total_mods: total_mods as u32,
+            });
             match r#mod.state.current.installation_method {
                 xml::InstallationMethod::LooseFiles => {
                     let root_path = game_path.join(&r#mod.state.current.root_folder);
@@ -205,7 +195,7 @@ pub fn migrate_legacy_managed_mods<P: AsRef<Path>>(
     game_path: P,
     mods_path: P,
     ini: &mut Ini,
-    tx: Option<Sender<ModsMigrationProgress>>,
+    on_progress: &dyn Fn(ModsMigrationProgress),
 ) -> ModActionResult<()> {
     // Gather paths:
     let game_path = game_path.as_ref();
@@ -231,11 +221,11 @@ pub fn migrate_legacy_managed_mods<P: AsRef<Path>>(
         .ok_or(anyhow::anyhow!("managed.xml does not exist"))?;
 
     // Delete all mods from game path, produce blank slate:
-    remove_all_old_mods(game_path, mods_path, ini, tx.clone())
+    remove_all_old_mods(game_path, mods_path, ini, on_progress)
         .tap_err(|e| log::error!("Couldn't remove old mods: {e}"))?;
 
     // Migrate the mods into the new "Mods" folder, roll back to the previous state on failure:
-    if let Err(e) = migrate_mods_from_old_folder(mods_path, &old_mods_path, tx) {
+    if let Err(e) = migrate_mods_from_old_folder(mods_path, &old_mods_path, on_progress) {
         let _ = rollback_migration(mods_path, &old_mods_path);
         return Err(e);
     }
@@ -251,7 +241,7 @@ pub fn migrate_legacy_managed_mods<P: AsRef<Path>>(
 fn migrate_mods_from_old_folder(
     mods_path: &Path,
     old_mods_path: &Path,
-    tx: Option<Sender<ModsMigrationProgress>>,
+    on_progress: &dyn Fn(ModsMigrationProgress),
 ) -> ModActionResult<()> {
     let tmp_path = get_mods_temp_path(mods_path);
     let frozen_data_path = mods_path
@@ -287,15 +277,11 @@ fn migrate_mods_from_old_folder(
     // Migrate each mod depending on it's legacy installation method:
     let total_mods = legacy_managed.mods.len();
     for (mod_index, r#mod) in legacy_managed.mods.into_iter().enumerate() {
-        let _ = channel::blocking_send_opt(
-            &tx,
-            function_name!(),
-            ModsMigrationProgress::MigratingMod {
-                mod_title: r#mod.title.clone(),
-                current_mod: mod_index as u32,
-                total_mods: total_mods as u32,
-            },
-        );
+        on_progress(ModsMigrationProgress::MigratingMod {
+            mod_title: r#mod.title.clone(),
+            current_mod: mod_index as u32,
+            total_mods: total_mods as u32,
+        });
         log::trace!("Migrating mod: {}", r#mod.title);
 
         // Create new mod folder:
@@ -468,7 +454,7 @@ fn migrate_mods_from_old_folder(
 
     // Cleanup files, best-effort: The migration itself succeeded at this point,
     // leftovers must not trigger a rollback or fail the migration:
-    let _ = channel::blocking_send_opt(&tx, function_name!(), ModsMigrationProgress::Cleanup);
+    on_progress(ModsMigrationProgress::Cleanup);
     log::trace!("Deleting Mods.old");
     let _ = fs::remove_dir_all(old_mods_path)
         .tap_err(|e| log::error!("Couldn't delete {old_mods_path:?}: {e}"));
@@ -505,7 +491,7 @@ pub fn remove_legacy_managed_mods<P: AsRef<Path>>(
     game_path: P,
     mods_path: P,
     ini: &mut Ini,
-    tx: Option<Sender<ModsMigrationProgress>>,
+    on_progress: &dyn Fn(ModsMigrationProgress),
 ) -> ModActionResult<()> {
     // Gather paths:
     let game_path = game_path.as_ref();
@@ -529,11 +515,11 @@ pub fn remove_legacy_managed_mods<P: AsRef<Path>>(
     log::trace!("Deleting old mods from managed.xml in {mods_path:?}");
 
     // Delete all mods from game path, produce blank slate:
-    remove_all_old_mods(game_path, mods_path, ini, tx.clone())
+    remove_all_old_mods(game_path, mods_path, ini, on_progress)
         .tap_err(|e| log::error!("Couldn't remove old mods: {e}"))?;
 
     // Cleanup files:
-    let _ = channel::blocking_send_opt(&tx, function_name!(), ModsMigrationProgress::Cleanup);
+    on_progress(ModsMigrationProgress::Cleanup);
     if frozen_data_path.exists() {
         fs::remove_dir_all(&frozen_data_path)?;
     }

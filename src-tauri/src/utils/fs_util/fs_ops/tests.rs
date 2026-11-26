@@ -59,16 +59,15 @@ pub mod copy_or_link_tests {
 }
 
 pub mod copy_dir_all_with_progress_tests {
-    use clone_macro::clone;
     use std::fs;
-    use tokio::sync::mpsc;
+    use std::sync::Mutex;
+
+    use tempfile::TempDir;
 
     use crate::utils::fs_util::{CopyDirProgress, CopyMethod, copy_dir_all_with_progress};
 
-    #[tokio::test]
-    async fn test_copy_dir_all_with_progress() {
-        use tempfile::TempDir;
-
+    #[test]
+    fn test_copy_dir_all_with_progress() {
         let tmp_dir = TempDir::new().unwrap();
         let src_dir = tmp_dir.path().join("source");
         let dst_dir = tmp_dir.path().join("destination");
@@ -83,14 +82,14 @@ pub mod copy_dir_all_with_progress_tests {
         fs::create_dir_all(&subdir).unwrap();
         fs::write(subdir.join("file3.txt"), "content3").unwrap();
 
-        // Create channel for progress updates
-        let (tx, mut rx) = mpsc::channel(10);
+        // Collect progress updates via callback
+        let progress_updates = Mutex::new(Vec::new());
 
         // Copy with progress
-        let result = tokio::task::spawn_blocking(clone!([src_dir, dst_dir], move || {
-            copy_dir_all_with_progress(&src_dir, &dst_dir, CopyMethod::Copy, tx)
-        }))
-        .await;
+        let result =
+            copy_dir_all_with_progress(&src_dir, &dst_dir, CopyMethod::Copy, &|progress| {
+                progress_updates.lock().unwrap().push(progress)
+            });
         assert!(result.is_ok());
 
         // Verify files were copied
@@ -98,11 +97,7 @@ pub mod copy_dir_all_with_progress_tests {
         assert!(dst_dir.join("file2.txt").exists());
         assert!(dst_dir.join("subdir").join("file3.txt").exists());
 
-        // Verify progress updates were sent
-        let mut progress_updates = Vec::new();
-        while let Some(progress) = rx.recv().await {
-            progress_updates.push(progress);
-        }
+        let progress_updates = progress_updates.into_inner().unwrap();
 
         // Should have received 5 progress updates (preparing, 3 files, finished)
         assert_eq!(progress_updates.len(), 5);

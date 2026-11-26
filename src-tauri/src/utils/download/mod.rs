@@ -9,7 +9,6 @@ use content_disposition::parse_content_disposition;
 use futures_util::StreamExt;
 use percent_encoding;
 use reqwest::RequestBuilder;
-use tokio::sync::mpsc::Sender;
 
 #[derive(Debug)]
 pub struct DownloadProgress {
@@ -23,8 +22,6 @@ pub enum DownloadError {
     Io(#[from] io::Error),
     #[error(transparent)]
     Reqwest(#[from] reqwest::Error),
-    #[error("Failed to send download progress over mpsc channel")]
-    SendError,
     #[error("Failed to get content length")]
     ContentLengthUnknown,
     #[error("Failed to determine file name from URL or HTTP headers")]
@@ -39,7 +36,7 @@ pub async fn download_file<P: AsRef<Path>>(
     request: RequestBuilder,
     path: P,
     file_name: Option<&str>,
-    tx: Sender<DownloadProgress>,
+    on_progress: &(dyn Fn(DownloadProgress) + Send + Sync),
 ) -> Result<PathBuf, DownloadError> {
     let resp = request.send().await?;
     let total_bytes = resp
@@ -92,12 +89,10 @@ pub async fn download_file<P: AsRef<Path>>(
     let mut stream = resp.bytes_stream();
     let mut file = File::create(&path)?;
 
-    tx.send(DownloadProgress {
+    on_progress(DownloadProgress {
         downloaded_bytes: 0,
         total_bytes,
-    })
-    .await
-    .map_err(|_| DownloadError::SendError)?;
+    });
 
     let mut last_emitted_downloaded_bytes = 0u64;
     while let Some(bytes) = stream.next().await {
@@ -107,21 +102,17 @@ pub async fn download_file<P: AsRef<Path>>(
 
         if (downloaded_bytes - last_emitted_downloaded_bytes) > one_percent_in_bytes {
             last_emitted_downloaded_bytes = downloaded_bytes;
-            tx.send(DownloadProgress {
+            on_progress(DownloadProgress {
                 downloaded_bytes,
                 total_bytes,
-            })
-            .await
-            .map_err(|_| DownloadError::SendError)?;
+            });
         }
     }
 
-    tx.send(DownloadProgress {
+    on_progress(DownloadProgress {
         downloaded_bytes: total_bytes,
         total_bytes,
-    })
-    .await
-    .map_err(|_| DownloadError::SendError)?;
+    });
 
     Ok(path)
 }

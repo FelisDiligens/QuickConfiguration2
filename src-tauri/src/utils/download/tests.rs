@@ -5,20 +5,19 @@ use std::path::Path;
 use reqwest::Client;
 use tempfile::TempDir;
 use tokio::fs;
-use tokio::sync::mpsc::channel;
 use wiremock::matchers::method;
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
 use crate::utils::test_utils;
 
-use super::{DownloadProgress, download_file};
+use super::download_file;
 
 #[tokio::test]
 pub async fn test_download_file_with_given_filename() {
     test_utils::setup_stdout_logger();
     let tmp_dir = TempDir::new().unwrap();
     let mock_server = MockServer::start().await;
-    let (tx, mut rx) = channel::<DownloadProgress>(3);
+    let messages = std::sync::Mutex::new(Vec::new());
 
     let fixture_path = Path::new("tests/fixtures/test.zip");
     let fixture_data = fs::read(fixture_path).await.unwrap();
@@ -35,7 +34,10 @@ pub async fn test_download_file_with_given_filename() {
 
     let expected_download_path = tmp_dir.path().join("test.zip");
 
-    let result = download_file(request, tmp_dir.path(), Some("test.zip"), tx).await;
+    let result = download_file(request, tmp_dir.path(), Some("test.zip"), &|progress| {
+        messages.lock().unwrap().push(progress)
+    })
+    .await;
 
     assert!(result.is_ok(), "{}", result.unwrap_err());
     let download_path = result.unwrap();
@@ -45,19 +47,13 @@ pub async fn test_download_file_with_given_filename() {
     assert_eq!(downloaded_data, fixture_data);
     assert_eq!(downloaded_data.len() as u64, fixture_len);
 
-    let first_progress = rx.recv().await.unwrap();
+    let messages = messages.into_inner().unwrap();
+
+    let first_progress = messages.first().unwrap();
     assert_eq!(first_progress.downloaded_bytes, 0);
     assert_eq!(first_progress.total_bytes, fixture_len);
 
-    let mut last_progress = DownloadProgress {
-        downloaded_bytes: 0,
-        total_bytes: 0,
-    };
-
-    while let Some(progress) = rx.recv().await {
-        last_progress = progress;
-    }
-
+    let last_progress = messages.last().unwrap();
     assert_eq!(last_progress.downloaded_bytes, fixture_len);
     assert_eq!(last_progress.total_bytes, fixture_len);
 }
@@ -67,7 +63,7 @@ pub async fn test_download_file_with_filename_from_url() {
     test_utils::setup_stdout_logger();
     let tmp_dir = TempDir::new().unwrap();
     let mock_server = MockServer::start().await;
-    let (tx, mut rx) = channel::<DownloadProgress>(3);
+    let messages = std::sync::Mutex::new(Vec::new());
 
     let fixture_path = Path::new("tests/fixtures/test.zip");
     let fixture_data = fs::read(fixture_path).await.unwrap();
@@ -85,7 +81,10 @@ pub async fn test_download_file_with_filename_from_url() {
 
     let expected_download_path = tmp_dir.path().join("test-from-url.zip");
 
-    let result = download_file(request, tmp_dir.path(), None, tx).await;
+    let result = download_file(request, tmp_dir.path(), None, &|progress| {
+        messages.lock().unwrap().push(progress)
+    })
+    .await;
 
     assert!(result.is_ok(), "{}", result.unwrap_err());
     let download_path = result.unwrap();
@@ -95,19 +94,13 @@ pub async fn test_download_file_with_filename_from_url() {
     assert_eq!(downloaded_data, fixture_data);
     assert_eq!(downloaded_data.len() as u64, fixture_len);
 
-    let first_progress = rx.recv().await.unwrap();
+    let messages = messages.into_inner().unwrap();
+
+    let first_progress = messages.first().unwrap();
     assert_eq!(first_progress.downloaded_bytes, 0);
     assert_eq!(first_progress.total_bytes, fixture_len);
 
-    let mut last_progress = DownloadProgress {
-        downloaded_bytes: 0,
-        total_bytes: 0,
-    };
-
-    while let Some(progress) = rx.recv().await {
-        last_progress = progress;
-    }
-
+    let last_progress = messages.last().unwrap();
     assert_eq!(last_progress.downloaded_bytes, fixture_len);
     assert_eq!(last_progress.total_bytes, fixture_len);
 }
@@ -117,7 +110,7 @@ pub async fn test_download_file_with_filename_from_content_disposition() {
     test_utils::setup_stdout_logger();
     let tmp_dir = TempDir::new().unwrap();
     let mock_server = MockServer::start().await;
-    let (tx, mut rx) = channel::<DownloadProgress>(3);
+    let messages = std::sync::Mutex::new(Vec::new());
 
     let fixture_path = Path::new("tests/fixtures/test.zip");
     let fixture_data = fs::read(fixture_path).await.unwrap();
@@ -142,7 +135,10 @@ pub async fn test_download_file_with_filename_from_content_disposition() {
 
     let expected_download_path = tmp_dir.path().join("test-from-header.zip");
 
-    let result = download_file(request, tmp_dir.path(), None, tx).await;
+    let result = download_file(request, tmp_dir.path(), None, &|progress| {
+        messages.lock().unwrap().push(progress)
+    })
+    .await;
 
     assert!(result.is_ok(), "{}", result.unwrap_err());
     let download_path = result.unwrap();
@@ -152,19 +148,13 @@ pub async fn test_download_file_with_filename_from_content_disposition() {
     assert_eq!(downloaded_data, fixture_data);
     assert_eq!(downloaded_data.len() as u64, fixture_len);
 
-    let first_progress = rx.recv().await.unwrap();
+    let messages = messages.into_inner().unwrap();
+
+    let first_progress = messages.first().unwrap();
     assert_eq!(first_progress.downloaded_bytes, 0);
     assert_eq!(first_progress.total_bytes, fixture_len);
 
-    let mut last_progress = DownloadProgress {
-        downloaded_bytes: 0,
-        total_bytes: 0,
-    };
-
-    while let Some(progress) = rx.recv().await {
-        last_progress = progress;
-    }
-
+    let last_progress = messages.last().unwrap();
     assert_eq!(last_progress.downloaded_bytes, fixture_len);
     assert_eq!(last_progress.total_bytes, fixture_len);
 }
