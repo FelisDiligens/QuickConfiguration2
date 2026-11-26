@@ -44,19 +44,7 @@ jobs:
         if: matrix.platform == 'ubuntu-24.04' || matrix.platform == 'ubuntu-24.04-arm' # This must match the platform value defined above.
         run: |
           sudo apt-get update
-          sudo apt-get install -y libappindicator3-dev librsvg2-dev patchelf
-
-          # Pin WebKit to avoid blank-webview regression on newer ubuntu-24.04 packages
-          # Credit:
-          # - https://github.com/ActivityWatch/activitywatch/pull/1311/changes
-          # - https://github.com/tauri-apps/tauri/issues/11994#issuecomment-2585913213
-          sudo apt-get install -y --allow-downgrades \
-            libwebkit2gtk-4.1-0=2.44.0-2 \
-            libwebkit2gtk-4.1-dev=2.44.0-2 \
-            libjavascriptcoregtk-4.1-0=2.44.0-2 \
-            libjavascriptcoregtk-4.1-dev=2.44.0-2 \
-            gir1.2-javascriptcoregtk-4.1=2.44.0-2 \
-            gir1.2-webkit2-4.1=2.44.0-2
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf xdg-utils
 
       # https://pnpm.io/continuous-integration#github-actions
       - name: Install pnpm
