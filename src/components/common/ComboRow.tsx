@@ -2,7 +2,7 @@ import { css } from "@emotion/react";
 import * as React from "react";
 import { useRef } from "react";
 import { Form } from "react-bootstrap";
-import { ActionRow } from "@/components/common";
+import ActionRow from "./ActionRow";
 
 interface Props {
   title?: string;

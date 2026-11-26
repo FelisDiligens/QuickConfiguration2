@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as React from "react";
 import { useRef } from "react";
 import { OverlayTrigger, Popover } from "react-bootstrap";
-import { FlexCol } from "@/components/common";
+import { FlexCol } from "./Flex";
 
 interface Props {
   children: React.ReactNode;

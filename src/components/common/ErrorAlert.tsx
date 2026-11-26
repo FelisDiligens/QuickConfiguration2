@@ -3,7 +3,7 @@ import { css } from "@emotion/react";
 import { Alert } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { AppTheme } from "../MyThemeProvider";
-import { FlexRow } from "@/components/common";
+import { FlexRow } from "./Flex";
 
 interface Props {
   reason: AnyError;

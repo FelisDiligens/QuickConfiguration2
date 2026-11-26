@@ -3,14 +3,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import {
-  ButtonRow,
-  PageAlert,
-  PageContainer,
-  PageContent,
-  PageTitle,
-  PreferencesGroup,
-} from "@/components/common";
+import ButtonRow from "./ButtonRow";
+import PageAlert from "./PageAlert";
+import PageContainer from "./PageContainer";
+import PageContent from "./PageContent";
+import PageTitle from "./PageTitle";
+import PreferencesGroup from "./PreferencesGroup";
 
 interface Props {
   title: string;

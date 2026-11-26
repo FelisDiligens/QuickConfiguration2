@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 import { IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ListGroup } from "react-bootstrap";
-import { FlexCol, FlexRow } from "@/components/common";
+import { FlexCol, FlexRow } from "./Flex";
 
 interface Props {
   title?: string;

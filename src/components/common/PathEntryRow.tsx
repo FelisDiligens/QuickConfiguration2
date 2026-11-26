@@ -5,7 +5,8 @@ import * as dialog from "@tauri-apps/plugin-dialog";
 import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { EntryRow, FlexRow } from "@/components/common";
+import EntryRow from "./EntryRow";
+import { FlexRow } from "./Flex";
 
 type DialogType = "open-file" | "open-folder" | "save-file";
 

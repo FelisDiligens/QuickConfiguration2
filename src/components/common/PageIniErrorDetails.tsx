@@ -4,15 +4,13 @@ import {
   commandErrorIsType,
   commandErrorToString,
 } from "@/commands/errors";
-import {
-  ButtonRow,
-  CodeError,
-  PageContainer,
-  PageContent,
-  PageErrorAlert,
-  PageTitle,
-  PreferencesGroup,
-} from "@/components/common";
+import ButtonRow from "./ButtonRow";
+import CodeError from "./CodeError";
+import { PageErrorAlert } from "./ErrorAlert";
+import PageContainer from "./PageContainer";
+import PageContent from "./PageContent";
+import PageTitle from "./PageTitle";
+import PreferencesGroup from "./PreferencesGroup";
 import { useProfilesStore } from "@/stores/profiles";
 import { faFileCirclePlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

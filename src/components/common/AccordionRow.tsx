@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as React from "react";
 import { useMemo, useState } from "react";
 import { ListGroup } from "react-bootstrap";
-import { FlexCol, FlexRow } from "@/components/common";
+import { FlexCol, FlexRow } from "./Flex";
 
 interface Props {
   children: React.ReactNode;

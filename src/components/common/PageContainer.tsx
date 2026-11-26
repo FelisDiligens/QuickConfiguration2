@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { FlexContainer } from "@/components/common";
+import { FlexContainer } from "./Flex";
 
 interface Props {
   noMargin?: boolean;

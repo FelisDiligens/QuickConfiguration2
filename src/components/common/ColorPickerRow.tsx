@@ -5,7 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { Button, InputGroup, OverlayTrigger, Popover } from "react-bootstrap";
 import { HexColorInput, HexColorPicker } from "react-colorful";
 import { useTranslation } from "react-i18next";
-import { ActionRow, FlexRow } from "@/components/common";
+import ActionRow from "./ActionRow";
+import { FlexRow } from "./Flex";
 
 interface Props {
   title: string;
